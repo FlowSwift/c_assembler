@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-/* 
+/*
     Current state:
         Strips file of extra whitespace
         Checks for macros
@@ -46,7 +46,8 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
 struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head);
 struct lines *malloc_line(char *line);
 char *add_file_extension(char *filename, char *extension);
-int hash(char *str);
+struct macros *is_existing_macro(struct macros *head, char *line);
+void write_macro(struct macros *macro, FILE *file);
 
 /*
     To do:
@@ -139,6 +140,7 @@ FILE *process_macros(char *filename, char *temp_file_name)
     FILE *file = NULL, *processed_file = NULL;
     char line[MAX_LINE_LENGTH];
     struct macros *head = NULL;
+    struct macros *macro = NULL;
     char *macr_pos = NULL;
     file = fopen(temp_file_name, "r");
     if (file == NULL)
@@ -156,7 +158,14 @@ FILE *process_macros(char *filename, char *temp_file_name)
     while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
     {
         macr_pos = strstr(line, MACRO_START);
-        if (macr_pos != NULL)
+        if ((macro = is_existing_macro(head, line)) != NULL)
+        {
+            write_macro(macro, processed_file);
+        }
+        /*
+            Check if found MACRO_START as the first word in the line
+        */
+        else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
             if (validate_macro_name(macr_pos, line))
             {
@@ -178,14 +187,8 @@ int validate_macro_name(char *macr_ptr, char *line)
     char macro_name[MAX_LINE_LENGTH];
     char temp[MAX_LINE_LENGTH];
     strcpy(temp, line);
-    if ((macr_ptr != line) && (strstr(line, MACRO_END) != NULL))
+    if (strcmp(strtok(line, " \t\n"), MACRO_START) != 0)
     {
-        printf("Macro definition must start at the beginning of the line\n");
-        return 0; /* IMPROVE ERRORS */
-    }
-    if (strcmp(strtok(macr_ptr, " \t\n"), MACRO_START) != 0)
-    {
-        printf("Macro definition must start with 'macr macr_name'\n");
         return 0; /* IMPROVE ERRORS */
     }
     strcpy(macro_name, strtok(NULL, " \t\n"));
@@ -234,57 +237,76 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     return;
 }
 
-    struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
+struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
+{
+    struct macros *head = *ptr_to_head;
+    struct macros *new_macro = malloc(sizeof(struct macros));
+    strcpy(new_macro->name, macro_name);
+    new_macro->lines = NULL;
+    new_macro->next = NULL;
+    if (*ptr_to_head == NULL)
     {
-        struct macros *head = *ptr_to_head;
-        struct macros *new_macro = malloc(sizeof(struct macros));
-        strcpy(new_macro->name, macro_name);
-        new_macro->lines = NULL;
-        new_macro->next = NULL;
-        if (*ptr_to_head == NULL)
-        {
-            *ptr_to_head = new_macro;
-            return new_macro;
-        }
-        while (head->next != NULL)
-        {
-            head = head->next;
-        }
-        head->next = new_macro;
+        *ptr_to_head = new_macro;
         return new_macro;
     }
+    while (head->next != NULL)
+    {
+        head = head->next;
+    }
+    head->next = new_macro;
+    return new_macro;
+}
 
-    /* ASSUMES CURRENT LINE */
-    struct lines *malloc_line(char *line)
+/* ASSUMES CURRENT LINE */
+struct lines *malloc_line(char *line)
+{
+    struct lines *new_line = malloc(sizeof(struct lines));
+    if (new_line == NULL)
     {
-        struct lines *new_line = malloc(sizeof(struct lines));
-        if (new_line == NULL)
-        {
-            printf("MEM ERROR\n");
-            return NULL; /* WHAT TO RETURN? */
-        }
-        strcpy(new_line->line, line);
-        new_line->next = NULL;
-        return new_line;
+        printf("MEM ERROR\n");
+        return NULL; /* WHAT TO RETURN? */
     }
-    char *add_file_extension(char *filename, char *extension)
+    strcpy(new_line->line, line);
+    new_line->next = NULL;
+    return new_line;
+}
+char *add_file_extension(char *filename, char *extension)
+{
+    char *new_filename = malloc(sizeof(char) * MAX_FILE_NAME);
+    if (new_filename == NULL)
     {
-        char *new_filename = malloc(sizeof(char) * MAX_FILE_NAME);
-        if (new_filename == NULL)
-        {
-            printf("MEM ERROR\n");
-            return NULL; /* WHAT TO RETURN? */
-        }
-        strcpy(new_filename, filename);
-        strcat(new_filename, extension);
-        return new_filename;
+        printf("MEM ERROR\n");
+        return NULL; /* WHAT TO RETURN? */
     }
-    int hash(char *str)
+    strcpy(new_filename, filename);
+    strcat(new_filename, extension);
+    return new_filename;
+}
+
+struct macros *is_existing_macro(struct macros *head, char *line)
+{
+    struct macros *current = head;
+    char macro_name[MAX_LINE_LENGTH];
+    strcpy(macro_name, line);
+    macro_name[strlen(macro_name) - 1] = '\0'; /* Remove newline for comparison */
+    while (current != NULL)
     {
-        int hash = 53;
-        while (*str)
+        if (strcmp(current->name, macro_name) == 0)
         {
-            hash += (*str++) % hash;
+            return current;
         }
-        return hash;
+        current = current->next;
     }
+    return NULL;
+}
+
+void write_macro(struct macros *macro, FILE *file)
+{
+    struct lines *current_line = macro->lines;
+    while (current_line != NULL)
+    {
+        fprintf(file, "%s", current_line->line);
+        current_line = current_line->next;
+    }
+    return;
+}
