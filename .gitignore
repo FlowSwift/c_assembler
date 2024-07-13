@@ -1,3 +1,5 @@
 *.am
 *.tmp
 *.test
+*.obj
+*.bin
