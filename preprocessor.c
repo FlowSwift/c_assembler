@@ -9,6 +9,7 @@
         Checks for macros
         Adds macros to linked list
         Writes .am file without macros (switch to tmp?)
+        Free memory
 */
 /*
     TODO:
