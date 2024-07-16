@@ -17,6 +17,7 @@
 */
 /*
     TODO:
+        Ignore comments
         Add error handling
         Add comments
         Add start macro name check
