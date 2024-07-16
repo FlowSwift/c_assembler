@@ -13,16 +13,15 @@
         Strips file of extra whitespace
         Checks for macros
         Adds macros to linked list
-        Writes .am file without macros (switch to tmp?)
-        Free memory
+        Writes .am with macros (switch to tmp?)
 */
 /*
     TODO:
         Add error handling
         Add comments
-        Split into multiple files
         Add start macro name check
         Add end macro name check
+        Free memory
 */
 
 /*
@@ -30,7 +29,7 @@
         Check macros name
 */
 
-
+/* CHECK HOW IT RETURNS INT */
 FILE *pre_process(char *file_name)
 {
     char *full_file_name; /* File name including extension */
