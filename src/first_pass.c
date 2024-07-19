@@ -30,7 +30,7 @@ int firstPass(FILE *amfile, SymbolTable *symbolTable, BinaryTable *binaryTable, 
     char line[MAX_LINE_LEN];
     AssemblyLine parsedLine;
     //SymbolNode *current;
-    lineNumber = isSymbol = entryCount = externCount = hasError = 0;
+    lineNumber = isSymbol= 0;
     //errorCode = SUCCESS;
     //FILE *file = NULL;
     //File file;
@@ -43,17 +43,8 @@ int firstPass(FILE *amfile, SymbolTable *symbolTable, BinaryTable *binaryTable, 
         }
         ParsedLine = parseAssemblyLine(line)
         //make all the checks if allowed 
-        if (ParsedLine->label!=NULL){
-            
-        }
-
-
-
-
-
-
-
+        if (ParsedLine->label!=NULL){ }
+        /* all the checks if legal will be here */
         free(ParsedLine)
     }
-    fclose(file);
 }
