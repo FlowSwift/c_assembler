@@ -38,8 +38,26 @@ FILE *pre_process(char *file_name)
     /* IMPROVE ERRORS */
     full_file_name = add_file_extension(file_name, ".as");
     temp_file_name = add_file_extension(file_name, ".tmp");
-    strip_file(full_file_name, temp_file_name);
-    process_macros(file_name, temp_file_name);
+    printf("Processing file: %s\n", full_file_name);
+    if (strip_file(full_file_name, temp_file_name) != 0)
+    {
+        free(full_file_name);
+        free(temp_file_name);
+        error_flag = ERROR_COULD_NOT_STRIP_FILE;
+        handle_error(error_flag, 0);
+        return error_flag;
+    }
+    if (process_macros(file_name, temp_file_name) != 0)
+    {
+        free(full_file_name);
+        free(temp_file_name);
+        error_flag = ERROR_COULD_NOT_PROCESS_MACROS;
+        handle_error(error_flag, 0);
+        return error_flag;
+    }
+    free(full_file_name);
+    free(temp_file_name);
+
     return 0;
 }
 
@@ -64,7 +82,7 @@ int strip_file(char *filename, char *stripped_file_name)
         return 1; /* IMPROVE ERRORS*/
     }
     /* Strip lines assuming the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
-    while (fgets(line, MAX_LINE_LENGTH + 1, file) != NULL)
+    while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
         if (line[strlen(line) - 1] != '\n')
         {
@@ -127,7 +145,7 @@ FILE *process_macros(char *filename, char *temp_file_name)
         printf("Error opening file to write to");
         return NULL; /* IMPROVE ERRORS */
     }
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         macr_pos = strstr(line, MACRO_START);
         if ((macro = is_existing_macro(head, line)) != NULL)
@@ -166,13 +184,16 @@ int validate_macro_name(char *macr_ptr, char *line)
     strcpy(macro_name, strtok(NULL, " \t\n"));
     if (macro_name == NULL)
     {
-        printf("Macro name missing\n");
-        return 0; /* IMPROVE ERRORS */
+        error_flag = ERROR_MACRO_NAME_MISSING;
+        handle_error(error_flag, line_number);
+        return error_flag;
     }
     if (strtok(NULL, " \t\n") != NULL)
     {
-        printf("Macro name must be a single word\n");
-        return 0; /* IMPROVE ERRORS */
+        error_flag = ERROR_INVALID_MACRO_DECLARATION;
+        handle_error(error_flag, line_number);
+        return error_flag;
+
     }
     strcpy(line, temp);
     return 1;
@@ -188,7 +209,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     /* get the macro name and copy to macro_name */
     strtok(macro_ptr, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         /* ADD ERROR CHECK TO MACRO_END */
         if (strstr(line, MACRO_END) != NULL)
