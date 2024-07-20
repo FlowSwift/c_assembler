@@ -33,5 +33,14 @@ typedef struct Operand{
     int is_label;
 } Operand;
 
-
-
+/*Function prototypes: */
+/*Parses to 3 parts the line it received from the file - 
+    -label(optional)
+    - instruction (in this stage doesnt matter which)
+    - operands 
+    this stage doesnt cheack if its legal, this is done in first_pass.c
+     */
+AssemblyLine* parseAssemblyLine(const char *line);
+void printAssemblyLine2(const AssemblyLine *parsedLine);
+void freeAssemblyLine(AssemblyLine *line);
+void freeOperand(Operand *operand);
