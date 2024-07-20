@@ -7,13 +7,22 @@
 #include "macros.h"
 #include "util.h"
 #include "preprocessor.h"
-#include "error_handler.h"
 
+/*
+    Current state:
+        Strips file of extra whitespace
+        Checks for macros
+        Adds macros to linked list
+        Writes .am with macros (switch to tmp?)
+*/
 /*
     TODO:
         Ignore comments
+        Add error handling
         Add comments
         Add start macro name check
+        Add end macro name check
+        Free memory
 */
 
 /*
@@ -22,11 +31,10 @@
 */
 
 /* CHECK HOW IT RETURNS INT */
-int pre_process(char *file_name)
+FILE *pre_process(char *file_name)
 {
     char *full_file_name; /* File name including extension */
-    char *temp_file_name; /* Temp file */
-    ErrorCode error_flag = 0;
+    char *temp_file_name; /* File name without extension */
     /* IMPROVE ERRORS */
     full_file_name = add_file_extension(file_name, ".as");
     temp_file_name = add_file_extension(file_name, ".tmp");
@@ -49,46 +57,38 @@ int pre_process(char *file_name)
     }
     free(full_file_name);
     free(temp_file_name);
+
     return 0;
 }
 
-/*
-    Strips file of extra whitespace
-    Returns 0 if successful
-    Returns error number if error
-*/
 int strip_file(char *filename, char *stripped_file_name)
 {
     FILE *stripped_file = NULL;
     FILE *file = NULL;
     char line[MAX_LINE_LENGTH];
     char stripped_line[MAX_LINE_LENGTH];
-    int line_counter = 0;
-    ErrorCode error_flag = 0;
+    int error_flag = 0;
     file = fopen(filename, "r");
     if (file == NULL)
     {
-        error_flag = ERROR_FILE_NOT_FOUND;
-        handle_error(error_flag, 0);
-        return error_flag;
+        printf("Error opening source file\n");
+        return 1; /* IMPROVE ERRORS*/
     }
     stripped_file = fopen(stripped_file_name, "w");
     if (stripped_file == NULL)
     {
         fclose(file);
-        error_flag = ERROR_CANT_WRITE_FILE;
-        handle_error(error_flag, 0);
-        return error_flag; /* IMPROVE ERRORS*/
+        printf("Error opening temporary file to write to\n");
+        return 1; /* IMPROVE ERRORS*/
     }
     /* Strip lines assuming the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
-        line_counter++;
         if (line[strlen(line) - 1] != '\n')
         {
-            error_flag = ERROR_LINE_TOO_LONG;
-            handle_error(error_flag, line_counter);
-            continue;
+            error_flag = 1;
+            printf("Line too long\n");
+            return 1; /* IMPROVE ERRORS*/
         }
         else
         {
@@ -98,9 +98,9 @@ int strip_file(char *filename, char *stripped_file_name)
     }
     fclose(file);
     fclose(stripped_file);
-    if (error_flag != 0)
+    if (error_flag)
     {
-        return error_flag;
+        return error_flag; /* IMPROVE ERRORS*/
     }
     return 0;
 }
@@ -125,36 +125,28 @@ void strip_line(char *dest, char *source)
     return;
 }
 
-int process_macros(char *filename, char *temp_file_name)
+FILE *process_macros(char *filename, char *temp_file_name)
 {
     FILE *file = NULL, *processed_file = NULL;
-    char *am_file_name = NULL;
     char line[MAX_LINE_LENGTH];
     struct macros *head = NULL;
     struct macros *macro = NULL;
-    int line_counter = 0;
     char *macr_pos = NULL;
-    ErrorCode error_flag = 0;
     file = fopen(temp_file_name, "r");
     if (file == NULL)
     {
-        error_flag = ERROR_FILE_NOT_FOUND;
-        handle_error(error_flag, 0);
-        return error_flag;
+        printf("Error opening file");
+        return NULL; /* IMPROVE ERRORS */
     }
-    am_file_name = add_file_extension(filename, ".am");
-    processed_file = fopen(am_file_name, "w");
-    free(am_file_name);
+    processed_file = fopen(add_file_extension(filename, ".am"), "w");
     if (processed_file == NULL)
     {
         fclose(file);
-        error_flag = ERROR_CANT_WRITE_FILE;
-        handle_error(error_flag, 0);
-        return error_flag;
+        printf("Error opening file to write to");
+        return NULL; /* IMPROVE ERRORS */
     }
     while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
-        line_counter++;
         macr_pos = strstr(line, MACRO_START);
         if ((macro = is_existing_macro(head, line)) != NULL)
         {
@@ -165,7 +157,7 @@ int process_macros(char *filename, char *temp_file_name)
         */
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if ((error_flag = validate_macro_name(macr_pos, line, line_counter)) == 0)
+            if (validate_macro_name(macr_pos, line))
             {
                 add_macro(file, processed_file, &head, line);
             }
@@ -176,22 +168,19 @@ int process_macros(char *filename, char *temp_file_name)
             fprintf(processed_file, "%s", line);
         }
     }
-    free_macros(head);
-    if (error_flag != 0)
-    {
-        return error_flag;
-    }
-    return 0;
+    return file;
 }
 
 /* TODO: ADD MACRO NAME CHECK */
-int validate_macro_name(char *macr_ptr, char *line, int line_number)
+int validate_macro_name(char *macr_ptr, char *line)
 {
     char macro_name[MAX_LINE_LENGTH];
     char temp[MAX_LINE_LENGTH];
-    ErrorCode error_flag = 0;
     strcpy(temp, line);
-    strtok(temp, " \t\n");
+    if (strcmp(strtok(line, " \t\n"), MACRO_START) != 0)
+    {
+        return 0; /* IMPROVE ERRORS */
+    }
     strcpy(macro_name, strtok(NULL, " \t\n"));
     if (macro_name == NULL)
     {
@@ -204,8 +193,10 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number)
         error_flag = ERROR_INVALID_MACRO_DECLARATION;
         handle_error(error_flag, line_number);
         return error_flag;
+
     }
-    return 0;
+    strcpy(line, temp);
+    return 1;
 }
 
 void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr)
