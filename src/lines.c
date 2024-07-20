@@ -17,3 +17,15 @@ struct lines *malloc_line(char *line)
     new_line->next = NULL;
     return new_line;
 }
+
+void free_lines(struct lines *head)
+{
+    struct lines *current = head;
+    struct lines *next = NULL;
+    while (current != NULL)
+    {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+}

@@ -9,5 +9,6 @@ struct lines
 };
 
 struct lines *malloc_line(char *line);
+void free_lines(struct lines *head);
 
 #endif /* __LINES_H__ */

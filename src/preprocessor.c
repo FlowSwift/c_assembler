@@ -10,20 +10,10 @@
 #include "error_handler.h"
 
 /*
-    Current state:
-        Strips file of extra whitespace
-        Checks for macros
-        Adds macros to linked list
-        Writes .am with macros (switch to tmp?)
-*/
-/*
     TODO:
         Ignore comments
-        Add error handling
         Add comments
         Add start macro name check
-        Add end macro name check
-        Free memory
 */
 
 /*
@@ -42,16 +32,22 @@ int pre_process(char *file_name)
     temp_file_name = add_file_extension(file_name, ".tmp");
     if (strip_file(full_file_name, temp_file_name) != 0)
     {
+        free(full_file_name);
+        free(temp_file_name);
         error_flag = ERROR_COULD_NOT_STRIP_FILE;
         handle_error(error_flag, 0);
         return error_flag;
     }
     if (process_macros(file_name, temp_file_name) != 0)
     {
+        free(full_file_name);
+        free(temp_file_name);
         error_flag = ERROR_COULD_NOT_PROCESS_MACROS;
         handle_error(error_flag, 0);
         return error_flag;
     }
+    free(full_file_name);
+    free(temp_file_name);
     return 0;
 }
 
@@ -131,6 +127,7 @@ void strip_line(char *dest, char *source)
 int process_macros(char *filename, char *temp_file_name)
 {
     FILE *file = NULL, *processed_file = NULL;
+    char *am_file_name = NULL;
     char line[MAX_LINE_LENGTH];
     struct macros *head = NULL;
     struct macros *macro = NULL;
@@ -144,7 +141,9 @@ int process_macros(char *filename, char *temp_file_name)
         handle_error(error_flag, 0);
         return error_flag;
     }
-    processed_file = fopen(add_file_extension(filename, ".am"), "w");
+    am_file_name = add_file_extension(filename, ".am");
+    processed_file = fopen(am_file_name, "w");
+    free(am_file_name);
     if (processed_file == NULL)
     {
         fclose(file);
@@ -165,7 +164,7 @@ int process_macros(char *filename, char *temp_file_name)
         */
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if (validate_macro_name(macr_pos, line, line_counter) == 0)
+            if ((error_flag = validate_macro_name(macr_pos, line, line_counter)) == 0)
             {
                 add_macro(file, processed_file, &head, line);
             }
@@ -175,6 +174,11 @@ int process_macros(char *filename, char *temp_file_name)
         {
             fprintf(processed_file, "%s", line);
         }
+    }
+    free_macros(head);
+    if (error_flag != 0)
+    {
+        return error_flag;
     }
     return 0;
 }

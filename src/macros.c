@@ -44,3 +44,16 @@ struct macros *is_existing_macro(struct macros *head, char *line)
     }
     return NULL;
 }
+
+void free_macros(struct macros *head)
+{
+    struct macros *current = head;
+    struct macros *next = NULL;
+    while (current != NULL)
+    {
+        next = current->next;
+        free_lines(current->lines);
+        free(current);
+        current = next;
+    }
+}
