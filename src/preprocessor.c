@@ -30,6 +30,7 @@ int pre_process(char *file_name)
     /* IMPROVE ERRORS */
     full_file_name = add_file_extension(file_name, ".as");
     temp_file_name = add_file_extension(file_name, ".tmp");
+    printf("Processing file: %s\n", full_file_name);
     if (strip_file(full_file_name, temp_file_name) != 0)
     {
         free(full_file_name);
@@ -80,7 +81,7 @@ int strip_file(char *filename, char *stripped_file_name)
         return error_flag; /* IMPROVE ERRORS*/
     }
     /* Strip lines assuming the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
-    while (fgets(line, MAX_LINE_LENGTH + 1, file) != NULL)
+    while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
         line_counter++;
         if (line[strlen(line) - 1] != '\n')
@@ -151,7 +152,7 @@ int process_macros(char *filename, char *temp_file_name)
         handle_error(error_flag, 0);
         return error_flag;
     }
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
@@ -195,13 +196,13 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number)
     if (macro_name == NULL)
     {
         error_flag = ERROR_MACRO_NAME_MISSING;
-        handle_error(error_flag, 0);
+        handle_error(error_flag, line_number);
         return error_flag;
     }
     if (strtok(NULL, " \t\n") != NULL)
     {
         error_flag = ERROR_INVALID_MACRO_DECLARATION;
-        handle_error(error_flag, 0);
+        handle_error(error_flag, line_number);
         return error_flag;
     }
     return 0;
@@ -217,7 +218,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     /* get the macro name and copy to macro_name */
     strtok(macro_ptr, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         /* ADD ERROR CHECK TO MACRO_END */
         if (strstr(line, MACRO_END) != NULL)

@@ -1,6 +1,6 @@
 #ifndef __LINES_H__
 #define __LINES_H__
-#define MAX_LINE_LENGTH 81   /* Max 80 chars + \n */
+#define MAX_LINE_LENGTH 82   /* Max 80 chars + \n + \0*/
 
 struct lines
 {
