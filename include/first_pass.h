@@ -2,6 +2,11 @@
 #define __FIRST_PASS_H__
 #include "line_parser.h"
 
+typedef struct {
+    int code;
+    char *name;
+    int numOfOperands;
+} Opcode;
 
 int firstPass(char *file_name, SymbolTable *symbolTable, int *IC, int *DC);
 /*check is there is dot ("."). reurns 1 if yes and 0 if not. */

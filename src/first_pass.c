@@ -30,6 +30,26 @@
                 - if operand register - make binary
                 - if operand is LABEL - write name only (?)
 */
+
+const Opcode OPCODES[] = {
+    {0, "mov", 2},
+    {1, "cmp", 2},
+    {2, "add", 2},
+    {3, "sub", 2},
+    {4, "lea", 1},
+    {5, "clr", 1},
+    {6, "not", 2},
+    {7, "inc", 1},
+    {8, "dec", 1},
+    {9, "jmp", 1},
+    {10, "bne", 1},
+    {11, "red", 1},
+    {12, "prn", 1},
+    {13, "jsr", 1},
+    {14, "rts", 0},
+    {15, "stop", 0}
+};
+
 int firstPass(char *file_name, SymbolTable *symbolTable, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
@@ -45,11 +65,20 @@ int firstPass(char *file_name, SymbolTable *symbolTable, int *IC, int *DC)
         lineNumber++;
         if (line[strlen(line) - 1] != '\n')
         {
-            /* error handeling */
+            /* IMPROVE ERRORS*/
         }
         parsedLine = parseAssemblyLine(line);
         printf("Parsed Line:\n");
         printAssemblyLine(&parsedLine);
+        if(parsedLine.label!=NULL){
+            /*if - call function to check if already defined*/
+        }
+        if(is_directive(&parsedLine)){
+            check_directive(&parsedLine);
+        }
+        else{
+            is_valid_instruction(&parsedLine);
+        }
         /* make all the checks if allowed */
         /*if (ParsedLine->label!=NULL){ }*/
         /* all the checks if legal will be here */
@@ -76,14 +105,35 @@ int countOccurrences(const char *str, char ch) {
 }
 
 int check_type(Operand *operand){
+    if (operand->value[0] == '\0' or operand->value[0] == NULL) {
+        operand->type = -1;
+        return 1;
+    }
     switch (operand->value[0]) 
     {
-        case '*':
-            operand->type = 2;
-            break;
         case '#':
-            operand->type = 0;
+            /*Remove '#' and check if the remaining part is a valid integer*/
+            memmove(operand->value, operand->value + 1, strlen(operand->value)-1);
+            if (is_valid_integer(operand->value)) {
+                operand->type = 0;
+            } 
+            else {
+                return 0;
+                /* IMPROVE ERRORS*/
+            }
+            operand->value[strlen(operand->value) - 1] = '\0';
             break;
+        case '*':
+            memmove(operand->value, operand->value + 1, strlen(operand->value)-1);
+            if (strlen(operand->value) == 2 && operand->value[0] == 'r'&& operand->value[1] >= '0' && operand->value[1] <= '7') {
+                operand->value[strlen(operand->value) - 1] = '\0';
+                operand->type = 0;
+                break;
+            }
+            elsel{
+                return 0;
+                /* IMPROVE ERRORS*/
+            }
         case 'r':
             if (strlen(operand->value) == 2 && operand->value[1] >= '0' && operand->value[1] <= '7') {
                 operand->type = 3;
@@ -101,81 +151,240 @@ int check_type(Operand *operand){
     return 1;
 }
 
-int operand_parser(AssemblyLine* parsedLine){
-    /*
-    TO DO - 
-        - check if up to 2 - V
-        - check type of miun - V
-        - change miun to type - V
-        - insert value to Operand structure - V
-    */
-    char *ptr_in_line = NULL;
-    ptr_in_line = parsedLine->operands;
-    Operand *srcOperand = NULL, *destOperand = NULL;
-    int srcLen = 0, destLen = 0;
-    int operandCount = 0;
+int get_opcode_operands(AssemblyLine* parsedLine){
+    /* gets allowed operands of insturction*/
+    int i =0;
+    for (i = 0; i < sizeof(OPCODES) / sizeof(OPCODES[0]); i++) {
+        if (strcmp(parsedLine->instruction, OPCODES[i].name) == 0) {
+            return OPCODES[i].numOfOperands;
+            /*Instruction found in OPCODES*/
+        }
+    }
+    return -1; /*Instruction not found in OPCODES*/
+}
 
-    srcOperand = (Operand *)malloc(sizeof(Operand));
-    destOperand = (Operand *)malloc(sizeof(Operand));
-    srcOperand->value = NULL;
-    destOperand->value = NULL;
-    
-    if (*ptr_in_line != '\0') {
-        char *start = ptr_in_line;
-        while (*ptr_in_line != '\0' && *ptr_in_line != ',') {
-            ptr_in_line++;
-            srcLen++;
+int get_opcode_code(AssemblyLine* parsedLine){
+    /* gets opcode number of insturction*/
+    int i =0;
+    for (i = 0; i < sizeof(OPCODES) / sizeof(OPCODES[0]); i++) {
+        if (strcmp(parsedLine->instruction, OPCODES[i].name) == 0) {
+            return OPCODES[i].code;
+            /*Instruction found in OPCODES*/
         }
-        srcOperand->value = (char *)malloc(srcLen + 1);
-        strncpy(srcOperand->value, start, srcLen);
-        srcOperand->value[srcLen] = '\0';
-        if (!check_type(srcOperand)) {
-            /* IMPROVE ERRORS */
-            free(srcOperand->value);
-            free(destOperand);
-            free(srcOperand);
-            return 0;
-        }
-        operandCount++;
-        if (*ptr_in_line == ',') ptr_in_line++; // Skip comma
-        while (*ptr_in_line != '\0' && isspace(*ptr_in_line)) ptr_in_line++; // Skip any whitespace between operands
     }
-    /*Parse second operand*/
-    if (*ptr_in_line != '\0') {
-        char *start = ptr_in_line;
-        while (*ptr_in_line != '\0' && *ptr_in_line != ',') {
-            ptr_in_line++;
-            destLen++;
-        }
-        destOperand->value = (char *)malloc(destLen + 1);
-        strncpy(destOperand->value, start, destLen);
-        destOperand->value[destLen] = '\0';
-        if (!check_type(destOperand)) {
-            /* IMPROVE ERRORS */
-            free(srcOperand->value);
-            free(destOperand->value);
-            free(destOperand);
-            free(srcOperand);
-            return 0;
-        }
-        operandCount++;
-        if (*ptr_in_line == ',') ptr_in_line++; /*Skip comma*/
+    return -1; /*Instruction not found in OPCODES*/
+}
+
+int is_valid_integer(char *operand) {
+    if (operand == NULL || *operand == '\0') {
+        return 0; /*Operand is null or empty*/
     }
-    /*Check for extra characters after second operand*/
+    /*Ensure the first character is a digit or '-'*/
+    if (!isdigit(*operand) && *operand != '-') {
+        return 0; /*First character is not valid*/
+    }
+    /*Ensure the rest of the characters are digits*/
+    operand++; /*Move past the first character*/
+    while (*operand != '\0') {
+        if (!isdigit(*operand)) {
+            return 0; /*Found a non-digit character*/
+        }
+        operand++;
+    }
+    return 1; /*Operand is a valid integer*/
+}
+
+int operand_parser(AssemblyLine* parsedLine){
+    char *ptr_in_line = NULL;
+    char *start = NULL;
+    ptr_in_line = parsedLine->operands;
+    Operand *temp_srcOperand = NULL, *temp_destOperand = NULL;
+    int operandCount = 0;
+    int num_operands = 0;
+    temp_srcOperand  = (Operand *)malloc(sizeof(Operand));
+    temp_destOperand  = (Operand *)malloc(sizeof(Operand));
+    char *operandValue;
+    int operandLen = 0;
+    num_operands = get_opcode_operands(parsedLine); /*got how many allowed*/
+    if(num_operands == -1){
+        /* IMPROVE ERRORS*/
+        /*insturction not found*/
+        free(temp_srcOperand);
+        free(temp_destOperand );
+        return 0;
+    }
+    while (*ptr_in_line != '\0' && operandCount < num_operands) {
+        while (*ptr_in_line != '\0' && isspace(*ptr_in_line)) ptr_in_line++; /* Skip whitespace */
+        start = ptr_in_line;
+        operandLen = 0;
+        while (*ptr_in_line != '\0' && *ptr_in_line != ',') { /*after whitespaces*/
+            /*go until first ',' the syntax of the value will be checked later*/
+            ptr_in_line++;
+            operandLen++;
+        }
+        *operandValue = (char *)malloc(operandLen + 1);
+        strncpy(operandValue, start, operandLen);
+        operandValue[operandLen] = '\0';
+        if (num_operands == 2 && operandCount == 0) {
+            temp_srcOperand->value = operandValue;
+            if (!check_type(temp_srcOperand)) { /*type of miun will be inserted*/
+                /* IMPROVE ERRORS */
+                free(temp_srcOperand->value);
+                free(temp_destOperand->value);
+                free(temp_destOperand);
+                free(temp_srcOperand);
+                return 0;
+            }
+        }
+        else if (num_operands == 1 || (num_operands == 2 && operandCount == 1)){
+            temp_destOperand->value = operandValue; /*if there is only one it is assigned to dest, if teo and this is seconf opperand also dest.*/
+            if (!check_type(temp_destOperand)) {/*type of miun will be inserted*/
+                /* IMPROVE ERRORS */
+                free(temp_srcOperand->value);
+                free(temp_destOperand->value);
+                free(temp_destOperand);
+                free(temp_srcOperand);
+                return 0;
+            }
+        }
+        else continue;
+        operandCount++;
+        if (*ptr_in_line == ',') ptr_in_line++; /* Skip comma */
+    }
+    /* Check for extra characters after the last operand (up to 2), if num_operands == 0 will also arrive here and check*/
     while (*ptr_in_line != '\0') {
         if (!isspace(*ptr_in_line)) {
+            /*there are chars after last operand or operands when needed to be 0*/
             /* IMPROVE ERRORS */
-            /* there are extra chars after the second operand */
-            if (srcOperand->value) free(srcOperand->value);
-            if (destOperand->value) free(destOperand->value);
-            free(srcOperand);
-            free(destOperand);
+            if (temp_srcOperand->value) free(temp_srcOperand->value);
+            if (temp_destOperand->value) free(temp_destOperand->value);
+            free(temp_srcOperand);
+            free(temp_destOperand);
             return 0;
         }
         ptr_in_line++;
     }
-    /* Assign operands to parsedLine*/
-    parsedLine->srcOperand = (operandCount > 0) ? srcOperand : NULL;
-    parsedLine->destOperand = (operandCount > 1) ? destOperand : NULL;
+    if(num_operands!=operandCount){
+        /* IMPROVE ERRORS*/
+        /*too many operands*/
+        if (temp_srcOperand->value) free(temp_srcOperand->value);
+        if (temp_destOperand->value) free(temp_destOperand->value);
+        free(temp_srcOperand);
+        free(temp_destOperand);
+        return 0;
+    }
+    /* Assign operands to parsedLine */
+    if (num_operands == 1) {
+        temp_srcOperand->type  = -1;
+        temp_srcOperand->value = '\0';
+        parsedLine->destOperand = temp_destOperand;
+    }
+    else if (operandCount == 0 && parsedLine->operands != NULL){
+            /* IMROVE ERRORS*/
+            /*chars but shouldnt be */
+            free(temp_srcOperand);
+            free(temp_destOperand);
+            return 0;
+    } 
+    else if (num_operands == 0 && parsedLine->operands == NULL) {
+        srcOperand->type  = -1;
+        srcOperand->value = '\0';
+        temp_destOperand->type  = -1;
+        temp_destOperand->value = '\0';
+    }
+    else{
+        parsedLine->srcOperand = temp_srcOperand;
+        parsedLine->destOperand = temp_destOperand;
+    }
+    int opcode_code = -1;
+    int type_miun = -1;
+    int type_miun_src = -1;
+    int type_miun_dest = -1;
+    opcode_code = get_opcode_address(parsedLine);
+    type_miun_src = parsedLine->srcOperand->type;
+    type_miun_dest = parsedLine->destOperand->type;
+    switch (opcode_code){
+        /*mov (0), add(2), sub(3), - have {0,1,2,3) types allowed for src*/
+        case -1:
+            /*cannot find insturction*/
+            /*IMPROVE ERRORS*/
+            break;
+        case 0:
+        case 2:
+        case 3:
+            if (!(parsedLine->srcOperand->type >= 0 && parsedLine->srcOperand->type <=3) && (parsedLine->destOperand->type >= 1 && parsedLine->destOperand->type <=3 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+            break;
+        case 1:
+            /*cmp(1)*/
+            if (!(parsedLine->srcOperand->type >= 0 && parsedLine->srcOperand->type <=3) && (parsedLine->destOperand->type >= 0 && parsedLine->destOperand->type <=3 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+            break;
+        case 4:
+            /*lea(4)*/
+            if (!(parsedLine->srcOperand->type == 1) && (parsedLine->destOperand->type >= 1 && parsedLine->destOperand->type <=3 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+            break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 11:
+            /*clr(5), not(6), inc(7), dec(8), red(11)*/
+            if (!(parsedLine->srcOperand->type == -1) && (parsedLine->destOperand->type >= 1 && parsedLine->destOperand->type <=3 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+            break;
+        case 9:
+        case 10:
+        case 13:
+            /*jmp (9), bne(10), jsr(1)*/
+            if (!(parsedLine->srcOperand->type == -1) && (parsedLine->destOperand->type >= 1 && parsedLine->destOperand->type <=2 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+            break;
+        case 12:
+            /*prn(12)*/
+            if (!(parsedLine->srcOperand->type == -1) && (parsedLine->destOperand->type >= 0 && parsedLine->destOperand->type <=3 ))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+        case 14:
+        case 15:
+            /*rts(14), stop(15)*/
+            if (!(parsedLine->srcOperand->type == -1) && (parsedLine->destOperand->type == -1))
+            {
+                /* IMPROVE ERRORS*/
+                /*type of operand not aligned to type of opcode*/
+            }
+        default:
+            break;
+    }
+    /*the instructions mathed the operands succefully and all was allocated in parsedLine*/
+    return 1;
+}
+
+int is_valid_instruction(AssemblyLine* parsedLine){
+    int did_parse = 0;
+    did_parse = operand_parser(parsedLine);
+    if(did_parse){
+        /*IMPROVE ERRORS*/
+        /*couldnt parse operands*/
+    }
+    /*if it parsed -> all operands are as should be for relevent opcode*/
     return 1;
 }
