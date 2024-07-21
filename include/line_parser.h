@@ -3,10 +3,8 @@
 
 typedef struct Operand{
     /*every operand will have this structure */
-    char *name; 
     char *value; /*if register will be changed to number, if label will be -1*/
-    int *type; /*miun types - {0,1,2,3} */
-    int *is_label;
+    int type; /*miun types - {0,1,2,3}, -1 if no operands */
 } Operand;
 
 typedef struct AssemblyLine {
