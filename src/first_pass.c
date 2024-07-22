@@ -292,7 +292,7 @@ int operand_parser(AssemblyLine* parsedLine){
         parsedLine->srcOperand = temp_srcOperand;
         parsedLine->destOperand = temp_destOperand;
     }
-    opcode_code = get_opcode_code(parsedLine);
+    opcode_code = get_opcode_code(parsedLine->instruction);
     type_miun_src = parsedLine->srcOperand->type;
     type_miun_dest = parsedLine->destOperand->type;
     switch (opcode_code){

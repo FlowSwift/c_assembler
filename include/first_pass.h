@@ -18,9 +18,9 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
 /*checks type of miun of each operand. changes value to name and updates in Operand*/
 int check_type(Operand *operand);
 /*gets opcode number of operands*/
-int get_opcode_operands(AssemblyLine* parsedLine);
+int get_opcode_operands(char* instruction);
 /*gets opcode code value*/
-int get_opcode_code(AssemblyLine* parsedLine);
+int get_opcode_code(char* instruction);
 /*cheks if operand is legit integer: +789, -9, 8 are allowed*/
 int is_valid_integer(char *operand);
 /*parses operands gor command line -> checks the insturction is valid(one of 16), 

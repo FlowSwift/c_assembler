@@ -1,6 +1,7 @@
 #ifndef __SYMBOL_TABLE_H__
 #define __SYMBOL_TABLE_H__
 
+#include "macros.h"
 typedef struct SymbolNode{
     /*every label will have this structure after it is checked that it is legal definition */
     char *name;
