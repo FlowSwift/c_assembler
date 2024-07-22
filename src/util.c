@@ -23,44 +23,41 @@ int is_empty_line(char *line)
 {
     while (*line != '\0') {
         if (!isspace(*line)) {
-            return 0;  /* Not empty */
+            return 1;  /* Not empty */
         }
         line++; 
     }
-    return 1;
+    return 0;
 }
 
 int is_commented_line(char *line)
 {
     if (*line == ';') {
-        return 1; /* Commented line*/
+        return 0; /* is commented line*/
     }
-    return 0;
+    return 1;
 }
 
 int is_valid_integer(char *operand) {
+    ErrorCode error_flag = 0; /*assume success*/
     if (operand == NULL || *operand == '\0') {
-        return 0; /* Operand is null or empty */
+        error_flag = ERROR_OPERAND_IS_EMPTY;
+        return error_flag; /* Operand is null or empty */
     }
-    /* Ensure the first character is a digit or a sign ('+' or '-') */
-    if (!isdigit(*operand) && *operand != '+' && *operand != '-') {
-        return 0; /* First character is not valid */
-    }
-    /* Move past the sign if it exists */
-    if (*operand == '+' || *operand == '-') {
-        operand++;
-        if (!isdigit(*operand)) {
-            return 0; /* Next character after the sign must be a digit */
+    if((isdigit(*operand)) || (*operand != '+') || (*operand != '-')) {/* Ensure the first character is a digit or a sign ('+' or '-') */
+        operand++; /*move past first char*/
+        while (*operand != '\0') {
+            if (!isdigit(*operand)) {
+                error_flag = ERROR_NOT_VALID_INTEGER; /*founs not integer char */
+                return error_flag;
+            }
+            operand++; /*move to nest char*/
         }
     }
-    /* Ensure the rest of the characters are digits */
-    while (*operand != '\0') {
-        if (!isdigit(*operand)) {
-            return 0; /* Found a non-digit character */
-        }
-        operand++;
+    else{ /*if first char not in allowed chars*/
+        error_flag = ERROR_NOT_VALID_INTEGER; /*founs not integer char */
     }
-    return 1; /* Operand is a valid integer */
+    return error_flag; /* 0 - > Success. Operand is a valid integer */
 }
 
 int count_occurrences(const char *str, char ch) {
@@ -95,13 +92,8 @@ char *strdup1(char *src_string)
 
 int is_valid_string(char* str){
     /*starts and ends with ""*/
-    if (str[0] != '"')
-    {
-        return 0;
+    if ((str[0] != '"') || (str[strlen(str) - 1] != '"') || (strlen(str) <=2)){
+        return 1; /*not string "{some value}" */
     }
-    if (str[strlen(str) - 1] != '"')
-    {
-        return 0;
-    }
-    return 1;
+    return 0; /*success*/
 }
