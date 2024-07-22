@@ -5,37 +5,6 @@
 
 #include "line_parser.h"
 
-/*TO DO:
-    - struct defintion - V
-    - add one word in structure check 
-    -  check if malloc succeded
-    - add label handeling here?
-            check if OK
-            add to symbolTable
-    - add determine lines
-*/
-const char *entries[] = {".entry", ".extern", ".data", ".string"};
-/*
-const Opcode OPCODES[] = {
-    {0, "mov", 2},
-    {1, "cmp", 2},
-    {2, "add", 2},
-    {3, "sub", 2},
-    {4, "not", 1},
-    {5, "clr", 1},
-    {6, "lea", 2},
-    {7, "inc", 1},
-    {8, "dec", 1},
-    {9, "jmp", 1},
-    {10, "bne", 1},
-    {11, "red", 1},
-    {12, "prn", 1},
-    {13, "jsr", 1},
-    {14, "rts", 0},
-    {15, "hlt", 0}};
-*/
-const char *REGISTERS[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
-
 /*every line will be parsed and inputed to this structure */
 AssemblyLine parseAssemblyLine(const char *line) {
      /*call the function with line - like (line) */

@@ -4,32 +4,9 @@
 #include "first_pass.h"
 #include "line_parser.h"
 #include "lines.h"
-/*FLOW:
-    - read line after line, count number of line -
-    - parse the line to 3 sections - label(optional), instucrion, operandes
-    - for every parsed line, see if it is allowed by a specific function
-        - label:
-            - is legal
-            - if directive line - check if its legal
-                - parse operandes accordinly - if string if ...
-            - up ID
-            - if everything legal - check if already in symbol table (if yes, ERROR), if not - ADD by IC,
-                continue, if legal by checking (OperandeCheck).
-            - parse operandes.
-                if operand is also label ?
-            - check if
-            - write in Binary structure into Binary list
-        - not label -
-            - if start with . -> ? (i think end reading)
-            - if regular opcode:
-                - check how many operandes to receive
-                - find number represenation of Opcode
-                - parse operands by ',' - if number as many as supposed to be - else ERROR
-                    - check type of miun - see if its allowed for this operand
-                    - make switch case on what to do binary for every case and edge case 3
-                - if operand register - make binary
-                - if operand is LABEL - write name only (?)
-*/
+#include "symbol_table.h"
+#include "binary_table.h"
+#include "util.h"
 
 const Opcode OPCODES[] = {
     {0, "mov", 2},
@@ -50,58 +27,86 @@ const Opcode OPCODES[] = {
     {15, "stop", 0}
 };
 
-int firstPass(char *file_name, SymbolTable *symbolTable, int *IC, int *DC)
+int firstPass(char *file_name, SymbolTable *symbolTable,BinaryTable *binaryTable, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
     AssemblyLine parsedLine;
-    /* SymbolNode *current; */
+    SymbolNode *current = NULL;
     int lineNumber = 0;
-    /* errorCode = SUCCESS; */
-    /* FILE *file = NULL; */
-    /* File file; */
-    while (fgets(line, MAX_LINE_LENGTH + 1, amfile) != NULL)
-    {
+    int is_symbol = 0;
+    while (fgets(line, MAX_LINE_LENGTH + 1, amfile) != NULL){
         lineNumber++;
         if (line[strlen(line) - 1] != '\n')
         {
             /* IMPROVE ERRORS*/
         }
-        parsedLine = parseAssemblyLine(line);
+        if (is_empty_line(line) || is_commented_line(line)) {
+            continue;
+        }
+        parsedLine = parseAssemblyLine(line); /* now has label{optional}, value of command and operands.*/
         printf("Parsed Line:\n");
         printAssemblyLine(&parsedLine);
         if(parsedLine.label!=NULL){
-            /*if - call function to check if already defined*/
+            if(is_symbol_in_table(symbolTable, parsedLine.label)){
+                /* IMRPOVE ERRORS*/
+                /* label id defined already*/
+            }
+            is_symbol = 1;
         }
-        if(is_directive(&parsedLine)){
-            check_directive(&parsedLine);
+        if(parsedLine.instruction[0] == '.'){ /* checks if there is '.'*/
+            if(strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0){
+                if(is_symbol){
+                    add_symbol_to_table(symbolTable, parsedLine.label, 1, *DC); /*add to symbol with 1 as data*/
+                }
+                error = handleDataDirective(&parsedLine, symbolTable, binaryTable, DC);
+            }
+            if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0){
+                if(is_symbol){
+                    add_symbol_to_table(symbolTable, parsedLine.label, 2, *DC); /*add to symbol with 2 as string*/
+                }
+                /*instruction is .data or .string*/
+                error = handleStringDirective(&parsedLine, symbolTable, binaryTable, DC);
+                }
+            else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0){  /* if extern*/
+                handleExternDirective(&parsedLine, symbolTable, binaryTable, *DC);
+                externCount += 1;
+            }
+            else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0) {/* if entry*/
+                handleEntryDirective(&parsedLine, symbolTable, binaryTable, *DC);
+                entryCount += 1;
+            }
+            else{
+                continue;
+                /* IMPROVE ERRORS*/
+                /* not defined directive*/
+            }
+            if (error != 1) {
+                continue; /*something failed*/
+                /* IMRPOVE ERRORS*/
+                /* -> by lineNumber, error*/
+            }
         }
-        else{
-            is_valid_instruction(&parsedLine);
+        else{ /* line is command - maybe also label is defined*/
+            handle_instruction(parsedLine,symbolTable,binaryTable, IC); /*label is defined inside, also makes binary*/
         }
-        /* make all the checks if allowed */
-        /*if (ParsedLine->label!=NULL){ }*/
-        /* all the checks if legal will be here */
-        freeAssemblyLine(&parsedLine);
+        is_symbol = 0;
+        /* check if memory overflow*/
+        if ((*IC + *DC) > MAX_MEMORY_WORDS) {
+            /* IMPROVE ERRORS*/
+        }
     }
-    return 0;
-}
-
-int is_directive(AssemblyLine* parsedLine)
-{
-    /* Check if the first character of the instruction is a dot, as should be in directive ('.')*/
-    return (parsedLine->instruction[0] == '.') ? 1 : 0;
-}
-
-int countOccurrences(const char *str, char ch) {
-    int count = 0;
-    while (*str) {
-        if (*str == ch) {
-            count++;
+    current = symbolTable->head;
+    while (current != NULL)
+    {
+        if (strcmp(current->symbolType, 1) == 0) /* data type is {data}*/
+        {
+            current->symbolValue = current->symbolValue + *IC;
         }
-        str++;
+        current = current->next;
     }
-    return count;
+    freeAssemblyLine(&parsedLine);
+    return 1; /*SUCCESS*/
 }
 
 int check_type(Operand *operand){
@@ -125,7 +130,7 @@ int check_type(Operand *operand){
             break;
         case '*':
             memmove(operand->value, operand->value + 1, strlen(operand->value)-1);
-            if (strlen(operand->value) == 2 && operand->value[0] == 'r'&& operand->value[1] >= '0' && operand->value[1] <= '7') {
+            if (valid_reg_name(operand->value)) {
                 operand->value[strlen(operand->value) - 1] = '\0';
                 operand->type = 0;
                 break;
@@ -135,7 +140,7 @@ int check_type(Operand *operand){
                 /* IMPROVE ERRORS*/
             }
         case 'r':
-            if (strlen(operand->value) == 2 && operand->value[1] >= '0' && operand->value[1] <= '7') {
+            if(valid_reg_name(operand->value)){
                 operand->type = 3;
                 break;
             }
@@ -175,25 +180,6 @@ int get_opcode_code(AssemblyLine* parsedLine){
     return -1; /*Instruction not found in OPCODES*/
 }
 
-int is_valid_integer(char *operand) {
-    if (operand == NULL || *operand == '\0') {
-        return 0; /*Operand is null or empty*/
-    }
-    /*Ensure the first character is a digit or '-'*/
-    if (!isdigit(*operand) && *operand != '-') {
-        return 0; /*First character is not valid*/
-    }
-    /*Ensure the rest of the characters are digits*/
-    operand++; /*Move past the first character*/
-    while (*operand != '\0') {
-        if (!isdigit(*operand)) {
-            return 0; /*Found a non-digit character*/
-        }
-        operand++;
-    }
-    return 1; /*Operand is a valid integer*/
-}
-
 int operand_parser(AssemblyLine* parsedLine){
     char *ptr_in_line = NULL;
     char *start = NULL;
@@ -206,9 +192,8 @@ int operand_parser(AssemblyLine* parsedLine){
     char *operandValue;
     int operandLen = 0;
     num_operands = get_opcode_operands(parsedLine); /*got how many allowed*/
-    if(num_operands == -1){
+    if(num_operands == -1){/*insturction not found*/
         /* IMPROVE ERRORS*/
-        /*insturction not found*/
         free(temp_srcOperand);
         free(temp_destOperand );
         return 0;
@@ -378,13 +363,158 @@ int operand_parser(AssemblyLine* parsedLine){
     return 1;
 }
 
-int is_valid_instruction(AssemblyLine* parsedLine){
+int handle_instruction(AssemblyLine* parsedLine,SymbolTable *symbol_table,BinaryTable *binary_table, *IC){
     int did_parse = 0;
-    did_parse = operand_parser(parsedLine);
+    did_parse = operand_parser(parsedLine); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if(did_parse){
         /*IMPROVE ERRORS*/
-        /*couldnt parse operands*/
+        /*couldnt parse operands + OPCODE not legal*/
     }
-    /*if it parsed -> all operands are as should be for relevent opcode*/
+    /*make_binary(parsedLine,IC); TO DO*/
+    /*the line is in correct syntax*/
+    if(parsedLine->label!=NULL){ /* already checked that wan't defined yet*/
+        add_symbol_to_table(symbol_table, parsedLine->label, 0,IC); /*also checks if name is legal, symbol gets IC place*/
+    }
     return 1;
+}
+
+int valid_reg_name(char *value){
+    if (strlen(value) == 2 && value[0] == 'r' && value[1] >= '0' && value[1] <= '7'){
+        return 1;
+    }
+    return 0;
+
+}
+
+int calculate_L(int srcType, int dstType)
+{
+    int L = 1;/* at least 1, the base word */
+    if (srcType == -1 && dstType == -1)
+    {
+        return L;
+    }
+    if (srcType == 3 && dstType == 3){
+        return L + 1;
+    }
+    if (srcType == 0 || srcType == 3 || srcType == 1){
+        L = L + 1;
+    }
+    if (dstType == 0 || dstType == 3 || dstType == 1){
+        L = L + 1;
+    }
+    if (dstType == 2){
+        L = L + 2;
+    }
+    if (srcType == 2){
+        L = L + 2;
+    }
+    return L;
+}
+
+int handleDataDirective(AssemblyLine* parsedLine,SymbolTable *symbolTable,BinaryTable *BinaryTable, int *DC){
+    char *token = NULL;
+    token = strtok(parsedLine->operands, ",");
+    int value = 0, error = 0;
+    while (token != NULL)
+    {
+        /*Trim leading whitespace - TO DO: ADD whitespaces if's before and after ','
+        while (isspace((unsigned char)*token)) token++; - move until not ' '
+        char *end = token + strlen(token) - 1;
+        while (end > token && isspace((unsigned char)*end)) end--;
+        end[1] = '\0';*/
+        if (!is_valid_integer(token)) {
+            /* IMRPOVE ERRORS*/
+            return 0;
+            /*operans is not valid number */
+        }
+        else { /*symbol syntax is checked in add symbol*/
+            value = atoi(token); /*numeral value of the operand*/
+        }
+        /* Insert the binary */
+        /*make binary - 
+        error = insertToBinaryCodesTable(BinaryTable, *DC, parsedLine, convertIntToBinary(value, BINARY_CODE_LEN), parsedLine->operands);
+        */
+        if (error != SUCCESS){
+            return 0;
+            /* IMRPOVE ERRORS*/
+            /* some error in binary conversion*/
+        }
+        *DC = *DC + 1;
+        token = strtok(NULL, ",");
+    }
+    return 1;
+}
+
+int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC)
+{
+    int stringLen = 0, i = 0;
+    char binaryCode[BINARY_CODE_LEN];
+    char *int_to_Binary_Res = NULL;
+
+    stringLen = strlen(parsedLine->operands);
+    memset(binaryCode, '\0', sizeof(binaryCode));
+
+    if (is_valid_string(parsedLine->operands) == 0) {
+        /* IMPROVE ERRORS*/
+        /*doesnt start with ""*/
+    }
+    /*go through string without ""*/
+    for (i = 1; i < stringLen -1; i++) {
+        /* converts the ASCII value of the character to a binary string */
+        /*make binary:
+        intToBinaryRes = convertIntToBinary((int)parsedLine->operands[i], BINARY_CODE_LEN);
+        strcpy(binaryCode, intToBinaryRes);
+        insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, binaryCode, &parsedLine->operands[i]);
+        */
+        *DC = *DC + 1; 
+    }
+
+    /* Null byte at the end of the string */
+    /* Check if BINARY_CODE_LEN or BINARY_CODE_LEN -1 */
+    /*insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, convertIntToBinary(0, BINARY_CODE_LEN), &parsedLine->operands[i]);*/
+    *DC = *DC + 1; /*for '/0'*/
+    return 1;
+}
+
+int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable){
+    int err = 0;
+    char *token = NULL;
+    if (parsedLine->label != NULL) {
+        /* IMPROVE ERRORS*/
+        /*extern cant have label defenition*/
+    }
+    token = strtok(parsedLine->operands, ","); /*operands should be the name of the labels from extern*/
+    int err = 1; /* Assume success */
+    while (token != NULL) {
+        if (!add_symbol_to_table(symbolTable, token, 4, 0)) {/*extern is type 4*/
+            /*cheks inside if the symbol is in valid name*/
+            /* IMPROVE ERRORS */
+            err = 0; /* Failed to add symbol */
+            break;
+        }
+        token = strtok(NULL, ",");
+    }
+    return err;
+}
+
+int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable){
+    int err = 0;
+    char *token = NULL;
+    if (parsedLine->label != NULL) {
+        /* IMPROVE ERRORS*/
+        /*entry shouldnt have label defenition*/
+    }
+    token = strtok(parsedLine->operands, ","); /*operands should be the name of the labels from extern*/
+    int err = 1; /* Assume success */
+    while (token != NULL) {
+        if (!add_symbol_to_table(symbolTable, token, 4, 0)) {
+            add_symbol_to_table(symbolTable,parsedLine->operands,3,0); /*entry is type 3*/
+            /*cheks inside if the symbol is in valid name*/
+            /* IMPROVE ERRORS */
+            err = 0; /* Failed to add symbol */
+            break;
+        }
+        token = strtok(NULL, ",");
+    }
+    return err;
 }
