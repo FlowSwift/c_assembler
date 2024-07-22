@@ -4,8 +4,8 @@
 typedef struct SymbolNode{
     /*every label will have this structure after it is checked that it is legal definition */
     char *name;
-    int *type; /*0 - definition in instruction, 1 - .data, 2- .string, 3 - .entry, 4 - extern*/
-    int *memory_place;
+    int type; /*0 - definition in instruction, 1 - .data, 2- .string, 3 - .entry, 4 - extern*/
+    int memory_place;
     struct SymbolNode *next;
 }SymbolNode;
 

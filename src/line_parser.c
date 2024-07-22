@@ -87,8 +87,6 @@ void freeOperand(Operand *operand)
     if (operand != NULL)
     {
         free(operand->value);
-        free(operand->memory_place);
-        free(operand->is_label);
         free(operand);
         operand = NULL;
     }

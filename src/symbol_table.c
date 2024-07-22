@@ -1,8 +1,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 #include "symbol_table.h"
+#include "constant.h"
+#include "first_pass.h"
 
 int is_symbol_in_table(SymbolTable *table, char *symbol_name) {
     SymbolNode *current = table->head;
@@ -39,8 +43,8 @@ int is_valid_symbol(char* label)
         }
     }
     /*check if label is opcode*/
-    for (j = 0; i < strlen(label); i++){
-        if (strcmp(plabel, OPCODES[i].name) == 0) {
+    for (j = 0; j < strlen(label); j++){
+        if (strcmp(label, OPCODES[j].name) == 0) {
             return 0;
             /* IMRPOVE ERRORS*/
             /*label had instruction name*/
@@ -62,7 +66,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
         return 0; /*Symbol already exists*/
     }
     /* Create a new node */ 
-    SymbolNode *new_node = (SymbolNode *)malloc(sizeof(SymbolNode));
+    new_node = (SymbolNode *)malloc(sizeof(SymbolNode));
     if (!new_node) {
         /* IMRPOVE ERRORS*/
         return 0; /*Memory allocation failed*/
@@ -77,12 +81,10 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
     new_node->memory_place = memory_place;
     if (!new_node->name || !new_node->type || !new_node->memory_place) {
         /*Handle memory allocation failure*/
-        free(new_node->name);
-        free(new_node->memory_place);
-        free(new_node);
+        freeSymbolNode(new_node);
         return 0;
     }
-    *(new_node->memory_place) = memory_place;
+    new_node->memory_place = memory_place;
     new_node->next = NULL;
 
     if (table->head == NULL) {
@@ -113,8 +115,7 @@ SymbolTable *createSymbolTable()
 void freeSymbolNode(SymbolNode *node) {
     if (node != NULL)
     {
-        free(node->symbolName);
-        free(node->symbolType);
+        free(node->name);
         free(node);
     }
 }

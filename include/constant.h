@@ -1,6 +1,6 @@
 #define MAX_LABEL_LEN 31
 #define MACRO_START "macr"   /* Macro start keyword */
-#define MACRO_END "end_macr
+#define MACRO_END "end_macr"
 #define MAX_FILE_NAME 100 
 #define MAX_MEMORY_WORDS 4096
 

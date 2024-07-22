@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "binary_table.h"
 
 BinaryTable* create_binary_table() {
@@ -17,7 +19,7 @@ BinaryTable* create_binary_table() {
 }
 void free_binary_table(BinaryTable *table) {
     if (table == NULL) {
-        return 1;
+        return;
     }
     BinaryNode *current = NULL;
     current = table->head;

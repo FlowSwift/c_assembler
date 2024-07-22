@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "util.h"
 #include "error_handler.h"
 
@@ -18,7 +19,7 @@ char *add_file_extension(char *filename, char *extension)
 }
 
 
-int isEmptyLine(char *line)
+int is_empty_line(char *line)
 {
     while (*line != '\0') {
         if (!isspace(*line)) {
@@ -29,7 +30,7 @@ int isEmptyLine(char *line)
     return 1;
 }
 
-int isCommentedLine(char *line)
+int is_commented_line(char *line)
 {
     if (*line == ';') {
         return 1; /* Commented line*/
@@ -73,11 +74,10 @@ int count_occurrences(const char *str, char ch) {
     return count;
 }
 
-char *strdup(char *src_string)
+char *strdup1(char *src_string)
 {
     size_t len;
     char *duplicate_string = NULL;
-
     if (src_string == NULL)
     {
         return NULL;
@@ -86,7 +86,7 @@ char *strdup(char *src_string)
     len = strlen(src_string) + 1;
     duplicate_string = malloc(len);
 
-    if (duplicate != NULL)
+    if (duplicate_string != NULL)
     {
         memcpy(duplicate_string, src_string, len);
     }
