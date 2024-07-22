@@ -6,6 +6,8 @@ char *add_file_extension(char *filename, char *extension);
 int is_empty_line(char *line);
 int is_commented_line(char *line);
 int is_valid_integer(char *operand);
+/*checks if the register is valid*/
+int valid_reg_name(char *value);
 int count_occurrences(const char *str, char ch);
 char *strdup1(char *src_string);
 int is_valid_string(char* str);

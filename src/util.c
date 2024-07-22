@@ -60,6 +60,14 @@ int is_valid_integer(char *operand) {
     return error_flag; /* 0 - > Success. Operand is a valid integer */
 }
 
+int valid_reg_name(char *value){
+    if (strlen(value) == 2 && value[0] == 'r' && value[1] >= '0' && value[1] <= '7'){
+        return 0; /*SUCCESS*/
+    }
+    return 1;
+
+}
+
 int count_occurrences(const char *str, char ch) {
     int count = 0;
     while (*str!='\0') {

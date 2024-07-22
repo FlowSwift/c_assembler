@@ -30,8 +30,6 @@ int operand_parser(AssemblyLine* parsedLine);
     insters to binary table.
     inserts label to Symbol Table if there is label*/
 int handle_instruction(AssemblyLine* parsedLine,SymbolTable *symbol_table,BinaryTable *binary_table, int *IC, struct macros *macro_head);
-/*checks if the register is valid*/
-int valid_reg_name(char *value);
 /*calculates L by miun types of Operands*/
 int calculate_L(int srcType, int dstType);
 int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC);
