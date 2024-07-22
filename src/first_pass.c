@@ -27,7 +27,7 @@ const Opcode OPCODES[] = {
     {15, "stop", 0}
 };
 
-int firstPass(char *file_name, SymbolTable *symbolTable,BinaryTable *BinaryTable, int *IC, int *DC)
+int firstPass(char *file_name, SymbolTable *symbolTable,BinaryTable *binaryTable, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
