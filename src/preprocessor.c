@@ -22,7 +22,7 @@
 */
 
 /* CHECK HOW IT RETURNS INT */
-int pre_process(char *file_name)
+int pre_process(char *file_name, struct macros *head)
 {
     char *full_file_name; /* File name including extension */
     char *temp_file_name; /* Temp file */
@@ -38,7 +38,7 @@ int pre_process(char *file_name)
         handle_error(error_flag, 0);
         return error_flag;
     }
-    if (process_macros(file_name, temp_file_name) != 0)
+    if (process_macros(file_name, temp_file_name, head) != 0)
     {
         free(full_file_name);
         free(temp_file_name);
@@ -124,12 +124,11 @@ void strip_line(char *dest, char *source)
     return;
 }
 
-int process_macros(char *filename, char *temp_file_name)
+int process_macros(char *filename, char *temp_file_name, struct macros *head)
 {
     FILE *file = NULL, *processed_file = NULL;
     char *am_file_name = NULL;
     char line[MAX_LINE_LENGTH];
-    struct macros *head = NULL;
     struct macros *macro = NULL;
     int line_counter = 0;
     char *macr_pos = NULL;

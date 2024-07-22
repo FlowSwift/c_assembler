@@ -3,8 +3,8 @@
 
 int main(int argc, char *argv[])
 {
-    
-    pre_process(argv[1]);
+    struct macros *head = NULL;   
+    pre_process(argv[1], head);
     //SymbolTable *symbolTable = NULL;
     //BinaryTable *binaryTable = NULL;
     //symbolTable = createSymbolTable(); /*create empty symbol table*/

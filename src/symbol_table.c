@@ -114,7 +114,8 @@ SymbolTable *createSymbolTable()
     if (table == NULL)
     {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
-        return error_flag;
+        handle_error(error_flag, 0);
+        return NULL;
     }
     table->head = NULL;
     table->last = NULL;

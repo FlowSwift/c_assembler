@@ -86,7 +86,7 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
             }
         }
         else{ /* assume line is command - maybe also label is defined*/
-            error_flag = handle_instruction(&parsedLine,symbolTable,binaryTable, IC);  /*label is defined inside, also makes binary*/
+            error_flag = handle_instruction(&parsedLine,symbolTable,binaryTable, IC, macro_head);  /*label is defined inside, also makes binary*/
         }
         if (error_flag != 0) { /*if something failed*/
             handle_error(error_flag, lineNumber);
@@ -382,6 +382,10 @@ int handle_instruction(AssemblyLine *parsedLine,SymbolTable *symbol_table,Binary
         error_flag = add_symbol_to_table(symbol_table, parsedLine->label, 0, *IC,macro_head); /*also checks if name is legal, symbol gets IC place*/
     }
     return error_flag; /* 0 -> SUCCESS*/
+}
+
+int valid_reg_name(char *value) {
+    return 0; /* TO DO*/
 }
 
 int calculate_L(int srcType, int dstType)
