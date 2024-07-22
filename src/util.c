@@ -37,6 +37,30 @@ int isCommentedLine(char *line)
     return 0;
 }
 
+int is_valid_integer(char *operand) {
+    if (operand == NULL || *operand == '\0') {
+        return 0; /* Operand is null or empty */
+    }
+    /* Ensure the first character is a digit or a sign ('+' or '-') */
+    if (!isdigit(*operand) && *operand != '+' && *operand != '-') {
+        return 0; /* First character is not valid */
+    }
+    /* Move past the sign if it exists */
+    if (*operand == '+' || *operand == '-') {
+        operand++;
+        if (!isdigit(*operand)) {
+            return 0; /* Next character after the sign must be a digit */
+        }
+    }
+    /* Ensure the rest of the characters are digits */
+    while (*operand != '\0') {
+        if (!isdigit(*operand)) {
+            return 0; /* Found a non-digit character */
+        }
+        operand++;
+    }
+    return 1; /* Operand is a valid integer */
+}
 
 int count_occurrences(const char *str, char ch) {
     int count = 0;
@@ -67,4 +91,17 @@ char *strdup(char *src_string)
         memcpy(duplicate_string, src_string, len);
     }
     return duplicate_string;
+}
+
+int is_valid_string(char* str){
+    /*starts and ends with ""*/
+    if (str[0] != '"')
+    {
+        return 0;
+    }
+    if (str[strlen(str) - 1] != '"')
+    {
+        return 0;
+    }
+    return 1;
 }

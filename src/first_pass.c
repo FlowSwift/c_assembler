@@ -6,6 +6,7 @@
 #include "lines.h"
 #include "symbol_table.h"
 #include "binary_table.h"
+#include "util.h"
 
 const Opcode OPCODES[] = {
     {0, "mov", 2},
@@ -177,31 +178,6 @@ int get_opcode_code(AssemblyLine* parsedLine){
         }
     }
     return -1; /*Instruction not found in OPCODES*/
-}
-
-int is_valid_integer(char *operand) {
-    if (operand == NULL || *operand == '\0') {
-        return 0; /* Operand is null or empty */
-    }
-    /* Ensure the first character is a digit or a sign ('+' or '-') */
-    if (!isdigit(*operand) && *operand != '+' && *operand != '-') {
-        return 0; /* First character is not valid */
-    }
-    /* Move past the sign if it exists */
-    if (*operand == '+' || *operand == '-') {
-        operand++;
-        if (!isdigit(*operand)) {
-            return 0; /* Next character after the sign must be a digit */
-        }
-    }
-    /* Ensure the rest of the characters are digits */
-    while (*operand != '\0') {
-        if (!isdigit(*operand)) {
-            return 0; /* Found a non-digit character */
-        }
-        operand++;
-    }
-    return 1; /* Operand is a valid integer */
 }
 
 int operand_parser(AssemblyLine* parsedLine){
@@ -389,7 +365,7 @@ int operand_parser(AssemblyLine* parsedLine){
 
 int handle_instruction(AssemblyLine* parsedLine,SymbolTable *symbol_table,BinaryTable *binary_table, *IC){
     int did_parse = 0;
-    did_parse = operand_parser(parsedLine); /*checks if OPCODE legal and Operand are as should be*/
+    did_parse = operand_parser(parsedLine); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if(did_parse){
         /*IMPROVE ERRORS*/
         /*couldnt parse operands + OPCODE not legal*/
@@ -435,3 +411,110 @@ int calculate_L(int srcType, int dstType)
     return L;
 }
 
+int handleDataDirective(AssemblyLine* parsedLine,SymbolTable *symbolTable,BinaryTable *BinaryTable, int *DC){
+    char *token = NULL;
+    token = strtok(parsedLine->operands, ",");
+    int value = 0, error = 0;
+    while (token != NULL)
+    {
+        /*Trim leading whitespace - TO DO: ADD whitespaces if's before and after ','
+        while (isspace((unsigned char)*token)) token++; - move until not ' '
+        char *end = token + strlen(token) - 1;
+        while (end > token && isspace((unsigned char)*end)) end--;
+        end[1] = '\0';*/
+        if (!is_valid_integer(token)) {
+            /* IMRPOVE ERRORS*/
+            return 0;
+            /*operans is not valid number */
+        }
+        else { /*symbol syntax is checked in add symbol*/
+            value = atoi(token); /*numeral value of the operand*/
+        }
+        /* Insert the binary */
+        /*make binary - 
+        error = insertToBinaryCodesTable(BinaryTable, *DC, parsedLine, convertIntToBinary(value, BINARY_CODE_LEN), parsedLine->operands);
+        */
+        if (error != SUCCESS){
+            return 0;
+            /* IMRPOVE ERRORS*/
+            /* some error in binary conversion*/
+        }
+        *DC = *DC + 1;
+        token = strtok(NULL, ",");
+    }
+    return 1;
+}
+
+int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC)
+{
+    int stringLen = 0, i = 0;
+    char binaryCode[BINARY_CODE_LEN];
+    char *int_to_Binary_Res = NULL;
+
+    stringLen = strlen(parsedLine->operands);
+    memset(binaryCode, '\0', sizeof(binaryCode));
+
+    if (is_valid_string(parsedLine->operands) == 0) {
+        /* IMPROVE ERRORS*/
+        /*doesnt start with ""*/
+    }
+    /*go through string without ""*/
+    for (i = 1; i < stringLen -1; i++) {
+        /* converts the ASCII value of the character to a binary string */
+        /*make binary:
+        intToBinaryRes = convertIntToBinary((int)parsedLine->operands[i], BINARY_CODE_LEN);
+        strcpy(binaryCode, intToBinaryRes);
+        insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, binaryCode, &parsedLine->operands[i]);
+        */
+        *DC = *DC + 1; 
+    }
+
+    /* Null byte at the end of the string */
+    /* Check if BINARY_CODE_LEN or BINARY_CODE_LEN -1 */
+    /*insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, convertIntToBinary(0, BINARY_CODE_LEN), &parsedLine->operands[i]);*/
+    *DC = *DC + 1; /*for '/0'*/
+    return 1;
+}
+
+int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable){
+    int err = 0;
+    char *token = NULL;
+    if (parsedLine->label != NULL) {
+        /* IMPROVE ERRORS*/
+        /*extern cant have label defenition*/
+    }
+    token = strtok(parsedLine->operands, ","); /*operands should be the name of the labels from extern*/
+    int err = 1; /* Assume success */
+    while (token != NULL) {
+        if (!add_symbol_to_table(symbolTable, token, 4, 0)) {/*extern is type 4*/
+            /*cheks inside if the symbol is in valid name*/
+            /* IMPROVE ERRORS */
+            err = 0; /* Failed to add symbol */
+            break;
+        }
+        token = strtok(NULL, ",");
+    }
+    return err;
+}
+
+int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable){
+    int err = 0;
+    char *token = NULL;
+    if (parsedLine->label != NULL) {
+        /* IMPROVE ERRORS*/
+        /*entry shouldnt have label defenition*/
+    }
+    token = strtok(parsedLine->operands, ","); /*operands should be the name of the labels from extern*/
+    int err = 1; /* Assume success */
+    while (token != NULL) {
+        if (!add_symbol_to_table(symbolTable, token, 4, 0)) {
+            add_symbol_to_table(symbolTable,parsedLine->operands,3,0); /*entry is type 3*/
+            /*cheks inside if the symbol is in valid name*/
+            /* IMPROVE ERRORS */
+            err = 0; /* Failed to add symbol */
+            break;
+        }
+        token = strtok(NULL, ",");
+    }
+    return err;
+}

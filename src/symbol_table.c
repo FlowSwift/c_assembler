@@ -67,8 +67,9 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
         /* IMRPOVE ERRORS*/
         return 0; /*Memory allocation failed*/
     }
-    if(!is_valid_symbol(symbol_name)){ /* checks if symbol is in correct format*/
+    if((symbol_type == 1 || symbol_type == 2) && !is_valid_symbol(symbol_name)){ 
         /* IMPROVE ERRORS*/
+        /* checks if symbol is in correct format if data or string*/
         return 0;
     }
     new_node->name = strdup(symbol_name);

@@ -30,5 +30,8 @@ int handle_instruction(AssemblyLine* parsedLine,SymbolTable *symbol_table,Binary
 int valid_reg_name(char *value);
 /*calculates L by miun types of Operands*/
 int calculate_L(int srcType, int dstType);
-
+int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC);
+int handleDataDirective(AssemblyLine *parsedLine,SymbolTable *symbolTable,BinaryTable *BinaryTable, int *DC);
+int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable);
+int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable);
 #endif /* __FIRST_PASS_H__ */
