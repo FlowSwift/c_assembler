@@ -9,6 +9,7 @@
 #include "first_pass.h"
 #include "error_handler.h"
 #include "macros.h"
+#include "util.h"
 
 int is_symbol_in_table(SymbolTable *table, char *symbol_name) {
     SymbolNode *current = NULL;
