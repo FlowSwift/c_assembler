@@ -49,11 +49,9 @@ int is_valid_symbol(struct macros *macro_head, char* label)
         }
     }
     /*check if label is opcode*/
-    for (j = 0; j < strlen(label); j++){
-        if (strcmp(label, OPCODES[j].name) == 0) {
-            error_flag = ERROR_SYMBOL_NAME_IS_OPCODE;
-            return error_flag;
-        }
+    if (check_if_opcode(label) != 0) {
+        error_flag = ERROR_SYMBOL_NAME_IS_OPCODE;
+        return error_flag;
     }
     /*check if label is register name*/
     if(valid_reg_name(label)){

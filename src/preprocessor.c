@@ -10,13 +10,6 @@
 #include "error_handler.h"
 
 /*
-    TODO:
-        Ignore comments
-        Add comments
-        Add start macro name check
-*/
-
-/*
     To do:
         Check macros name
 */
@@ -220,6 +213,12 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
     if (is_existing_macro(head, macro_name) != NULL)
     {
         error_flag = ERROR_MACRO_NAME_EXISTS;
+        handle_error(error_flag, line_number);
+        return error_flag;
+    }
+    if (check_if_opcode(macro_name) != 0)
+    {
+        error_flag = ERROR_MACRO_NAME_IS_OPCODE;
         handle_error(error_flag, line_number);
         return error_flag;
     }

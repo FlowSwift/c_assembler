@@ -10,3 +10,4 @@
 #define ENTRY_DIRECTIVE ".entry"
 
 #define BINARY_CODE_LEN 15
+#define OP_CODE_ARRAY_SIZE 16

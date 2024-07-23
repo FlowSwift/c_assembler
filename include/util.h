@@ -7,6 +7,7 @@ int is_empty_line(char *line);
 int is_commented_line(char *line);
 int is_valid_integer(char *operand);
 int valid_reg_name(char *value);
+int check_if_opcode(char* name);
 int count_occurrences(const char *str, char ch);
 char *strdup1(char *src_string);
 int is_valid_string(char* str);

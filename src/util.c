@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include "util.h"
 #include "error_handler.h"
+#include "constant.h"
+#include "first_pass.h"
 
 /*
     Adds a file extension to the given filename.
@@ -82,6 +84,20 @@ int valid_reg_name(char *value){
     }
     return 1;
 
+}
+
+/*
+    Check if a string is a opcode.
+    Returns 1 if the string is an opcode, 0 otherwise.
+*/
+int check_if_opcode(char* name){
+    int j = 0;
+    while (j++ < OP_CODE_ARRAY_SIZE) {
+        if (strcmp(name, OPCODES[j-1].name) == 0) {
+            return 1; /*found name in opcode table*/
+        }
+    }
+    return 0;
 }
 
 /*
