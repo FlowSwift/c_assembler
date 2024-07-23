@@ -170,7 +170,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
         */
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if ((error_flag = validate_macro_name(macr_pos, line, line_counter)) == 0)
+            if ((error_flag = validate_macro_name(macr_pos, line, line_counter, head)) == 0)
             {
                 add_macro(file, processed_file, &head, line);
             }
@@ -193,7 +193,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
     Validates the macro name is legal in the given line
     Returns 0 if successful, error code otherwise.
 */
-int validate_macro_name(char *macr_ptr, char *line, int line_number)
+int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macros *head)
 {
     char macro_name[MAX_LINE_LENGTH];
     char temp[MAX_LINE_LENGTH];
@@ -201,16 +201,25 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number)
     strcpy(temp, line);
     strtok(temp, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
+    /* Check if a macro name was given */
     if (macro_name == NULL)
     {
         error_flag = ERROR_MACRO_NAME_MISSING;
-        handle_error(error_flag, 0);
+        handle_error(error_flag, line_number);
         return error_flag;
     }
+    /* Check if the macro name does not exist */
+    if (is_existing_macro(head, macro_name) != NULL)
+    {
+        error_flag = ERROR_MACRO_NAME_EXISTS;
+        handle_error(error_flag, line_number);
+        return error_flag;
+    }
+    /* Check if the macro name was followed by another word */
     if (strtok(NULL, " \t\n") != NULL)
     {
         error_flag = ERROR_INVALID_MACRO_DECLARATION;
-        handle_error(error_flag, 0);
+        handle_error(error_flag, line_number);
         return error_flag;
     }
     return 0;

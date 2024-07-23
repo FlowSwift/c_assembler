@@ -36,11 +36,11 @@ struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
     Checks if a macro with the given name exists in the linked list of macros.
     Returns a pointer to the macro node if it exists, NULL otherwise.
 */
-struct macros *is_existing_macro(struct macros *head, char *line)
+struct macros *is_existing_macro(struct macros *head, char *name)
 {
     struct macros *current = head;
     char macro_name[MAX_LINE_LENGTH];
-    strcpy(macro_name, line);
+    strcpy(macro_name, name);
     macro_name[strlen(macro_name) - 1] = '\0'; /* Remove newline for comparison */
     while (current != NULL)
     {
@@ -54,7 +54,7 @@ struct macros *is_existing_macro(struct macros *head, char *line)
 }
 
 /* 
-    Frees all the macro nodes and their associated lines in the linked list
+    Frees all the macro nodes and their associated lines in the linked list.
 */
 void free_macros(struct macros *head)
 {

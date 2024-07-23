@@ -29,6 +29,7 @@ typedef enum {
     ERROR_NOT_ENOUGH_OPERANDS,
     ERROR_OPERAND_IS_EMPTY,
     ERROR_NOT_VALID_INTEGER,
+    ERROR_MACRO_NAME_EXISTS
 } ErrorCode;
 
 typedef struct Error {

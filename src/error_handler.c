@@ -65,6 +65,8 @@ void handle_error(ErrorCode error, int line_number) {
             printf("ERROR: Operand is empty, on line %d\n.", line_number);
         case ERROR_NOT_VALID_INTEGER:
             printf("ERROR: Operand not valid Inetger, on line %d\n.", line_number);
+        case ERROR_MACRO_NAME_EXISTS:
+            printf("ERROR: Macro name exists, on line %d\n.", line_number);
         default:
             printf("Unknown error occurred.\n");
     }
