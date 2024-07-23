@@ -80,7 +80,7 @@ int strip_file(char *filename, char *stripped_file_name)
         return error_flag; /* IMPROVE ERRORS*/
     }
     /* Strip lines and checking the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
-    while (fgets(line, MAX_LINE_LENGTH + 1, file) != NULL)
+    while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
         line_counter++;
         if (line[strlen(line) - 1] != '\n')
@@ -157,7 +157,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
         handle_error(error_flag, 0);
         return error_flag;
     }
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
@@ -237,7 +237,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     strtok(macro_ptr, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
     /* Process lines until the end of the macro */
-    while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
+    while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         /* ADD ERROR CHECK TO MACRO_END */
         if (strstr(line, MACRO_END) != NULL)

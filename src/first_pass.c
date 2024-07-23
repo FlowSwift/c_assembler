@@ -41,7 +41,7 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
     int lineNumber = 0;
     int is_symbol = 0;
     ErrorCode error_flag = 0; /*assume success*/
-    while (fgets(line, MAX_LINE_LENGTH + 1, amfile) != NULL){
+    while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL){
         lineNumber++;
         if (line[strlen(line) - 1] != '\n')
         {
@@ -382,10 +382,6 @@ int handle_instruction(AssemblyLine *parsedLine,SymbolTable *symbol_table,Binary
         error_flag = add_symbol_to_table(symbol_table, parsedLine->label, 0, *IC,macro_head); /*also checks if name is legal, symbol gets IC place*/
     }
     return error_flag; /* 0 -> SUCCESS*/
-}
-
-int valid_reg_name(char *value) {
-    return 0; /* TO DO*/
 }
 
 int calculate_L(int srcType, int dstType)
