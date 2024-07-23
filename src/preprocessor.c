@@ -82,9 +82,12 @@ int strip_file(char *filename, char *stripped_file_name)
     /* Strip lines and checking the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
+        int length;
+        char c;
         line_counter++;
-        if (line[strlen(line) - 1] != '\n')
+        if (line[(length = strlen(line)) - 1] != '\n' && length > MAX_LINE_LENGTH - 2)
         {
+            while (((c = fgetc(file)) != '\n') && (c != EOF));
             error_flag = ERROR_LINE_TOO_LONG;
             handle_error(error_flag, line_counter);
             continue;
@@ -92,6 +95,11 @@ int strip_file(char *filename, char *stripped_file_name)
         else
         {
             strip_line(stripped_line, line);
+            /* Ignore comments */
+            if (stripped_line[0] == ';')
+            {
+                continue;
+            }
             fprintf(stripped_file, "%s", stripped_line);
         }
     }
