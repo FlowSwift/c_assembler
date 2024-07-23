@@ -21,15 +21,16 @@
         Check macros name
 */
 
-/* CHECK HOW IT RETURNS INT */
+/* Main pre-process function that handles the initial file processing */
 int pre_process(char *file_name, struct macros *head)
 {
     char *full_file_name; /* File name including extension */
     char *temp_file_name; /* Temp file */
     ErrorCode error_flag = 0;
-    /* IMPROVE ERRORS */
+    /* Assumes file input was without extension, add file extension */
     full_file_name = add_file_extension(file_name, ".as");
     temp_file_name = add_file_extension(file_name, ".tmp");
+    /* Strip the file of extra whitespace */
     if (strip_file(full_file_name, temp_file_name) != 0)
     {
         free(full_file_name);
@@ -53,8 +54,7 @@ int pre_process(char *file_name, struct macros *head)
 
 /*
     Strips file of extra whitespace
-    Returns 0 if successful
-    Returns error number if error
+    Returns 0 if successful or error code otherwise
 */
 int strip_file(char *filename, char *stripped_file_name)
 {
@@ -79,7 +79,7 @@ int strip_file(char *filename, char *stripped_file_name)
         handle_error(error_flag, 0);
         return error_flag; /* IMPROVE ERRORS*/
     }
-    /* Strip lines assuming the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
+    /* Strip lines and checking the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
     while (fgets(line, MAX_LINE_LENGTH + 1, file) != NULL)
     {
         line_counter++;
@@ -104,6 +104,9 @@ int strip_file(char *filename, char *stripped_file_name)
     return 0;
 }
 
+/* 
+    Remove any leading or trailing whitespaces in the line or any 2 or more following whitespaces
+*/
 void strip_line(char *dest, char *source)
 {
     int i = 0, j = 0;
@@ -124,6 +127,10 @@ void strip_line(char *dest, char *source)
     return;
 }
 
+/*
+    Processes macros in the file.
+    Returns 0 if successful, error code otherwise.
+*/
 int process_macros(char *filename, char *temp_file_name, struct macros *head)
 {
     FILE *file = NULL, *processed_file = NULL;
@@ -182,7 +189,10 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
     return 0;
 }
 
-/* TODO: ADD MACRO NAME CHECK */
+/* 
+    Validates the macro name is legal in the given line
+    Returns 0 if successful, error code otherwise.
+*/
 int validate_macro_name(char *macr_ptr, char *line, int line_number)
 {
     char macro_name[MAX_LINE_LENGTH];
@@ -206,6 +216,7 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number)
     return 0;
 }
 
+/* Adds a macro to the macro list */
 void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr)
 {
     char macro_name[MAX_LINE_LENGTH];
@@ -216,6 +227,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     /* get the macro name and copy to macro_name */
     strtok(macro_ptr, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
+    /* Process lines until the end of the macro */
     while ((fgets(line, MAX_LINE_LENGTH + 1, file)) != NULL)
     {
         /* ADD ERROR CHECK TO MACRO_END */
@@ -237,6 +249,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     return;
 }
 
+/* Writes macro to files*/
 void write_macro(struct macros *macro, FILE *file)
 {
     struct lines *current_line = macro->lines;
