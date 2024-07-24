@@ -75,7 +75,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
     }
     /* Create a new node */ 
     new_node = (SymbolNode *)malloc(sizeof(SymbolNode));
-    if (!new_node) {
+    if (new_node == NULL) {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         return error_flag;
     }

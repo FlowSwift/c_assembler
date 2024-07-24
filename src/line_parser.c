@@ -7,7 +7,6 @@
 
 /*every line will be parsed and inputed to this structure */
 AssemblyLine parseAssemblyLine(const char *line) {
-     /*call the function with line - like (line) */
     AssemblyLine parsedLine;
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;

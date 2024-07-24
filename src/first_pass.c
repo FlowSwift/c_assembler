@@ -40,41 +40,42 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
     SymbolNode *current = NULL;
     int lineNumber = 0;
     int is_symbol = 0;
+    int temp_memory_place = 0;
     ErrorCode error_flag = 0; /*assume success*/
+    printf("works - %d", lineNumber);
     while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL){
+        temp_memory_place = 0;
         lineNumber++;
-        if (line[strlen(line) - 1] != '\n')
-        {
-            /* IMPROVE ERRORS*/
-        }
-        if ((is_empty_line(line) == 0) || (is_commented_line(line) == 0)) { /*continue to next line if empty or commented.*/
+        if ((is_empty_line(line) == 0) || (is_commented_line(line) == 0)) { /*continue to next line if line is empty or commented.*/
             continue;
         }
         parsedLine = parseAssemblyLine(line); /* Parse line for this format: label{optional},instruction, operands.*/
         printf("Parsed Line:\n");
         printAssemblyLine(&parsedLine);
-        if(parsedLine.label!=NULL){
-            if(is_symbol_in_table(symbolTable, parsedLine.label) == 0){
+        if(parsedLine.label!=NULL){ /*a label is defined. NULL when not.*/
+            if(is_symbol_in_table(symbolTable, parsedLine.label) == 0){ /*searches if label is already defined, 0 if found*/
                 error_flag = ERROR__SYMBOL_DEFINED_TWICE;
                 handle_error(error_flag, lineNumber);
             }
-            is_symbol = 1;
+            is_symbol = 1; /*update is_sunbol flag*/
         }
         if(parsedLine.instruction[0] == '.'){ /* if '.' is found it is directive line.*/
             if(strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0){ /* if data*/
-                if(is_symbol){
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 1, *DC, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
+                temp_memory_place = *DC;
+                error_flag = handleDataDirective(&parsedLine, symbolTable, binaryTable, DC);
+                if(is_symbol && (error_flag==0)){ /*data was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 1, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
                     handle_error(error_flag, lineNumber);
                 }
-                error_flag = handleDataDirective(&parsedLine, symbolTable, binaryTable, DC);
             }
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0){ /* if string*/
-                if(is_symbol){
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 2, *DC, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
+                temp_memory_place = *DC;
+                error_flag = handleStringDirective(&parsedLine, symbolTable, binaryTable, DC);
+                if(is_symbol && (error_flag==0)){ /*string was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 2, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
                     handle_error(error_flag, lineNumber);
                 }
-                error_flag = handleStringDirective(&parsedLine, symbolTable, binaryTable, DC);
-                }
+            }
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0){  /* if extern*/
                 error_flag = handleExternDirective(&parsedLine, symbolTable, binaryTable, macro_head);
             }
@@ -82,11 +83,15 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
                 error_flag = handleEntryDirective(&parsedLine, symbolTable, binaryTable, macro_head);
             }
             else{ /*if not one of defined directives.*/
-                handle_error(ERROR_NOT_DEFINED_DIRECTIVE, lineNumber);
+                error_flag = ERROR_NOT_DEFINED_DIRECTIVE;
             }
         }
         else{ /* assume line is command - maybe also label is defined*/
+            temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine,symbolTable,binaryTable, IC, macro_head);  /*label is defined inside, also makes binary*/
+            if(is_symbol && (error_flag==0)){ /* has label and is in regular instruction format.*/
+                error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 0, temp_memory_place ,macro_head); /*also checks if name is legal, symbol gets IC place*/
+            }
         }
         if (error_flag != 0) { /*if something failed*/
             handle_error(error_flag, lineNumber);
@@ -112,7 +117,7 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int check_type(Operand *operand){
+int check_type(Operand *operand,struct macros *macro_head ){
     ErrorCode error_flag = 0; /*assume success*/
     if ((operand->value[0] == '\0')) {
         error_flag = ERROR_NOT_ENOUGH_OPERANDS;
@@ -153,8 +158,14 @@ int check_type(Operand *operand){
                 return error_flag;
             }
         default:
-            operand->type = 1; /*to do:  Default is it's label, will be checked in 2 pass */
-            break;
+            error_flag = is_valid_symbol(macro_head,operand->value);
+            if(error_flag==0){
+                operand->type = 1; /*Default is it's label, will be checked in 2 pass */
+                break;
+            }
+            else {
+                return error_flag;
+            }
     }
     return error_flag; /*0 ->success*/
 }
@@ -162,7 +173,7 @@ int check_type(Operand *operand){
 int get_opcode_operands(char* instruction){
     /* gets allowed operands of insturction*/
     int i = 0;
-    for (i = 0; i < sizeof(OPCODES) / sizeof(OPCODES[0]); i++) {
+    for (i = 0; i < OP_CODE_ARRAY_SIZE; i++) {
         if (strcmp(instruction, OPCODES[i].name) == 0) {
             return OPCODES[i].numOfOperands; /*Instruction found in OPCODES*/
         }
@@ -173,7 +184,7 @@ int get_opcode_operands(char* instruction){
 int get_opcode_code(char* instruction){
     /* gets opcode number of insturction*/
     int i =0;
-    for (i = 0; i < sizeof(OPCODES) / sizeof(OPCODES[0]); i++) {
+    for (i = 0; i < OP_CODE_ARRAY_SIZE; i++) {
         if (strcmp(instruction, OPCODES[i].name) == 0) {
             return OPCODES[i].code; /*Instruction found in OPCODES*/
         }
@@ -181,7 +192,7 @@ int get_opcode_code(char* instruction){
     return -1; /*Instruction not found in OPCODES*/
 }
 
-int operand_parser(AssemblyLine* parsedLine){
+int operand_parser(AssemblyLine* parsedLine,struct macros *macro_head){
     char *ptr_in_line = NULL;
     char *start = NULL;
     ptr_in_line = parsedLine->operands;
@@ -218,29 +229,27 @@ int operand_parser(AssemblyLine* parsedLine){
         }
         operandValue = (char *)malloc(operandLen + 1);
         if(operandValue == NULL){
-        error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
-        return error_flag;
+            error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
+            return error_flag;
         }
         strncpy(operandValue, start, operandLen);
-        operandValue[operandLen] = '\0';
+        operandValue = trim_whitespace(operandValue); /*already adds operandValue[operandLen] = '\0';*/
         if (num_operands_allowed == 2 && operandCount == 0) {/*while reading first operand where should be two -> assign to srcOperand*/
             temp_srcOperand->value = operandValue;
-            if (!check_type(temp_srcOperand)) { /*inserts type of miun to parsedLine and checks errors*/
-                /* IMPROVE ERRORS */
+            error_flag = check_type(temp_srcOperand, macro_head);
+            if (error_flag!=0) { /*inserts type of miun to parsedLine and checks errors*/
                 freeOperand(temp_srcOperand);
                 freeOperand(temp_destOperand);
-                return 0;
+                return error_flag;
             }
         }
-        else if (num_operands_allowed == 1 || (num_operands_allowed == 2 && operandCount == 1)){
-            temp_destOperand->value = operandValue; /*if only one operand allowed or if two and this is second opperand -> assign to destOperand .*/
-            if (!check_type(temp_destOperand)) {/*type of miun will be inserted*/
-                /* IMPROVE ERRORS */
-                free(temp_srcOperand->value);
-                free(temp_destOperand->value);
-                free(temp_destOperand);
-                free(temp_srcOperand);
-                return 0;
+        else if (num_operands_allowed == 1 || (num_operands_allowed == 2 && operandCount == 1)){ /*if only one operand allowed or if two and this is second opperand -> assign to destOperand .*/
+            temp_destOperand->value = operandValue; 
+            error_flag = check_type(temp_srcOperand, macro_head);
+            if (error_flag!=0) { /*inserts type of miun to parsedLine and checks errors*/
+                freeOperand(temp_srcOperand);
+                freeOperand(temp_destOperand);
+                return error_flag;
             }
         }
         else continue;
@@ -251,23 +260,18 @@ int operand_parser(AssemblyLine* parsedLine){
     while (*ptr_in_line != '\0') {
         if (!isspace(*ptr_in_line)) {
             /*there are chars after last operand or operands when needed to be 0*/
-            /* IMPROVE ERRORS */
-            if (temp_srcOperand->value) free(temp_srcOperand->value);
-            if (temp_destOperand->value) free(temp_destOperand->value);
-            free(temp_srcOperand);
-            free(temp_destOperand);
-            return 0;
+            error_flag = ERROR_TOO_MANY_OPERANDS;
+            freeOperand(temp_srcOperand);
+            freeOperand(temp_destOperand);
+            return error_flag;
         }
         ptr_in_line++;
     }
-    if(num_operands_allowed!=operandCount){
-        /* IMPROVE ERRORS*/
-        /*too many operands*/
-        if (temp_srcOperand->value) free(temp_srcOperand->value);
-        if (temp_destOperand->value) free(temp_destOperand->value);
-        free(temp_srcOperand);
-        free(temp_destOperand);
-        return 0;
+    if(num_operands_allowed!=operandCount || (operandCount == 0 && parsedLine->operands != NULL)){
+        error_flag = ERROR_INSTRUCTION_NOT_VALID;
+        freeOperand(temp_srcOperand);
+        freeOperand(temp_destOperand);
+        return error_flag;
     }
     /* Assign operands to parsedLine */
     if (num_operands_allowed == 1) {
@@ -275,14 +279,7 @@ int operand_parser(AssemblyLine* parsedLine){
         temp_srcOperand->value = '\0';
         parsedLine->destOperand = temp_destOperand;
     }
-    else if (operandCount == 0 && parsedLine->operands != NULL){
-            /* IMROVE ERRORS*/
-            /*chars but shouldnt be */
-            free(temp_srcOperand);
-            free(temp_destOperand);
-            return 0;
-    } 
-    else if (num_operands_allowed == 0 && parsedLine->operands == NULL) {
+    if (num_operands_allowed == 0 && parsedLine->operands == NULL) {
         temp_srcOperand->type  = -1;
         temp_srcOperand->value = '\0';
         temp_destOperand->type  = -1;
@@ -292,95 +289,92 @@ int operand_parser(AssemblyLine* parsedLine){
         parsedLine->srcOperand = temp_srcOperand;
         parsedLine->destOperand = temp_destOperand;
     }
-    opcode_code = get_opcode_code(parsedLine->instruction);
+    /*check if miun type of src and dest is valid to instruction*/
+    opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
     type_miun_src = parsedLine->srcOperand->type;
     type_miun_dest = parsedLine->destOperand->type;
     switch (opcode_code){
-        /*mov (0), add(2), sub(3), - have {0,1,2,3) types allowed for src*/
+        /* -1 if instruction is not one of 16 allowed. */
         case -1:
-            /*cannot find insturction*/
-            /*IMPROVE ERRORS*/
+            error_flag = ERROR_INSTRUCTION_NOT_VALID; /*cannot find insturction*/
             break;
+        /*mov (0), add(2), sub(3) - {0,1,2,3) types allowed for src and {1,2,3} for dest*/
         case 0:
         case 2:
         case 3:
             if (!(type_miun_src >= 0 && type_miun_src <=3) && (type_miun_dest >= 1 && type_miun_dest <=3 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
             }
             break;
+        /*cmp(1) - {0,1,2,3} allowed for src and dest*/
         case 1:
-            /*cmp(1)*/
             if (!(type_miun_src >= 0 && type_miun_src <=3) && (type_miun_dest >= 0 && type_miun_dest <=3 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
             }
             break;
+        /*lea(4) - {1,2,3} allowed for src and {1,2,3} for dest*/
         case 4:
-            /*lea(4)*/
             if (!(type_miun_src == 1) && (type_miun_dest >= 1 && type_miun_dest <=3 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
             }
             break;
+        /*clr(5), not(6), inc(7), dec(8), red(11) - only dest allowed - {1,2,3}*/
         case 5:
         case 6:
         case 7:
         case 8:
         case 11:
-            /*clr(5), not(6), inc(7), dec(8), red(11)*/
-            if (!(type_miun_src == -1) && (type_miun_dest >= 1 && type_miun_dest <=3 ))
+            if ((!(type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <=3 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
             }
             break;
+        /*jmp (9), bne(10), jsr(1) - only dest allowed - {1,2}*/
         case 9:
         case 10:
         case 13:
-            /*jmp (9), bne(10), jsr(1)*/
             if (!(type_miun_src == -1) && (type_miun_dest >= 1 && type_miun_dest <=2 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+
             }
             break;
+        /*prn(12) - only dest allowed - {0,1,2,3}*/
         case 12:
-            /*prn(12)*/
             if (!(type_miun_src == -1) && (type_miun_dest >= 0 && type_miun_dest <=3 ))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+
             }
+        /*rts(14), stop(15) - not expecting any operands. */
         case 14:
         case 15:
-            /*rts(14), stop(15)*/
-            if (!(type_miun_src == -1) && (type_miun_dest == -1))
+            if ((!(type_miun_src == -1)) && (!(type_miun_dest == -1)))
             {
-                /* IMPROVE ERRORS*/
-                /*type of operand not aligned to type of opcode*/
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+
             }
         default:
             break;
     }
-    /*the instructions mathed the operands succefully and all was allocated in parsedLine*/
-    return 1;
+    if(error_flag!=0){
+        freeOperand(temp_srcOperand);
+        freeOperand(temp_destOperand);
+    }
+    return error_flag; /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
 }
 
 int handle_instruction(AssemblyLine *parsedLine,SymbolTable *symbol_table,BinaryTable *binary_table, int *IC, struct macros *macro_head){
     ErrorCode error_flag = 0; /*assume success*/
-    error_flag = operand_parser(parsedLine); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
+    error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if(error_flag != 0){
         return error_flag;
     }
     /*make_binary(parsedLine,IC); TO DO*/
     /*the line is in correct syntax*/
-    if(parsedLine->label!=NULL){ /* already checked that wan't defined yet*/
-        error_flag = add_symbol_to_table(symbol_table, parsedLine->label, 0, *IC,macro_head); /*also checks if name is legal, symbol gets IC place*/
-    }
     return error_flag; /* 0 -> SUCCESS*/
 }
 
@@ -411,31 +405,29 @@ int calculate_L(int srcType, int dstType)
 
 int handleDataDirective(AssemblyLine* parsedLine,SymbolTable *symbolTable,BinaryTable *BinaryTable, int *DC){
     char *token = NULL;
-    token = strtok(parsedLine->operands, ", ");
-    int value = 0, error = 0;
+    token = strtok(parsedLine->operands, ","); /*split operands by ','*/
+    int value = 0;
     ErrorCode error_flag = 0; /*assume success*/
     while (token != NULL)
-    {
-        /*Trim leading whitespace - TO DO: ADD whitespaces if's before and after ','
-        while (isspace((unsigned char)*token)) token++; - move until not ' '
-        char *end = token + strlen(token) - 1;
-        while (end > token && isspace((unsigned char)*end)) end--;
-        end[1] = '\0';*/
+    {        
+        token = trim_whitespace(token);/*Trim leading and ending whitespace - use this string for next checks*/
+        if (strlen(token) == 0) {
+            error_flag = ERROR_WRONG_DATA_DIRECTIVE_SYNTAX;
+            return error_flag;
+        }
         if (is_valid_integer(token)!=0) {
             error_flag = ERROR_WRONG_DATA_DIRECTIVE_SYNTAX;
             return error_flag;
         }
-        else { /*symbol syntax is checked in add symbol*/
+        else { /*symbol syntax is checked and is integer*/
             value = atoi(token); /*numeral value of the operand*/
         }
         /* Insert the binary */
         /*make binary - 
         error = insertToBinaryCodesTable(BinaryTable, *DC, parsedLine, convertIntToBinary(value, BINARY_CODE_LEN), parsedLine->operands);
         */
-        if (error != 0){
-            return 0;
-            /* IMRPOVE ERRORS*/
-            /* some error in binary conversion*/
+        if (error_flag != 0){
+            return error_flag; /* some error in binary conversion*/
         }
         *DC = *DC + 1;
         token = strtok(NULL, ",");
@@ -451,7 +443,7 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
     stringLen = strlen(parsedLine->operands);
     memset(binaryCode, '\0', sizeof(binaryCode));
     ErrorCode error_flag = 0; /*assume success*/
-    if (is_valid_string(parsedLine->operands) != 0) {
+    if (is_valid_string(parsedLine->operands) != 0) { /*doesnt start and end with quotation.*/
         error_flag = ERROR_STRING_SYNTAX_NOT_VALID;
         return error_flag;
     }
@@ -474,7 +466,6 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
 }
 
 int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, struct macros *macro_head){
-    /* TO DO - add if there is space between operands*/
     char *token = NULL;
     ErrorCode error_flag = 0; /* Assume success */
     if (parsedLine->label != NULL) {
@@ -482,7 +473,12 @@ int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
         return error_flag;
     }
     token = strtok(parsedLine->operands, ","); /*in .extern the labels will be the operands.*/
-    while (token != NULL) {
+    while (token != NULL) { /*if number of labels is bigger then one*/
+        token = trim_whitespace(token); /*returns char pointer after whitespaces and ends before whitespaces.*/
+        if (strlen(token) == 0) { /*symbol empty, can happen between two ','*/
+            error_flag = ERROR_SYMBOL_SHORT;
+            return error_flag;
+        }   
         error_flag = add_symbol_to_table(symbolTable, token, 4, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
         if(error_flag!=0){ /*if some label not valid.*/
             return error_flag;
@@ -502,6 +498,11 @@ int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bin
     }
     token = strtok(parsedLine->operands, ","); /*in .entry the labels will be the operands.*/
     while (token != NULL) {
+        token = trim_whitespace(token); /*returns char pointer after whitespaces and ends before whitespaces.*/
+        if (strlen(token) == 0) { /*symbol empty, can happen between two ','*/
+            error_flag = ERROR_SYMBOL_SHORT;
+            return error_flag;
+        }  
         error_flag = add_symbol_to_table(symbolTable, token, 3, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
         if(error_flag!=0){ /*if some label not valid.*/
             return error_flag;

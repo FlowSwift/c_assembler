@@ -69,6 +69,10 @@ void handle_error(ErrorCode error, int line_number) {
             printf("ERROR: Macro name exists, on line %d\n.", line_number);
         case ERROR_MACRO_NAME_IS_OPCODE:
             printf("ERROR: Macro name is Opcode, on line %d\n.", line_number);
+        case ERROR_SYMBOL_SHORT:
+            printf("ERROR: Symbol is too short, on line %d\n.", line_number);
+        case ERROR_MIUN_TYPES_DONT_MATCH:
+            printf("ERROR: Miun types don't match what is allowed for instruction, on line %d\n.", line_number);
         default:
             printf("Unknown error occurred.\n");
     }

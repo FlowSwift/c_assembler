@@ -54,18 +54,22 @@ int is_commented_line(char *line)
 */
 int is_valid_integer(char *operand) {
     ErrorCode error_flag = 0; /*assume success*/
-    if (operand == NULL || *operand == '\0') {
+    if (operand == NULL || *operand == '\0') { /* Operand is null or empty */
         error_flag = ERROR_OPERAND_IS_EMPTY;
-        return error_flag; /* Operand is null or empty */
+        return error_flag; 
     }
     if((isdigit(*operand)) || (*operand != '+') || (*operand != '-')) {/* Ensure the first character is a digit or a sign ('+' or '-') */
+        if(!isdigit(*operand) && strlen(operand) == 1){ 
+            error_flag = ERROR_NOT_VALID_INTEGER;/*so first char was only + or - */
+            return error_flag;
+        }
         operand++; /*move past first char*/
         while (*operand != '\0') {
             if (!isdigit(*operand)) {
-                error_flag = ERROR_NOT_VALID_INTEGER; /*founs not integer char */
+                error_flag = ERROR_NOT_VALID_INTEGER; /*found not integer char */
                 return error_flag;
             }
-            operand++; /*move to nest char*/
+            operand++; /*move to next char*/
         }
     }
     else{ /*if first char not in allowed chars*/
@@ -97,7 +101,7 @@ int check_if_opcode(char* name){
             return 1; /*found name in opcode table*/
         }
     }
-    return 0;
+    return 0; /*not opcode*/
 }
 
 /*
@@ -142,9 +146,21 @@ char *strdup1(char *src_string)
     Returns 0 if the string is valid, 1 otherwise.
 */
 int is_valid_string(char* str){
-    /*starts and ends with ""*/
+    /* starts and ends with "" */
     if ((str[0] != '"') || (str[strlen(str) - 1] != '"') || (strlen(str) <=2)){
         return 1; /*not string "{some value}" */
     }
     return 0; /*success*/
+}
+
+char *trim_whitespace(char *str) {
+    /*function to move past whitespace values*/
+    char *end = NULL;
+    end = str + strlen(str) - 1;
+    while (isspace((unsigned char)*str)) str++; /*move past space in starting string*/
+    /*Trim trailing space*/
+    while (end > str && isspace((unsigned char)*end)) end--;
+    /*Write new null terminator character*/
+    end[1] = '\0';
+    return str; /*return pointer for the start of not space string*/
 }
