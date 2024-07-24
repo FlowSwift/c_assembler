@@ -42,8 +42,8 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
     int is_symbol = 0;
     int temp_memory_place = 0;
     ErrorCode error_flag = 0; /*assume success*/
-    printf("works - %d", lineNumber);
     while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL){
+        error_flag = 0; 
         temp_memory_place = 0;
         lineNumber++;
         if ((is_empty_line(line) == 0) || (is_commented_line(line) == 0)) { /*continue to next line if line is empty or commented.*/
@@ -119,6 +119,8 @@ int firstPass(char *file_name,struct macros *macro_head, SymbolTable *symbolTabl
 
 int check_type(Operand *operand,struct macros *macro_head ){
     ErrorCode error_flag = 0; /*assume success*/
+    printf("AAAAA\n");
+    printf("%s\n",operand->value);
     if ((operand->value[0] == '\0')) {
         error_flag = ERROR_NOT_ENOUGH_OPERANDS;
         return error_flag;

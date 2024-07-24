@@ -42,13 +42,13 @@ AssemblyLine parseAssemblyLine(const char *line) {
         line = spacePos + 1;
         /* Set operands*/
         if (*line != '\0') {
-                parsedLine.operands = strdup(line);
+                parsedLine.operands = strdup1(line);
         } else {
                 parsedLine.operands = NULL;
         }
     } else {
         /*If there is no space, the entire line is the instruction with no operands*/
-        parsedLine.instruction = strdup(line);
+        parsedLine.instruction = strdup1(line);
     }
     return parsedLine;
 }

@@ -83,15 +83,14 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
         error_flag = ERROR_SYMBOL_SYNTAX_IS_WRONG; /* checks if symbol is in correct format if data or string*/
         return error_flag;
     }
-    new_node->name = strdup(symbol_name);
+    new_node->name = strdup1(symbol_name);
     new_node->type = symbol_type;
     new_node->memory_place = memory_place;
-    if (!new_node->name || !new_node->type || !new_node->memory_place) {
+    if (!new_node->name) {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         freeSymbolNode(new_node);
         return error_flag;
     }
-    new_node->memory_place = memory_place;
     new_node->next = NULL;
 
     if (table->head == NULL) {
