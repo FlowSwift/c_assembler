@@ -1,7 +1,8 @@
 #ifndef __ERROR_CODES_H__
 #define __ERROR_CODES_H__
 
-typedef enum {
+typedef enum
+{
     ERROR_NONE = 0,
     ERROR_FILE_NOT_FOUND,
     ERROR_CANT_WRITE_FILE,
@@ -19,8 +20,8 @@ typedef enum {
     ERROR_SYMBOL_NAME_IS_OPCODE,
     ERROR_SYMBOL_NAME_IS_REGISTER,
     ERROR_SYMBOL_NAME_IS_MACRO,
-    ERROR_WRONG_DATA_DIRECTIVE_SYNTAX, 
-    ERROR_MEMORY_OVERFLOW, 
+    ERROR_WRONG_DATA_DIRECTIVE_SYNTAX,
+    ERROR_MEMORY_OVERFLOW,
     ERROR_NOT_DEFINED_DIRECTIVE,
     ERROR_STRING_SYNTAX_NOT_VALID,
     ERROR_EXTERN_NOT_VALID,
@@ -36,7 +37,8 @@ typedef enum {
     ERROR_SYMBOL_SHORT
 } ErrorCode;
 
-typedef struct Error {
+typedef struct Error
+{
     ErrorCode code;
     char *message;
 } Error;

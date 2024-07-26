@@ -4,7 +4,7 @@
 #include "lines.h"
 #include "error_handler.h"
 
-/* 
+/*
     Allocates memory for a new line node and initializes it with the given line content.
     Returns a pointer to the new line node.
 */

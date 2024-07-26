@@ -80,7 +80,8 @@ int strip_file(char *filename, char *stripped_file_name)
         line_counter++;
         if (line[(length = strlen(line)) - 1] != '\n' && length > MAX_LINE_LENGTH - 2)
         {
-            while (((c = fgetc(file)) != '\n') && (c != EOF));
+            while (((c = fgetc(file)) != '\n') && (c != EOF))
+                ;
             error_flag = ERROR_LINE_TOO_LONG;
             handle_error(error_flag, line_counter);
             continue;
@@ -105,7 +106,7 @@ int strip_file(char *filename, char *stripped_file_name)
     return 0;
 }
 
-/* 
+/*
     Remove any leading or trailing whitespaces in the line or any 2 or more following whitespaces
 */
 void strip_line(char *dest, char *source)
@@ -190,7 +191,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
     return 0;
 }
 
-/* 
+/*
     Validates the macro name is legal in the given line
     Returns 0 if successful, error code otherwise.
 */

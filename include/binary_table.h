@@ -16,7 +16,7 @@ typedef struct BinaryTable
     int length;
 } BinaryTable;
 
-BinaryTable* create_binary_table();
+BinaryTable *create_binary_table();
 void free_binary_table(BinaryTable *table);
 void print_binary_table(BinaryTable *table);
 

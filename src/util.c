@@ -30,11 +30,13 @@ char *add_file_extension(char *filename, char *extension)
 */
 int is_empty_line(char *line)
 {
-    while (*line != '\0') {
-        if (!isspace(*line)) {
-            return 1;  /* Not empty */
+    while (*line != '\0')
+    {
+        if (!isspace(*line))
+        {
+            return 1; /* Not empty */
         }
-        line++; 
+        line++;
     }
     return 0;
 }
@@ -42,7 +44,8 @@ int is_empty_line(char *line)
 /* Checks if a line is a commented line (starts with ';') */
 int is_commented_line(char *line)
 {
-    if (*line == ';') {
+    if (*line == ';')
+    {
         return 0; /* is commented line*/
     }
     return 1;
@@ -52,27 +55,34 @@ int is_commented_line(char *line)
     Validates if the operand is a valid integer
     Returns 0 if the operand is a valid integer, error code otherwise.
 */
-int is_valid_integer(char *operand) {
+int is_valid_integer(char *operand)
+{
     ErrorCode error_flag = 0; /*assume success*/
-    if (operand == NULL || *operand == '\0') { /* Operand is null or empty */
+    if (operand == NULL || *operand == '\0')
+    { /* Operand is null or empty */
         error_flag = ERROR_OPERAND_IS_EMPTY;
-        return error_flag; 
+        return error_flag;
     }
-    if((isdigit(*operand)) || (*operand != '+') || (*operand != '-')) {/* Ensure the first character is a digit or a sign ('+' or '-') */
-        if(!isdigit(*operand) && strlen(operand) == 1){ 
-            error_flag = ERROR_NOT_VALID_INTEGER;/*so first char was only + or - */
+    if ((isdigit(*operand)) || (*operand != '+') || (*operand != '-'))
+    { /* Ensure the first character is a digit or a sign ('+' or '-') */
+        if (!isdigit(*operand) && strlen(operand) == 1)
+        {
+            error_flag = ERROR_NOT_VALID_INTEGER; /*so first char was only + or - */
             return error_flag;
         }
         operand++; /*move past first char*/
-        while (*operand != '\0') {
-            if (!isdigit(*operand)) {
+        while (*operand != '\0')
+        {
+            if (!isdigit(*operand))
+            {
                 error_flag = ERROR_NOT_VALID_INTEGER; /*found not integer char */
                 return error_flag;
             }
             operand++; /*move to next char*/
         }
     }
-    else{ /*if first char not in allowed chars*/
+    else
+    {                                         /*if first char not in allowed chars*/
         error_flag = ERROR_NOT_VALID_INTEGER; /*founs not integer char */
     }
     return error_flag; /* 0 - > Success. Operand is a valid integer */
@@ -82,22 +92,26 @@ int is_valid_integer(char *operand) {
     Validates if the value is a valid register name (r0 to r7).
     Returns 0 if the value is a valid register name, 1 otherwise.
 */
-int valid_reg_name(char *value){
-    if (strlen(value) == 2 && value[0] == 'r' && value[1] >= '0' && value[1] <= '7'){
+int valid_reg_name(char *value)
+{
+    if (strlen(value) == 2 && value[0] == 'r' && value[1] >= '0' && value[1] <= '7')
+    {
         return 0; /*SUCCESS*/
     }
     return 1;
-
 }
 
 /*
     Check if a string is a opcode.
     Returns 1 if the string is an opcode, 0 otherwise.
 */
-int check_if_opcode(char* name){
+int check_if_opcode(char *name)
+{
     int j = 0;
-    while (j++ < OP_CODE_ARRAY_SIZE) {
-        if (strcmp(name, OPCODES[j-1].name) == 0) {
+    while (j++ < OP_CODE_ARRAY_SIZE)
+    {
+        if (strcmp(name, OPCODES[j - 1].name) == 0)
+        {
             return 1; /*found name in opcode table*/
         }
     }
@@ -108,10 +122,13 @@ int check_if_opcode(char* name){
     Counts the occurrences of a character in a string.
     Returns the number of occurrences.
 */
-int count_occurrences(const char *str, char ch) {
+int count_occurrences(const char *str, char ch)
+{
     int count = 0;
-    while (*str!='\0') {
-        if (*str == ch) {
+    while (*str != '\0')
+    {
+        if (*str == ch)
+        {
             count++;
         }
         str++;
@@ -145,21 +162,26 @@ char *strdup1(char *src_string)
     Checks if a string is valid (starts and ends with double quotes).
     Returns 0 if the string is valid, 1 otherwise.
 */
-int is_valid_string(char* str){
+int is_valid_string(char *str)
+{
     /* starts and ends with "" */
-    if ((str[0] != '"') || (str[strlen(str) - 1] != '"') || (strlen(str) <=2)){
+    if ((str[0] != '"') || (str[strlen(str) - 1] != '"') || (strlen(str) <= 2))
+    {
         return 1; /*not string "{some value}" */
     }
     return 0; /*success*/
 }
 
-char *trim_whitespace(char *str) {
+char *trim_whitespace(char *str)
+{
     /*function to move past whitespace values*/
     char *end = NULL;
     end = str + strlen(str) - 1;
-    while (isspace((unsigned char)*str)) str++; /*move past space in starting string*/
+    while (isspace((unsigned char)*str))
+        str++; /*move past space in starting string*/
     /*Trim trailing space*/
-    while (end > str && isspace((unsigned char)*end)) end--;
+    while (end > str && isspace((unsigned char)*end))
+        end--;
     /*Write new null terminator character*/
     end[1] = '\0';
     return str; /*return pointer for the start of not space string*/

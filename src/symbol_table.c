@@ -11,11 +11,14 @@
 #include "macros.h"
 #include "util.h"
 
-int is_symbol_in_table(SymbolTable *table, char *symbol_name) {
+int is_symbol_in_table(SymbolTable *table, char *symbol_name)
+{
     SymbolNode *current = NULL;
     current = table->head;
-    while (current != NULL) {
-        if (strcmp(current->name, symbol_name) == 0) {
+    while (current != NULL)
+    {
+        if (strcmp(current->name, symbol_name) == 0)
+        {
             return 0; /* Symbol found*/
         }
         current = current->next;
@@ -23,7 +26,7 @@ int is_symbol_in_table(SymbolTable *table, char *symbol_name) {
     return 1; /*Symbol not found*/
 }
 
-int is_valid_symbol(struct macros *macro_head, char* label)
+int is_valid_symbol(struct macros *macro_head, char *label)
 {
     int i = 1;
     int j = 0;
@@ -49,54 +52,64 @@ int is_valid_symbol(struct macros *macro_head, char* label)
         }
     }
     /*check if label is opcode*/
-    if (check_if_opcode(label) != 0) {
+    if (check_if_opcode(label) != 0)
+    {
         error_flag = ERROR_SYMBOL_NAME_IS_OPCODE;
         return error_flag;
     }
     /*check if label is register name*/
-    if(valid_reg_name(label)){
+    if (valid_reg_name(label))
+    {
         error_flag = ERROR_SYMBOL_NAME_IS_REGISTER;
         return error_flag;
     }
     /*check if label is macro name*/
-    if(is_existing_macro(macro_head, label) != NULL){ /*found label in macro table*/
+    if (is_existing_macro(macro_head, label) != NULL)
+    { /*found label in macro table*/
         error_flag = ERROR_SYMBOL_NAME_IS_MACRO;
         return error_flag;
     }
     return error_flag; /* 0 if success*/
 }
 
-int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, int memory_place, struct macros *macro_head) {
+int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, int memory_place, struct macros *macro_head)
+{
     SymbolNode *new_node = NULL;
     ErrorCode error_flag = 0; /*assume success*/
-    if (is_symbol_in_table(table, symbol_name) == 0) { /*symbol found in table*/
+    if (is_symbol_in_table(table, symbol_name) == 0)
+    { /*symbol found in table*/
         error_flag = ERROR__SYMBOL_DEFINED_TWICE;
         return error_flag; /*Symbol already exists*/
     }
-    /* Create a new node */ 
+    /* Create a new node */
     new_node = (SymbolNode *)malloc(sizeof(SymbolNode));
-    if (new_node == NULL) {
+    if (new_node == NULL)
+    {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         return error_flag;
     }
-    if((symbol_type == 1 || symbol_type == 2) && (is_valid_symbol(macro_head, symbol_name)!=0)){ /*check label definition only for DATA and STRING. for entry and extern label is not defined.*/
+    if ((symbol_type == 1 || symbol_type == 2) && (is_valid_symbol(macro_head, symbol_name) != 0))
+    {                                              /*check label definition only for DATA and STRING. for entry and extern label is not defined.*/
         error_flag = ERROR_SYMBOL_SYNTAX_IS_WRONG; /* checks if symbol is in correct format if data or string*/
         return error_flag;
     }
     new_node->name = strdup1(symbol_name);
     new_node->type = symbol_type;
     new_node->memory_place = memory_place;
-    if (!new_node->name) {
+    if (!new_node->name)
+    {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         freeSymbolNode(new_node);
         return error_flag;
     }
     new_node->next = NULL;
 
-    if (table->head == NULL) {
+    if (table->head == NULL)
+    {
         table->head = new_node;
         table->last = new_node;
-    } else if (table->last != NULL)
+    }
+    else if (table->last != NULL)
     {
         table->last->next = new_node;
     }
@@ -120,7 +133,8 @@ SymbolTable *createSymbolTable()
     return table;
 }
 
-void freeSymbolNode(SymbolNode *node) {
+void freeSymbolNode(SymbolNode *node)
+{
     if (node != NULL)
     {
         free(node->name);
@@ -128,7 +142,8 @@ void freeSymbolNode(SymbolNode *node) {
     }
 }
 
-void freeSymbolTable(SymbolTable *table) {
+void freeSymbolTable(SymbolTable *table)
+{
     if (table != NULL)
     {
         SymbolNode *current = table->head;

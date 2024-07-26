@@ -6,7 +6,8 @@
 #include "line_parser.h"
 
 /*every line will be parsed and inputed to this structure */
-AssemblyLine parseAssemblyLine(const char *line) {
+AssemblyLine parseAssemblyLine(const char *line)
+{
     AssemblyLine parsedLine;
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
@@ -14,11 +15,12 @@ AssemblyLine parseAssemblyLine(const char *line) {
     parsedLine.operands = NULL;
     parsedLine.srcOperand = NULL;
     parsedLine.destOperand = NULL;
-	char *spacePos = NULL;
-	char *colonPos = NULL;
+    char *spacePos = NULL;
+    char *colonPos = NULL;
     /* Find the position of the colon*/
     colonPos = strchr(line, ':');
-    if (colonPos != NULL) {
+    if (colonPos != NULL)
+    {
         /* Extract and set the label*/
         size_t labelLen = colonPos - line;
         parsedLine.label = (char *)malloc(labelLen + 1);
@@ -26,13 +28,15 @@ AssemblyLine parseAssemblyLine(const char *line) {
         parsedLine.label[labelLen] = '\0';
         /* Move past the colon*/
         line = colonPos + 1;
-        while (*line == ' ') {
-                line++;
+        while (*line == ' ')
+        {
+            line++;
         }
     }
     /*Find the position of the first space after the label (if any)*/
     spacePos = strchr(line, ' ');
-    if (spacePos != NULL) {
+    if (spacePos != NULL)
+    {
         /* Extract and set the instruction*/
         size_t instrLen = spacePos - line;
         parsedLine.instruction = (char *)malloc(instrLen + 1);
@@ -41,20 +45,27 @@ AssemblyLine parseAssemblyLine(const char *line) {
         /* Move past space to operands*/
         line = spacePos + 1;
         /* Set operands*/
-        if (*line != '\0') {
-                parsedLine.operands = strdup1(line);
-        } else {
-                parsedLine.operands = NULL;
+        if (*line != '\0')
+        {
+            parsedLine.operands = strdup1(line);
         }
-    } else {
+        else
+        {
+            parsedLine.operands = NULL;
+        }
+    }
+    else
+    {
         /*If there is no space, the entire line is the instruction with no operands*/
         parsedLine.instruction = strdup1(line);
     }
     return parsedLine;
 }
-void printAssemblyLine(const AssemblyLine *parsedLine) {
-        if (parsedLine == NULL) {
-            printf("AssemblyLine is NULL\n");
+void printAssemblyLine(const AssemblyLine *parsedLine)
+{
+    if (parsedLine == NULL)
+    {
+        printf("AssemblyLine is NULL\n");
         return;
     }
     printf("Label: %s\n", parsedLine->label ? parsedLine->label : "(none)");
