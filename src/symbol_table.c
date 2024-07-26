@@ -58,7 +58,7 @@ int is_valid_symbol(struct macros *macro_head, char *label)
         return error_flag;
     }
     /*check if label is register name*/
-    if (valid_reg_name(label))
+    if (!valid_reg_name(label))
     {
         error_flag = ERROR_SYMBOL_NAME_IS_REGISTER;
         return error_flag;
@@ -78,7 +78,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
     ErrorCode error_flag = 0; /*assume success*/
     if (is_symbol_in_table(table, symbol_name) == 0)
     { /*symbol found in table*/
-        error_flag = ERROR__SYMBOL_DEFINED_TWICE;
+        error_flag = ERROR_SYMBOL_DEFINED_TWICE;
         return error_flag; /*Symbol already exists*/
     }
     /* Create a new node */

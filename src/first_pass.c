@@ -18,9 +18,9 @@ Opcode OPCODES[] = {
     {1, "cmp", 2},
     {2, "add", 2},
     {3, "sub", 2},
-    {4, "lea", 1},
+    {4, "lea", 2},
     {5, "clr", 1},
-    {6, "not", 2},
+    {6, "not", 1},
     {7, "inc", 1},
     {8, "dec", 1},
     {9, "jmp", 1},
@@ -51,14 +51,15 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             continue;
         }
         parsedLine = parseAssemblyLine(line); /* Parse line for this format: label{optional},instruction, operands.*/
-        printf("Parsed Line:\n");
+        printf("Parsed Line %d:\n", lineNumber);
         printAssemblyLine(&parsedLine);
         if (parsedLine.label != NULL)
         { /*a label is defined. NULL when not.*/
             if (is_symbol_in_table(symbolTable, parsedLine.label) == 0)
             { /*searches if label is already defined, 0 if found*/
-                error_flag = ERROR__SYMBOL_DEFINED_TWICE;
+                error_flag = ERROR_SYMBOL_DEFINED_TWICE;
                 handle_error(error_flag, lineNumber);
+                continue;
             }
             is_symbol = 1; /*update is_sunbol flag*/
         }
@@ -118,6 +119,11 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             handle_error(error_flag, lineNumber);
             return error_flag;
         }
+        printf("Source Operand: %s\n", parsedLine.srcOperand->value);
+        printf("Destination Operand: %s\n", parsedLine.destOperand->value);
+        printf("Type of src %d\n", parsedLine.srcOperand->type);
+        printf("Type of dest %d\n", parsedLine.destOperand->type);
+        printf("----------------\n");
     }
     current = symbolTable->head;
     while (current != NULL)
@@ -135,8 +141,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
 int check_type(Operand *operand, struct macros *macro_head)
 {
     ErrorCode error_flag = 0; /*assume success*/
-    printf("AAAAA\n");
-    printf("%s\n", operand->value);
+    int len = strlen(operand->value) - 1;
     if ((operand->value[0] == '\0'))
     {
         error_flag = ERROR_NOT_ENOUGH_OPERANDS;
@@ -146,12 +151,12 @@ int check_type(Operand *operand, struct macros *macro_head)
     {
     case '#':
         /*Remove '#' and check if the remaining part is a valid integer*/
-        memmove(operand->value, operand->value + 1, strlen(operand->value) - 1);
+        memmove(operand->value, operand->value + 1, len);
+        operand->value[len] = '\0';
         error_flag = is_valid_integer(operand->value);
         if (error_flag == 0)
         {
             operand->type = 0;
-            operand->value[strlen(operand->value) - 1] = '\0';
         }
         else
         {
@@ -159,12 +164,12 @@ int check_type(Operand *operand, struct macros *macro_head)
         }
         break;
     case '*':
-        memmove(operand->value, operand->value + 1, strlen(operand->value) - 1);
+        memmove(operand->value, operand->value + 1, len);
+        operand->value[len] = '\0';
         error_flag = valid_reg_name(operand->value);
         if (error_flag == 0)
         {
-            operand->value[strlen(operand->value) - 1] = '\0';
-            operand->type = 0;
+            operand->type = 2;
             break;
         }
         else
@@ -236,16 +241,13 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     char *operandValue = NULL;
     Operand *temp_srcOperand = NULL;
     Operand *temp_destOperand = NULL;
-
     temp_srcOperand = (Operand *)malloc(sizeof(Operand));
     temp_destOperand = (Operand *)malloc(sizeof(Operand));
-
     if (temp_srcOperand == NULL || temp_destOperand == NULL)
     {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         return error_flag;
     }
-
     num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*got how many operands allowed for Opcode*/
     if (num_operands_allowed == -1)
     { /*insturction not found*/
@@ -288,7 +290,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         else if (num_operands_allowed == 1 || (num_operands_allowed == 2 && operandCount == 1))
         { /*if only one operand allowed or if two and this is second opperand -> assign to destOperand .*/
             temp_destOperand->value = operandValue;
-            error_flag = check_type(temp_srcOperand, macro_head);
+            error_flag = check_type(temp_destOperand, macro_head);
             if (error_flag != 0)
             { /*inserts type of miun to parsedLine and checks errors*/
                 freeOperand(temp_srcOperand);
@@ -424,6 +426,7 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if (error_flag != 0)
     {
+        printf("Error in operand parser %d\n", error_flag);
         return error_flag;
     }
     /*make_binary(parsedLine,IC); TO DO*/
