@@ -38,6 +38,12 @@ void handle_error(ErrorCode error, int line_number)
     case ERROR_SYMBOL_DEFINED_TWICE:
         printf("Error: Symbol defined more than once on line %d\n", line_number);
         break;
+    case ERROR_ENTRY_DEFINED_TWICE:
+        printf("Error: Entry defined more than once on line %d\n", line_number);
+        break;
+    case ERROR_EXTERN_DEFINED_TWICE:
+        printf("Error: Extern defined more than once on line %d\n", line_number);
+        break;
     case ERROR_SYMBOL_SYNTAX_IS_WRONG:
         printf("Error: Symbol syntax is wrong.  %d\n", line_number);
         break;

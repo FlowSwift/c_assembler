@@ -4,11 +4,13 @@
 #include <ctype.h>
 
 #include "line_parser.h"
+#include "util.h"
 
 /*every line will be parsed and inputed to this structure */
-AssemblyLine parseAssemblyLine(const char *line)
+AssemblyLine parseAssemblyLine(char *line)
 {
     AssemblyLine parsedLine;
+    line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
     parsedLine.instruction = NULL;

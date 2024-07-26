@@ -54,13 +54,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         printf("Parsed Line %d:\n", lineNumber);
         printAssemblyLine(&parsedLine);
         if (parsedLine.label != NULL)
-        { /*a label is defined. NULL when not.*/
-            if (is_symbol_in_table(symbolTable, parsedLine.label) == 0)
-            { /*searches if label is already defined, 0 if found*/
-                error_flag = ERROR_SYMBOL_DEFINED_TWICE;
-                handle_error(error_flag, lineNumber);
-                continue;
-            }
+        {                  /*a label is defined. NULL when not.*/
             is_symbol = 1; /*update is_sunbol flag*/
         }
         if (parsedLine.instruction[0] == '.')
@@ -70,8 +64,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 temp_memory_place = *DC;
                 error_flag = handleDataDirective(&parsedLine, symbolTable, binaryTable, DC);
                 if (is_symbol && (error_flag == 0))
-                {                                                                                                      /*data was in correct format and has symbol definition*/
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 1, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
+                {                                                                                                              /*data was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
                     handle_error(error_flag, lineNumber);
                 }
             }
@@ -80,8 +74,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 temp_memory_place = *DC;
                 error_flag = handleStringDirective(&parsedLine, symbolTable, binaryTable, DC);
                 if (is_symbol && (error_flag == 0))
-                {                                                                                                      /*string was in correct format and has symbol definition*/
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 2, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
+                {                                                                                                                /*string was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
                     handle_error(error_flag, lineNumber);
                 }
             }
@@ -103,8 +97,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, binaryTable, IC, macro_head); /*label is defined inside, also makes binary*/
             if (is_symbol && (error_flag == 0))
-            {                                                                                                      /* has label and is in regular instruction format.*/
-                error_flag = add_symbol_to_table(symbolTable, parsedLine.label, 0, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
+            {                                                                                                                   /* has label and is in regular instruction format.*/
+                error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
             }
         }
         if (error_flag != 0)
@@ -119,11 +113,14 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             handle_error(error_flag, lineNumber);
             return error_flag;
         }
-        printf("Source Operand: %s\n", parsedLine.srcOperand->value);
-        printf("Destination Operand: %s\n", parsedLine.destOperand->value);
-        printf("Type of src %d\n", parsedLine.srcOperand->type);
-        printf("Type of dest %d\n", parsedLine.destOperand->type);
-        printf("----------------\n");
+        if (get_opcode_code(parsedLine.instruction) != -1)
+        {
+            printf("Source Operand: %s\n", parsedLine.srcOperand->value);
+            printf("Destination Operand: %s\n", parsedLine.destOperand->value);
+            printf("Type of src %d\n", parsedLine.srcOperand->type);
+            printf("Type of dest %d\n", parsedLine.destOperand->type);
+            printf("----------------\n");
+        }
     }
     current = symbolTable->head;
     while (current != NULL)
@@ -210,6 +207,9 @@ int get_opcode_operands(char *instruction)
     {
         if (strcmp(instruction, OPCODES[i].name) == 0)
         {
+            // printf("%d\n", i);
+            // printf("XXXXXXXXXX%s\n", OPCODES[i].name);
+            // printf("XXXXXXXXXX%d\n", OPCODES[i].numOfOperands);
             return OPCODES[i].numOfOperands; /*Instruction found in OPCODES*/
         }
     }
@@ -256,6 +256,8 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         free(temp_destOperand);
         return error_flag;
     }
+    printf("num_operands_allowed: %d\n", num_operands_allowed);
+    printf("parsedLine->operands: %s\n", parsedLine->instruction);
     while (*ptr_in_line != '\0' && operandCount < num_operands_allowed)
     {
         while (*ptr_in_line != '\0' && isspace(*ptr_in_line))
@@ -426,7 +428,6 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if (error_flag != 0)
     {
-        printf("Error in operand parser %d\n", error_flag);
         return error_flag;
     }
     /*make_binary(parsedLine,IC); TO DO*/
@@ -551,7 +552,7 @@ int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, 4, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, TYPE_EXTERN, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
         if (error_flag != 0)
         { /*if some label not valid.*/
             return error_flag;
@@ -580,7 +581,7 @@ int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bin
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, 3, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, TYPE_ENTRY, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
         if (error_flag != 0)
         { /*if some label not valid.*/
             return error_flag;

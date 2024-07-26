@@ -1,6 +1,19 @@
 #ifndef __SYMBOL_TABLE_H__
 #define __SYMBOL_TABLE_H__
 
+enum SymbolType
+{
+    TYPE_LABEL_DEF = 0,
+    TYPE_DATA,
+    TYPE_STRING,
+    TYPE_ENTRY,
+    TYPE_EXTERN
+};
+
+/*
+    Todo:
+        Modify to use only SymbolNode without SymbolTable
+*/
 #include "macros.h"
 typedef struct SymbolNode
 {
@@ -19,7 +32,7 @@ typedef struct SymbolTable
 } SymbolTable;
 
 /*searchs if symbol is in table*/
-int is_symbol_in_table(SymbolTable *table, char *symbol_name);
+SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name, int symbol_type);
 /*cheks if symbol name is legal*/
 int is_valid_symbol(struct macros *head, char *label);
 /*adds symbol to table - cheks inside if symbol name is legal(is_valid_symbol)*/

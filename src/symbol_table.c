@@ -11,19 +11,19 @@
 #include "macros.h"
 #include "util.h"
 
-int is_symbol_in_table(SymbolTable *table, char *symbol_name)
+SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name, int symbol_type)
 {
     SymbolNode *current = NULL;
     current = table->head;
     while (current != NULL)
     {
-        if (strcmp(current->name, symbol_name) == 0)
+        if ((strcmp(current->name, symbol_name) == 0) && (current->type == symbol_type))
         {
-            return 0; /* Symbol found*/
+            return current; /* Symbol found*/
         }
         current = current->next;
     }
-    return 1; /*Symbol not found*/
+    return NULL; /*Symbol not found*/
 }
 
 int is_valid_symbol(struct macros *macro_head, char *label)
@@ -76,10 +76,34 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
 {
     SymbolNode *new_node = NULL;
     ErrorCode error_flag = 0; /*assume success*/
-    if (is_symbol_in_table(table, symbol_name) == 0)
+    new_node = is_symbol_in_table(table, symbol_name, symbol_type);
+    if (new_node != NULL)
     { /*symbol found in table*/
-        error_flag = ERROR_SYMBOL_DEFINED_TWICE;
-        return error_flag; /*Symbol already exists*/
+        if (new_node->type == symbol_type)
+        { /*symbol already exists under the same type*/
+            error_flag = ERROR_SYMBOL_DEFINED_TWICE;
+            return error_flag; /*Symbol already exists*/
+        }
+        else if (new_node->type == TYPE_ENTRY && symbol_type == TYPE_LABEL_DEF)
+        {                                          /*try to add a label defination when label was defined as entry already*/
+            new_node->memory_place = memory_place; /*only add memory place*/
+            return error_flag;
+        }
+        else if (new_node->type == TYPE_LABEL_DEF && symbol_type == TYPE_ENTRY)
+        {
+            new_node->type = symbol_type;
+            return error_flag;
+        }
+        else if (new_node->type == TYPE_ENTRY && symbol_type == TYPE_ENTRY)
+        {
+            error_flag = ERROR_ENTRY_DEFINED_TWICE;
+            return error_flag; /*Symbol already exists*/
+        }
+        else if (new_node->type == TYPE_EXTERN && symbol_type == TYPE_EXTERN)
+        {
+            error_flag = ERROR_EXTERN_DEFINED_TWICE;
+            return error_flag; /*Symbol already exists*/
+        }
     }
     /* Create a new node */
     new_node = (SymbolNode *)malloc(sizeof(SymbolNode));

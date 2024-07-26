@@ -24,7 +24,7 @@ typedef struct AssemblyLine
     - operands
     this stage doesnt cheack if its legal, this is done in first_pass.c
      */
-AssemblyLine parseAssemblyLine(const char *line);
+AssemblyLine parseAssemblyLine(char *line);
 void printAssemblyLine(const AssemblyLine *parsedLine);
 void freeAssemblyLine(AssemblyLine *line);
 void freeOperand(Operand *operand);
