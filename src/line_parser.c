@@ -11,7 +11,7 @@ AssemblyLine parseAssemblyLine(char *line)
 {
     AssemblyLine parsedLine;
     int len = strlen(line);
-    if ((len - 1) == '\n')
+    if (line[(len - 1)] == '\n')
         line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
