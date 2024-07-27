@@ -67,7 +67,6 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                              /*data was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
-                    handle_error(error_flag, lineNumber);
                 }
             }
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)
@@ -77,7 +76,6 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                /*string was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
-                    handle_error(error_flag, lineNumber);
                 }
             }
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)
@@ -515,7 +513,6 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
 {
     int stringLen = 0, i = 0;
     char binaryCode[BINARY_CODE_LEN];
-
     stringLen = strlen(parsedLine->operands);
     memset(binaryCode, '\0', sizeof(binaryCode));
     ErrorCode error_flag = 0; /*assume success*/
