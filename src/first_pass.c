@@ -43,6 +43,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     ErrorCode error_flag = 0; /*assume success*/
     while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL)
     {
+        printf("----------------\n");
         error_flag = 0;
         temp_memory_place = 0;
         lineNumber++;
@@ -115,11 +116,16 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         }
         if (get_opcode_code(parsedLine.instruction) != -1)
         {
-            printf("Source Operand: %s\n", parsedLine.srcOperand->value);
-            printf("Destination Operand: %s\n", parsedLine.destOperand->value);
-            printf("Type of src %d\n", parsedLine.srcOperand->type);
-            printf("Type of dest %d\n", parsedLine.destOperand->type);
-            printf("----------------\n");
+            if (parsedLine.srcOperand != NULL)
+            {
+                printf("Source Operand: %s\n", parsedLine.srcOperand->value);
+                printf("Type of src %d\n", parsedLine.srcOperand->type);
+            }
+            if (parsedLine.destOperand != NULL)
+            {
+                printf("Destination Operand: %s\n", parsedLine.destOperand->value);
+                printf("Type of dest %d\n", parsedLine.destOperand->type);
+            }
         }
     }
     current = symbolTable->head;
@@ -241,6 +247,19 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     char *operandValue = NULL;
     Operand *temp_srcOperand = NULL;
     Operand *temp_destOperand = NULL;
+    num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*got how many operands allowed for Opcode*/
+    if (num_operands_allowed == -1)
+    { /*insturction not found*/
+        error_flag = ERROR_INSTRUCTION_NOT_VALID;
+        return error_flag;
+    }
+    printf("num_operands_allowed: %d\n", num_operands_allowed);
+    if (num_operands_allowed == 0)
+    { /*no operands allowed*/
+        parsedLine->srcOperand = NULL;
+        parsedLine->destOperand = NULL;
+        return error_flag;
+    }
     temp_srcOperand = (Operand *)malloc(sizeof(Operand));
     temp_destOperand = (Operand *)malloc(sizeof(Operand));
     if (temp_srcOperand == NULL || temp_destOperand == NULL)
@@ -248,16 +267,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         return error_flag;
     }
-    num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*got how many operands allowed for Opcode*/
-    if (num_operands_allowed == -1)
-    { /*insturction not found*/
-        error_flag = ERROR_INSTRUCTION_NOT_VALID;
-        free(temp_srcOperand);
-        free(temp_destOperand);
-        return error_flag;
-    }
-    printf("num_operands_allowed: %d\n", num_operands_allowed);
-    printf("parsedLine->operands: %s\n", parsedLine->instruction);
     while (*ptr_in_line != '\0' && operandCount < num_operands_allowed)
     {
         while (*ptr_in_line != '\0' && isspace(*ptr_in_line))
