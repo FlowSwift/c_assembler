@@ -10,7 +10,9 @@
 AssemblyLine parseAssemblyLine(char *line)
 {
     AssemblyLine parsedLine;
-    line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
+    int len = strlen(line);
+    if ((len - 1) == '\n')
+        line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
     parsedLine.instruction = NULL;
