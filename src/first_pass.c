@@ -125,6 +125,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 printf("Type of dest %d\n", parsedLine.destOperand->type);
             }
         }
+        freeAssemblyLine(&parsedLine);
     }
     current = symbolTable->head;
     while (current != NULL)
@@ -135,7 +136,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         }
         current = current->next;
     }
-    freeAssemblyLine(&parsedLine);
+    fclose(amfile);
     return error_flag; /* 0 -> SUCCESS*/
 }
 

@@ -1,5 +1,9 @@
 #include "preprocessor.h"
 #include "first_pass.h"
+#include "symbol_table.h"
+#include "binary_table.h"
+#include "macros.h"
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -12,5 +16,7 @@ int main(int argc, char *argv[])
     int IC = 0;
     int DC = 0;
     firstPass("test_firstpass", macro_head, symbolTable, binaryTable, &IC, &DC);
+    free(binaryTable);
+    freeSymbolTable(symbolTable);
     return 0;
 }

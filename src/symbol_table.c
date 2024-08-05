@@ -143,6 +143,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
 
 SymbolTable *createSymbolTable()
 {
+    printf("Creating symbol table\n");
     SymbolTable *table = NULL;
     table = (SymbolTable *)malloc(sizeof(SymbolTable));
     ErrorCode error_flag = 0; /*assume success*/
@@ -180,5 +181,6 @@ void freeSymbolTable(SymbolTable *table)
         }
         table->head = NULL;
         table->last = NULL;
+        free(table);
     }
 }
