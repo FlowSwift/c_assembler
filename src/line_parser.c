@@ -81,9 +81,18 @@ void freeAssemblyLine(AssemblyLine *line)
 {
     if (line != NULL)
     {
-        free(line->label);
-        free(line->instruction);
-        free(line->operands);
+        if (line->label != NULL)
+        {
+            free(line->label);
+        }
+        if (line->instruction != NULL)
+        {
+            free(line->instruction);
+        }
+        if (line->operands != NULL)
+        {
+            free(line->operands);
+        }
         if (line->srcOperand != NULL)
         {
             freeOperand(line->srcOperand);

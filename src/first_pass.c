@@ -285,6 +285,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             return error_flag;
         }
         strncpy(operandValue, start, operandLen);
+        operandValue[operandLen] = '\0';
         operandValue = trim_whitespace(operandValue); /*already adds operandValue[operandLen] = '\0';*/
         if (num_operands_allowed == 2 && operandCount == 0)
         { /*while reading first operand where should be two -> assign to srcOperand*/
