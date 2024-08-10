@@ -12,6 +12,7 @@
 #include "constant.h"
 #include "error_handler.h"
 #include "macros.h"
+#include "binary_conversion.h"
 
 Opcode OPCODES[] = {
     {0, "mov", 2},
@@ -31,7 +32,7 @@ Opcode OPCODES[] = {
     {14, "rts", 0},
     {15, "stop", 0}};
 
-int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryTable *binaryTable, int *IC, int *DC)
+int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binaryTable, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
@@ -94,7 +95,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         else
         { /* assume line is command - maybe also label is defined*/
             temp_memory_place = *IC;
-            error_flag = handle_instruction(&parsedLine, symbolTable, binaryTable, IC, macro_head); /*label is defined inside, also makes binary*/
+            error_flag = handle_instruction(&parsedLine, symbolTable, binaryTable, IC, macro_head, lineNumber); /*label is defined inside, also makes binary*/
             if (is_symbol && (error_flag == 0))
             {                                                                                                                   /* has label and is in regular instruction format.*/
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
@@ -126,6 +127,19 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             }
         }
         freeAssemblyLine(&parsedLine);
+    }
+    int i = 1;
+    char bin[16];
+    while (*binaryTable != NULL)
+    {
+        printf("Binary Line: %d\n", i);
+        decimal_to_binary((*binaryTable)->binary_code, bin, 16);
+        printf("Binary Line: %s\n", bin);
+        printf("Binary code: %d\n", (*binaryTable)->binary_code);
+        printf("Original line number: %d\n", (*binaryTable)->original_line_number);
+        i++;
+        printf("---------------------\n");
+        *binaryTable = (*binaryTable)->next;
     }
     current = symbolTable->head;
     while (current != NULL)
@@ -243,6 +257,8 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     ErrorCode error_flag = 0; /*assume success*/
     /*helper variables:*/
     int opcode_code = -1, type_miun_src = -1, type_miun_dest = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
+    opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
+    parsedLine->opcode_code = opcode_code;
     char *operandValue = NULL;
     Operand *temp_srcOperand = NULL;
     Operand *temp_destOperand = NULL;
@@ -355,7 +371,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         parsedLine->destOperand = temp_destOperand;
     }
     /*check if miun type of src and dest is valid to instruction*/
-    opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
     type_miun_src = parsedLine->srcOperand->type;
     type_miun_dest = parsedLine->destOperand->type;
     switch (opcode_code)
@@ -431,7 +446,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     return error_flag; /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
 }
 
-int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, BinaryTable *binary_table, int *IC, struct macros *macro_head)
+int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, BinaryLine **binary_table, int *IC, struct macros *macro_head, int line)
 {
     ErrorCode error_flag = 0;                            /*assume success*/
     error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
@@ -439,8 +454,8 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     {
         return error_flag;
     }
-    /*make_binary(parsedLine,IC); TO DO*/
-    /*the line is in correct syntax*/
+    printf("CHECK %s\n", parsedLine->instruction);
+    convert_instruction_to_binary_code(parsedLine, binary_table, line);
     return error_flag; /* 0 -> SUCCESS*/
 }
 
@@ -474,7 +489,7 @@ int calculate_L(int srcType, int dstType)
     return L;
 }
 
-int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC)
+int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, int *DC)
 {
     char *token = NULL;
     token = strtok(parsedLine->operands, ","); /*split operands by ','*/
@@ -511,7 +526,7 @@ int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bina
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, int *DC)
+int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, int *DC)
 {
     int stringLen = 0, i = 0;
     char binaryCode[BINARY_CODE_LEN];
@@ -542,7 +557,7 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, struct macros *macro_head)
+int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
 {
     char *token = NULL;
     ErrorCode error_flag = 0; /* Assume success */
@@ -570,7 +585,7 @@ int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
     return error_flag; /*0 -> SUCCESS*/
 }
 
-int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryTable *BinaryTable, struct macros *macro_head)
+int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
 {
     /* TO DO - add if there is space between operands*/
     char *token = NULL;

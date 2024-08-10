@@ -13,6 +13,7 @@ typedef struct AssemblyLine
     char *label;
     char *instruction;
     char *operands;
+    int opcode_code;
     Operand *srcOperand;
     Operand *destOperand;
 } AssemblyLine;

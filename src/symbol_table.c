@@ -11,13 +11,13 @@
 #include "macros.h"
 #include "util.h"
 
-SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name, int symbol_type)
+SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name)
 {
     SymbolNode *current = NULL;
     current = table->head;
     while (current != NULL)
     {
-        if ((strcmp(current->name, symbol_name) == 0) && (current->type == symbol_type))
+        if ((strcmp(current->name, symbol_name) == 0))
         {
             return current; /* Symbol found*/
         }
@@ -76,7 +76,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
 {
     SymbolNode *new_node = NULL;
     ErrorCode error_flag = 0; /*assume success*/
-    new_node = is_symbol_in_table(table, symbol_name, symbol_type);
+    new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL)
     { /*symbol found in table*/
         if (new_node->type == symbol_type)
