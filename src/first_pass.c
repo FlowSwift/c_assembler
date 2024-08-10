@@ -519,17 +519,21 @@ int calculate_L(int srcType, int dstType)
 int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, int *DC)
 {
     char *token = NULL;
+    if(parsedLine->operands[strlen(parsedLine->operands)-1] == ',')
+    {
+        return ERROR_WRONG_DATA_DIRECTIVE_SYNTAX;
+    }
     token = strtok(parsedLine->operands, ","); /*split operands by ','*/
     int value = 0;
     ErrorCode error_flag = 0; /*assume success*/
     while (token != NULL)
     {
-        token = trim_whitespace(token); /*Trim leading and ending whitespace - use this string for next checks*/
         if (strlen(token) == 0)
         {
             error_flag = ERROR_WRONG_DATA_DIRECTIVE_SYNTAX;
             return error_flag;
         }
+        token = trim_whitespace(token); /*Trim leading and ending whitespace - use this string for next checks*/
         if (is_valid_integer(token) != 0)
         {
             error_flag = ERROR_WRONG_DATA_DIRECTIVE_SYNTAX;
@@ -550,6 +554,7 @@ int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bina
         *DC = *DC + 1;
         token = strtok(NULL, ",");
     }
+
     return error_flag; /* 0 -> SUCCESS*/
 }
 
