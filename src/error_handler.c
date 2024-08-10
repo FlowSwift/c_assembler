@@ -104,6 +104,9 @@ void handle_error(ErrorCode error, int line_number)
     case ERROR_MIUN_TYPES_DONT_MATCH:
         printf("ERROR: Miun types don't match what is allowed for instruction, on line %d\n.", line_number);
         break;
+    case ERROR_WRONG_OPERAND_SYNTAX:
+        printf("ERROR: Wrong operand syntax, on line %d\n.", line_number);
+        break;
     default:
         printf("Unknown error occurred.\n");
     }

@@ -96,6 +96,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         { /* assume line is command - maybe also label is defined*/
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, binaryTable, IC, macro_head, lineNumber); /*label is defined inside, also makes binary*/
+            printf("THIS THIS THIS %d\n", error_flag);
             if (is_symbol && (error_flag == 0))
             {                                                                                                                   /* has label and is in regular instruction format.*/
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
@@ -130,17 +131,17 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     }
     int i = 1;
     char bin[16];
-    while (*binaryTable != NULL)
-    {
-        printf("Binary Line: %d\n", i);
-        decimal_to_binary((*binaryTable)->binary_code, bin, 16);
-        printf("Binary Line: %s\n", bin);
-        printf("Binary code: %d\n", (*binaryTable)->binary_code);
-        printf("Original line number: %d\n", (*binaryTable)->original_line_number);
-        i++;
-        printf("---------------------\n");
-        *binaryTable = (*binaryTable)->next;
-    }
+    // while (*binaryTable != NULL)
+    // {
+    //     printf("Binary Line: %d\n", i);
+    //     decimal_to_binary((*binaryTable)->binary_code, bin, 16);
+    //     printf("Binary Line: %s\n", bin);
+    //     printf("Binary code: %d\n", (*binaryTable)->binary_code);
+    //     printf("Original line number: %d\n", (*binaryTable)->original_line_number);
+    //     i++;
+    //     printf("---------------------\n");
+    //     *binaryTable = (*binaryTable)->next;
+    // }
     current = symbolTable->head;
     while (current != NULL)
     {
@@ -226,9 +227,6 @@ int get_opcode_operands(char *instruction)
     {
         if (strcmp(instruction, OPCODES[i].name) == 0)
         {
-            // printf("%d\n", i);
-            // printf("XXXXXXXXXX%s\n", OPCODES[i].name);
-            // printf("XXXXXXXXXX%d\n", OPCODES[i].numOfOperands);
             return OPCODES[i].numOfOperands; /*Instruction found in OPCODES*/
         }
     }
@@ -277,23 +275,34 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     }
     temp_srcOperand = (Operand *)malloc(sizeof(Operand));
     temp_destOperand = (Operand *)malloc(sizeof(Operand));
-    if (temp_srcOperand == NULL || temp_destOperand == NULL)
+    if ((temp_srcOperand == NULL) || (temp_destOperand == NULL))
     {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;
         return error_flag;
     }
-    while (*ptr_in_line != '\0' && operandCount < num_operands_allowed)
+    temp_srcOperand->value = NULL;
+    temp_destOperand->value = NULL;
+    while ((*ptr_in_line != '\0') && (operandCount < num_operands_allowed))
     {
-        while (*ptr_in_line != '\0' && isspace(*ptr_in_line))
+        while ((*ptr_in_line != '\0') && (isspace(*ptr_in_line)))
             ptr_in_line++; /* Skip whitespace */
+        if (*ptr_in_line == ',' && operandCount == 0)
+        {
+            error_flag = ERROR_WRONG_OPERAND_SYNTAX;
+            freeOperand(temp_srcOperand);
+            freeOperand(temp_destOperand);
+            return error_flag;
+
+        }
         start = ptr_in_line;
         operandLen = 0;
-        while (*ptr_in_line != '\0' && *ptr_in_line != ',')
-        { /*after whitespaces*/
-            /*go until first ',' the syntax of the value will be checked later*/
+        while ((*ptr_in_line != '\0') && (*ptr_in_line != ',') && (!isspace(*ptr_in_line)))
+        {
             ptr_in_line++;
             operandLen++;
         }
+        while ((*ptr_in_line != '\0') && (isspace(*ptr_in_line)))
+            ptr_in_line++; /* Skip whitespace */
         operandValue = (char *)malloc(operandLen + 1);
         if (operandValue == NULL)
         {
@@ -328,8 +337,17 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         else
             continue;
         operandCount++;
-        if (*ptr_in_line == ',')
+        if ((*ptr_in_line == ','))
+        {
+            if (operandCount == num_operands_allowed)
+            {
+                error_flag = ERROR_TOO_MANY_OPERANDS;
+                freeOperand(temp_srcOperand);
+                freeOperand(temp_destOperand);
+                return error_flag;
+            }
             ptr_in_line++; /* Skip comma */
+        }
     }
     /* Check for extra characters after the last operand (up to 2), if num_operands == 0 will also arrive here and check*/
     while (*ptr_in_line != '\0')
@@ -344,7 +362,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         }
         ptr_in_line++;
     }
-    if (num_operands_allowed != operandCount || (operandCount == 0 && parsedLine->operands != NULL))
+    if ((num_operands_allowed != operandCount) || (operandCount == 0 && parsedLine->operands != NULL))
     {
         error_flag = ERROR_INSTRUCTION_NOT_VALID;
         freeOperand(temp_srcOperand);
@@ -370,80 +388,89 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         parsedLine->srcOperand = temp_srcOperand;
         parsedLine->destOperand = temp_destOperand;
     }
-    /*check if miun type of src and dest is valid to instruction*/
-    type_miun_src = parsedLine->srcOperand->type;
-    type_miun_dest = parsedLine->destOperand->type;
-    switch (opcode_code)
-    {
-    /* -1 if instruction is not one of 16 allowed. */
-    case -1:
-        error_flag = ERROR_INSTRUCTION_NOT_VALID; /*cannot find insturction*/
-        break;
-    /*mov (0), add(2), sub(3) - {0,1,2,3) types allowed for src and {1,2,3} for dest*/
-    case 0:
-    case 2:
-    case 3:
-        if (!(type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 1 && type_miun_dest <= 3))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-        break;
-    /*cmp(1) - {0,1,2,3} allowed for src and dest*/
-    case 1:
-        if (!(type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 0 && type_miun_dest <= 3))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-        break;
-    /*lea(4) - {1,2,3} allowed for src and {1,2,3} for dest*/
-    case 4:
-        if (!(type_miun_src == 1) && (type_miun_dest >= 1 && type_miun_dest <= 3))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-        break;
-    /*clr(5), not(6), inc(7), dec(8), red(11) - only dest allowed - {1,2,3}*/
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 11:
-        if ((!(type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <= 3))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-        break;
-    /*jmp (9), bne(10), jsr(1) - only dest allowed - {1,2}*/
-    case 9:
-    case 10:
-    case 13:
-        if (!(type_miun_src == -1) && (type_miun_dest >= 1 && type_miun_dest <= 2))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-        break;
-    /*prn(12) - only dest allowed - {0,1,2,3}*/
-    case 12:
-        if (!(type_miun_src == -1) && (type_miun_dest >= 0 && type_miun_dest <= 3))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-    /*rts(14), stop(15) - not expecting any operands. */
-    case 14:
-    case 15:
-        if ((!(type_miun_src == -1)) && (!(type_miun_dest == -1)))
-        {
-            error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
-        }
-    default:
-        break;
-    }
+    error_flag = check_valid_operands(parsedLine);
+    printf("ERROR FLAG %d\n", error_flag);
     if (error_flag != 0)
     {
         freeOperand(temp_srcOperand);
         freeOperand(temp_destOperand);
     }
     return error_flag; /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
+}
+
+int check_valid_operands(AssemblyLine *parsedLine)
+{
+    /*check if miun type of src and dest is valid to instruction*/
+    int type_miun_src = parsedLine->srcOperand->type;
+    int type_miun_dest = parsedLine->destOperand->type;
+    int opcode_code = parsedLine->opcode_code;
+    ErrorCode error_flag = 0; /*assume success*/
+    switch (opcode_code)
+    {
+        /* -1 if instruction is not one of 16 allowed. */
+        case -1:
+            error_flag = ERROR_INSTRUCTION_NOT_VALID; /*cannot find insturction*/
+            break;
+        /*mov (0), add(2), sub(3) - {0,1,2,3) types allowed for src and {1,2,3} for dest*/
+        case 0:
+        case 2:
+        case 3:
+            if (!(type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+            break;
+        /*cmp(1) - {0,1,2,3} allowed for src and dest*/
+        case 1:
+            if (!(type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 0 && type_miun_dest <= 3))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+            break;
+        /*lea(4) - {1,2,3} allowed for src and {1,2,3} for dest*/
+        case 4:
+            if (!(type_miun_src == 1) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+            break;
+        /*clr(5), not(6), inc(7), dec(8), red(11) - only dest allowed - {1,2,3}*/
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 11:
+            if ((!(type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+            break;
+        /*jmp (9), bne(10), jsr(1) - only dest allowed - {1,2}*/
+        case 9:
+        case 10:
+        case 13:
+            if (!(type_miun_src == -1) && (type_miun_dest >= 1 && type_miun_dest <= 2))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+            break;
+        /*prn(12) - only dest allowed - {0,1,2,3}*/
+        case 12:
+            if (!(type_miun_src == -1) && (type_miun_dest >= 0 && type_miun_dest <= 3))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+        /*rts(14), stop(15) - not expecting any operands. */
+        case 14:
+        case 15:
+            if ((!(type_miun_src == -1)) && (!(type_miun_dest == -1)))
+            {
+                error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
+            }
+        default:
+            break;
+    }
+    return error_flag; /* 0 -> SUCCESS*/
 }
 
 int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, BinaryLine **binary_table, int *IC, struct macros *macro_head, int line)
