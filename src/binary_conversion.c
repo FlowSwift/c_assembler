@@ -7,7 +7,7 @@
 #include "binary_conversion.h"
 #include "util.h"
 
-void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line)
+void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC)
 {
     struct BinaryLine *lines = malloc_BinaryLine(line);
     struct BinaryLine *current = lines;
@@ -25,6 +25,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     }
     printf("%s !!!!!!\n", assembly_line->instruction);
     int L = calculate_L(src_type, dest_type);
+    *IC += L;
     /* Instruction */
     current->binary_code |= (1 << 2);
     current->binary_code |= ((assembly_line->opcode_code) << 11);

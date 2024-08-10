@@ -150,11 +150,12 @@ char *strdup1(char *src_string)
 
     len = strlen(src_string) + 1;
     duplicate_string = malloc(len);
-
-    if (duplicate_string != NULL)
+    if (duplicate_string == NULL)
     {
-        memcpy(duplicate_string, src_string, len);
+        handle_error(ERROR_MEMORY_ALLOCATION_FAILED, 0);
+        return NULL;
     }
+    memcpy(duplicate_string, src_string, len);
     return duplicate_string;
 }
 

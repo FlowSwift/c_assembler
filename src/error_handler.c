@@ -107,6 +107,12 @@ void handle_error(ErrorCode error, int line_number)
     case ERROR_WRONG_OPERAND_SYNTAX:
         printf("ERROR: Wrong operand syntax, on line %d\n.", line_number);
         break;
+    case ERROR_CANT_DEFINE_EXTERN:
+        printf("ERROR: Can't define extern, on line %d\n.", line_number);
+        break;
+    case ERROR_SYMBOL_DEF_ERROR:
+        printf("ERROR: Symbol definition error, on line %d\n.", line_number);
+        break;
     default:
         printf("Unknown error occurred.\n");
     }

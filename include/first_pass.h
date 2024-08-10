@@ -40,6 +40,7 @@ int is_valid_integer(char *operand);
 /*parses operands gor command line -> checks the insturction is valid(one of 16),
     gets type of miun for each operand and checks if they are allowed for the instruction.*/
 int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head);
+int check_valid_operands(AssemblyLine *parsedLine);
 /*checks if instruction is valid (by parse_operands func),
     insters to binary table.
     inserts label to Symbol Table if there is label*/

@@ -151,6 +151,14 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         }
         current = current->next;
     }
+    SymbolNode *current_symbol = symbolTable->head;
+    while (current_symbol != NULL) {
+        printf("----------------\n");
+        printf("Symbol: %s\n", current_symbol->name);
+        printf("Type: %d\n", current_symbol->type);
+        printf("Memory place: %d\n", current_symbol->memory_place);
+        current_symbol = current_symbol->next;
+    }
     fclose(amfile);
     return error_flag; /* 0 -> SUCCESS*/
 }
@@ -254,7 +262,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     ptr_in_line = parsedLine->operands;
     ErrorCode error_flag = 0; /*assume success*/
     /*helper variables:*/
-    int opcode_code = -1, type_miun_src = -1, type_miun_dest = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
+    int opcode_code = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
     opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
     parsedLine->opcode_code = opcode_code;
     char *operandValue = NULL;
@@ -482,7 +490,7 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
         return error_flag;
     }
     printf("CHECK %s\n", parsedLine->instruction);
-    convert_instruction_to_binary_code(parsedLine, binary_table, line);
+    convert_instruction_to_binary_code(parsedLine, binary_table, line, IC);
     return error_flag; /* 0 -> SUCCESS*/
 }
 

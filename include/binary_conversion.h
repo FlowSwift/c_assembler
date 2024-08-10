@@ -14,7 +14,7 @@ typedef struct BinaryLine
 
 
 
-void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line);
+void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC);
 int calc_opcode_binary(struct BinaryLine *line, int opcode);
 int calc_miun_binary(struct BinaryLine *line, int miun);
 void add_binary_line(struct BinaryLine *line, struct BinaryLine **head);
