@@ -137,8 +137,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
             table->last->next = new_node;
         }
         table->last = new_node;
-        return error_flag; /*if 0, Symbol added successfully*/
     }
+    return error_flag; /*if 0, Symbol added successfully*/
 }
 
 // int add_symbol_to_table2(SymbolTable *table, char *symbol_name, int symbol_type, int memory_place, struct macros *macro_head)

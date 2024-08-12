@@ -12,8 +12,8 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
 {
     struct BinaryLine *lines = malloc_BinaryLine(line);
     struct BinaryLine *current = lines;
-    int extra_word = 1;
-    current->next = malloc_BinaryLine(line);
+    struct BinaryLine *temp_word = NULL;
+    int disable_extra_word = 0;
     char *label = NULL;
     char *instruction = NULL;
     int src_type = -1;
@@ -33,8 +33,6 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
     current->binary_code |= ((assembly_line->opcode_code) << BITWISE_SHIFT_LEFT_OPCODE);
     /* Check operands */
-    printf("%d %d\n", src_type, dest_type);
-    printf("%d\n", assembly_line->opcode_code);
     if (dest_type != -1)
     {
         current->binary_code |= (calc_miun_binary(current, dest_type) << BITWISE_SHIFT_LEFT_DEST_MIUN);
@@ -43,38 +41,48 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     {
         current->binary_code |= (calc_miun_binary(current, src_type) << BITWISE_SHIFT_LEFT_SRC_MIUN);
     }
+    disable_extra_word = (((dest_type == 2) || (dest_type == 3)) && ((src_type == 2) || (src_type == 3)));
     if (L >= 2)
     {
-        current->next = malloc_BinaryLine(line);
+        printf("DEST TYPE: %d\n", dest_type);
+        printf("SRC TYPE: %d\n", src_type);
+        current->next = convert_word(assembly_line, line, (L == 3 ? src_type : dest_type), (L == 3 ? SRC_OPERAND : DEST_OPERAND), disable_extra_word);
         current = current->next;
-        if (dest_type == 0)
-        {
-            current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
-            current->binary_code |= (atoi(assembly_line->destOperand->value) << BITWISE_SHIFT_LEFT_NUM_WORD);
-        }
-        else if (dest_type == 1)
-        {
-            current->label = strdup1(assembly_line->destOperand->value);
-        }
-        else if (dest_type == 2 || dest_type == 3)
-        {
-            current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
-            current->binary_code |= atoi(assembly_line->destOperand->value[1]) << BITWISE_SHIFT_LEFT_DEST_REGISTER;
-            if (src_type == 2 || src_type == 3)
-            {
-                current->binary_code |= atoi(assembly_line->srcOperand->value[1]) << BITWISE_SHIFT_LEFT_SRC_REGISTER;
-                extra_word = 0;
-            }
-        }
+        printf("current->binary_code: %d\n", current->binary_code);
     }
-    if (L >= 3) {
-        
+    if (L == 3)
+    {
+        current->next = convert_word(assembly_line, line, dest_type, DEST_OPERAND, disable_extra_word);
+        current = current->next;
     }
     add_binary_line(lines, head);
     return;
 }
 
-
+BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, int operand_type, int disable_extra_word)
+{
+    printf("MIUN TYPE: %d\n", miun_type);
+    BinaryLine *binary_line = malloc_BinaryLine(line);
+    if (miun_type == 0)
+    {
+        binary_line->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
+        binary_line->binary_code |= (atoi(assembly_line->destOperand->value) << BITWISE_SHIFT_LEFT_NUM_WORD);
+    }
+    else if (miun_type == 1)
+    {
+        binary_line->label = strdup1(assembly_line->destOperand->value);
+    }
+    else if (miun_type == 2 || miun_type == 3)
+    {
+        binary_line->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
+        binary_line->binary_code |= ((operand_type == DEST_OPERAND) ? (assembly_line->destOperand->value[1] - '0') : ((assembly_line->srcOperand->value[1] - '0'))) << ((operand_type == DEST_OPERAND) ? BITWISE_SHIFT_LEFT_DEST_REGISTER : BITWISE_SHIFT_LEFT_SRC_REGISTER);
+        if (disable_extra_word == 1)
+        {
+            binary_line->binary_code |= (assembly_line->srcOperand->value[1] - '0') << BITWISE_SHIFT_LEFT_SRC_REGISTER;
+        }
+    }
+    return binary_line;
+}
 
 int calc_miun_binary(struct BinaryLine *line, int miun)
 {

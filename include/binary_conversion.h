@@ -4,6 +4,12 @@
 #include "line_parser.h"
 #include "symbol_table.h"
 
+enum operator_type
+{
+    DEST_OPERAND = 0,
+    SRC_OPERAND = 1
+};
+
 typedef struct BinaryLine
 {
     short binary_code;
@@ -12,10 +18,8 @@ typedef struct BinaryLine
     struct BinaryLine *next;
 } BinaryLine;
 
-
-
 void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC);
-int calc_opcode_binary(struct BinaryLine *line, int opcode);
+BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, int operand_type, int extra_word);
 int calc_miun_binary(struct BinaryLine *line, int miun);
 void add_binary_line(struct BinaryLine *line, struct BinaryLine **head);
 struct BinaryLine *malloc_BinaryLine(int line_number);
