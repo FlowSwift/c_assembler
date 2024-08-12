@@ -73,7 +73,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)
             { /* if string*/
                 temp_memory_place = *DC;
-                error_flag = handleStringDirective(&parsedLine, symbolTable, instruction_binary_table, DC);
+                error_flag = handleStringDirective(&parsedLine, symbolTable, directive_binary_table, line_number ,DC);
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                /*string was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
@@ -128,36 +128,49 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         }
         freeAssemblyLine(&parsedLine);
     }
+    BinaryLine *current_instruction = *instruction_binary_table, *current_directive = *directive_binary_table;
+    while (current_instruction != NULL)
+    {
+        (current_instruction)->decimal_memory_address += 100;
+        current_instruction = (current_instruction)->next;
+    }
+    while (current_directive != NULL)
+    {
+        (current_directive)->decimal_memory_address += *IC + 100;
+        current_directive = (current_directive)->next;
+    }
+    current_instruction = *instruction_binary_table;
+    current_directive = *directive_binary_table;
     int i = 1;
     char bin[16];
-    BinaryLine *temp = (*instruction_binary_table);
-    while (*instruction_binary_table != NULL)
+    BinaryLine *temp = (current_instruction);
+    while (current_instruction != NULL)
     {
         printf("Binary Line: %d\n", i);
-        decimal_to_binary((*instruction_binary_table)->binary_code, bin, 16);
+        decimal_to_binary((current_instruction)->binary_code, bin, 16);
         printf("Binary Line: %s\n", bin);
-        printf("Labal: %s\n", (*instruction_binary_table)->label);
-        printf("Binary code: %d\n", (*instruction_binary_table)->binary_code);
-        printf("Original line number: %d\n", (*instruction_binary_table)->original_line_number);
-        printf("Decimal memory address: %d\n", (*instruction_binary_table)->decimal_memory_address);
+        printf("Labal: %s\n", (current_instruction)->label);
+        printf("Binary code: %d\n", (current_instruction)->binary_code);
+        printf("Original line number: %d\n", (current_instruction)->original_line_number);
+        printf("Decimal memory address: %d\n", (current_instruction)->decimal_memory_address);
         i++;
         printf("---------------------\n");
-        *instruction_binary_table = (*instruction_binary_table)->next;
+        current_instruction = (current_instruction)->next;
     }
     i = 1;
     printf("DIRECTIVE: \n");
-    while (*directive_binary_table != NULL)
+    while (current_directive != NULL)
     {
         printf("Binary Line: %d\n", i);
-        decimal_to_binary((*directive_binary_table)->binary_code, bin, 16);
+        decimal_to_binary((current_directive)->binary_code, bin, 16);
         printf("Binary Line: %s\n", bin);
-        printf("Labal: %s\n", (*directive_binary_table)->label);
-        printf("Binary code: %d\n", (*directive_binary_table)->binary_code);
-        printf("Original line number: %d\n", (*directive_binary_table)->original_line_number);
-        printf("Decimal memory address: %d\n", (*directive_binary_table)->decimal_memory_address);
+        printf("Labal: %s\n", (current_directive)->label);
+        printf("Binary code: %d\n", (current_directive)->binary_code);
+        printf("Original line number: %d\n", (current_directive)->original_line_number);
+        printf("Decimal memory address: %d\n", (current_directive)->decimal_memory_address);
         i++;
         printf("---------------------\n");
-        *directive_binary_table = (*directive_binary_table)->next;
+        current_directive = (current_directive)->next;
     }
     while (temp != NULL)
     {
@@ -592,13 +605,14 @@ int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bina
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, int *DC)
+int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line_number, int *DC)
 {
     int stringLen = 0, i = 0;
     char binaryCode[BINARY_CODE_LEN];
+    BinaryLine *binary_line = NULL, *head = NULL;
+    ErrorCode error_flag = 0; /*assume success*/
     stringLen = strlen(parsedLine->operands);
     memset(binaryCode, '\0', sizeof(binaryCode));
-    ErrorCode error_flag = 0; /*assume success*/
     if (is_valid_string(parsedLine->operands) != 0)
     { /*doesnt start and end with quotation.*/
         error_flag = ERROR_STRING_SYNTAX_NOT_VALID;
@@ -607,15 +621,21 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
     /*go through string without ""*/
     for (i = 1; i < stringLen - 1; i++)
     {
+        if (binary_line == NULL)
+        {
+            binary_line = convert_directive_to_binary_code(parsedLine->operands[i], line_number, *DC);
+            head = binary_line;
+        }
+        else
+        {
+            binary_line->next = convert_directive_to_binary_code(parsedLine->operands[i], line_number, *DC);
+            binary_line = binary_line->next;
+        }
         /* converts the ASCII value of the character to a binary string */
-        /*make binary:
-        intToBinaryRes = convertIntToBinary((int)parsedLine->operands[i], BINARY_CODE_LEN);
-        strcpy(binaryCode, intToBinaryRes);
-        insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, binaryCode, &parsedLine->operands[i]);
-        */
         *DC = *DC + 1;
     }
-
+    binary_line->next = convert_directive_to_binary_code(0, line_number, *DC); /* add null terminator */
+    add_binary_lines(head, directive_binary_table);
     /* Null byte at the end of the string */
     /* Check if BINARY_CODE_LEN or BINARY_CODE_LEN -1 */
     /*insertToBinaryCodesTable(binaryCodesTable, *DC, parsedLine, convertIntToBinary(0, BINARY_CODE_LEN), &parsedLine->operands[i]);*/

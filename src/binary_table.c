@@ -50,7 +50,7 @@ void print_binary_table(BinaryTable *table)
     while (current != NULL)
     {
         printf("Address: %d, Binary Code: %s, Source Code: %s\n",
-               current->decAddress, current->binaryCode, current->sourceCode);
+        current->decAddress, current->binaryCode, current->sourceCode);
         current = current->next;
     }
 }

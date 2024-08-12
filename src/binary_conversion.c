@@ -28,12 +28,12 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     int L = calculate_L(src_type, dest_type);
     printf("L AMOUNT %d\n", L);
     printf("IC BEFORE: %d\n", *IC);
-    *IC += L;
     printf("IC AFTER: %d\n", *IC);
     /* Instruction */
     current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
     current->binary_code |= ((assembly_line->opcode_code) << BITWISE_SHIFT_LEFT_OPCODE);
     /* Check operands */
+    *IC += 1;
     if (dest_type != -1)
     {
         current->binary_code |= (calc_miun_binary(current, dest_type) << BITWISE_SHIFT_LEFT_DEST_MIUN);
@@ -45,6 +45,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     disable_third_word = (((dest_type == 2) || (dest_type == 3)) && ((src_type == 2) || (src_type == 3)));
     if (L >= 2)
     {
+        *IC += 1;
         printf("DEST TYPE: %d\n", dest_type);
         printf("SRC TYPE: %d\n", src_type);
         current->next = convert_word(assembly_line, line, (L == 3 ? src_type : dest_type), (L == 3 ? SRC_OPERAND : DEST_OPERAND), disable_third_word, *IC);
@@ -53,6 +54,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     }
     if (L == 3)
     {
+        *IC += 1;
         current->next = convert_word(assembly_line, line, dest_type, DEST_OPERAND, disable_third_word, *IC);
         current = current->next;
     }
