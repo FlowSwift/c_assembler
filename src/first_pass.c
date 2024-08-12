@@ -131,17 +131,18 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     }
     int i = 1;
     char bin[16];
-    // while (*binaryTable != NULL)
-    // {
-    //     printf("Binary Line: %d\n", i);
-    //     decimal_to_binary((*binaryTable)->binary_code, bin, 16);
-    //     printf("Binary Line: %s\n", bin);
-    //     printf("Binary code: %d\n", (*binaryTable)->binary_code);
-    //     printf("Original line number: %d\n", (*binaryTable)->original_line_number);
-    //     i++;
-    //     printf("---------------------\n");
-    //     *binaryTable = (*binaryTable)->next;
-    // }
+    while (*binaryTable != NULL)
+    {
+        printf("Binary Line: %d\n", i);
+        decimal_to_binary((*binaryTable)->binary_code, bin, 16);
+        printf("Binary Line: %s\n", bin);
+        printf("Labal: %s\n", (*binaryTable)->label);
+        printf("Binary code: %d\n", (*binaryTable)->binary_code);
+        printf("Original line number: %d\n", (*binaryTable)->original_line_number);
+        i++;
+        printf("---------------------\n");
+        *binaryTable = (*binaryTable)->next;
+    }
     current = symbolTable->head;
     while (current != NULL)
     {

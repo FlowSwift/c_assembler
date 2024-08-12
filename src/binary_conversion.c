@@ -6,11 +6,14 @@
 #include "first_pass.h"
 #include "binary_conversion.h"
 #include "util.h"
+#include "constant.h"
 
 void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC)
 {
     struct BinaryLine *lines = malloc_BinaryLine(line);
     struct BinaryLine *current = lines;
+    int extra_word = 1;
+    current->next = malloc_BinaryLine(line);
     char *label = NULL;
     char *instruction = NULL;
     int src_type = -1;
@@ -23,89 +26,55 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     {
         dest_type = assembly_line->destOperand->type;
     }
-    printf("%s !!!!!!\n", assembly_line->instruction);
     int L = calculate_L(src_type, dest_type);
+    printf("L AMOUNT %d\n", L);
     *IC += L;
     /* Instruction */
-    current->binary_code |= (1 << 2);
-    current->binary_code |= ((assembly_line->opcode_code) << 11);
+    current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
+    current->binary_code |= ((assembly_line->opcode_code) << BITWISE_SHIFT_LEFT_OPCODE);
     /* Check operands */
     printf("%d %d\n", src_type, dest_type);
     printf("%d\n", assembly_line->opcode_code);
-    printf("%d\n", calc_opcode_binary(current, assembly_line->opcode_code));
     if (dest_type != -1)
     {
-        current->binary_code |= (calc_miun_binary(current, dest_type) << 3);
+        current->binary_code |= (calc_miun_binary(current, dest_type) << BITWISE_SHIFT_LEFT_DEST_MIUN);
     }
     if (src_type != -1)
     {
-        current->binary_code |= (calc_miun_binary(current, src_type) << 7);
+        current->binary_code |= (calc_miun_binary(current, src_type) << BITWISE_SHIFT_LEFT_SRC_MIUN);
     }
-    if (L == 2)
+    if (L >= 2)
     {
         current->next = malloc_BinaryLine(line);
         current = current->next;
         if (dest_type == 0)
         {
-
+            current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
+            current->binary_code |= (atoi(assembly_line->destOperand->value) << BITWISE_SHIFT_LEFT_NUM_WORD);
         }
         else if (dest_type == 1)
         {
             current->label = strdup1(assembly_line->destOperand->value);
         }
-        else if (dest_type == 2)
+        else if (dest_type == 2 || dest_type == 3)
         {
-            current->binary_code |= (1 << 2);
-            /* current->binary_code |= strtoi(assembly_line->destOperand->value[1])<<3; */
+            current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
+            current->binary_code |= atoi(assembly_line->destOperand->value[1]) << BITWISE_SHIFT_LEFT_DEST_REGISTER;
+            if (src_type == 2 || src_type == 3)
+            {
+                current->binary_code |= atoi(assembly_line->srcOperand->value[1]) << BITWISE_SHIFT_LEFT_SRC_REGISTER;
+                extra_word = 0;
+            }
         }
-        else if (dest_type == 3)
-        {
-        }
+    }
+    if (L >= 3) {
+        
     }
     add_binary_line(lines, head);
     return;
 }
 
-int calc_opcode_binary(struct BinaryLine *line, int opcode)
-{
-    if (opcode == 0)
-    {
-        return (1 << 7);
-    }
-    else if (opcode == 1)
-    {
-        return (1 << 8);
-    }
-    else if (opcode == 2)
-    {
-        return (1 << 9);
-    }
-    else if (opcode == 3)
-    {
-        return (1 << 10);
-    }
-    else if (opcode == 4)
-    {
-        return (1 << 11);
-    }
-    else if (opcode == 5)
-    {
-        return (1 << 12);
-    }
-    else if (opcode == 6)
-    {
-        return (1 << 13);
-    }
-    else if (opcode == 7)
-    {
-        return (1 << 14);
-    }
-    else if (opcode == 8)
-    {
-        return (1 << 15);
-    }
-    return -1;
-}
+
 
 int calc_miun_binary(struct BinaryLine *line, int miun)
 {
@@ -170,7 +139,7 @@ void free_BinaryLine(struct BinaryLine *line)
     free(line);
 }
 
-void decimal_to_binary(unsigned int a, char str[], int size)
+void decimal_to_binary(unsigned int num, char str[], int size)
 {
     char currentBinDigit;
     int i = size - 2;     /* set i to the index before \0 */
@@ -181,7 +150,7 @@ void decimal_to_binary(unsigned int a, char str[], int size)
     */
     while (i >= 0)
     {
-        (a & (1u << (i))) ? (currentBinDigit = '1') : (currentBinDigit = '0');
+        (num & (1u << (i))) ? (currentBinDigit = '1') : (currentBinDigit = '0');
 
         str[size - 2 - i] = currentBinDigit;
         i--;

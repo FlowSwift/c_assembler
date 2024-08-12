@@ -20,6 +20,6 @@ int calc_miun_binary(struct BinaryLine *line, int miun);
 void add_binary_line(struct BinaryLine *line, struct BinaryLine **head);
 struct BinaryLine *malloc_BinaryLine(int line_number);
 void free_BinaryLine(struct BinaryLine *line);
-void decimal_to_binary(unsigned int a, char str[], int size);
+void decimal_to_binary(unsigned int num, char str[], int size);
 
 #endif /* __BINARY_CONVERSION_H__ */
