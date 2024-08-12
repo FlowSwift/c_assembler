@@ -10,10 +10,9 @@
 
 void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC)
 {
-    struct BinaryLine *lines = malloc_BinaryLine(line);
+    struct BinaryLine *lines = malloc_BinaryLine(line, *IC);
     struct BinaryLine *current = lines;
-    struct BinaryLine *temp_word = NULL;
-    int disable_extra_word = 0;
+    int disable_third_word = 0;
     char *label = NULL;
     char *instruction = NULL;
     int src_type = -1;
@@ -28,7 +27,9 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     }
     int L = calculate_L(src_type, dest_type);
     printf("L AMOUNT %d\n", L);
+    printf("IC BEFORE: %d\n", *IC);
     *IC += L;
+    printf("IC AFTER: %d\n", *IC);
     /* Instruction */
     current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
     current->binary_code |= ((assembly_line->opcode_code) << BITWISE_SHIFT_LEFT_OPCODE);
@@ -41,28 +42,28 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     {
         current->binary_code |= (calc_miun_binary(current, src_type) << BITWISE_SHIFT_LEFT_SRC_MIUN);
     }
-    disable_extra_word = (((dest_type == 2) || (dest_type == 3)) && ((src_type == 2) || (src_type == 3)));
+    disable_third_word = (((dest_type == 2) || (dest_type == 3)) && ((src_type == 2) || (src_type == 3)));
     if (L >= 2)
     {
         printf("DEST TYPE: %d\n", dest_type);
         printf("SRC TYPE: %d\n", src_type);
-        current->next = convert_word(assembly_line, line, (L == 3 ? src_type : dest_type), (L == 3 ? SRC_OPERAND : DEST_OPERAND), disable_extra_word);
+        current->next = convert_word(assembly_line, line, (L == 3 ? src_type : dest_type), (L == 3 ? SRC_OPERAND : DEST_OPERAND), disable_third_word, *IC);
         current = current->next;
         printf("current->binary_code: %d\n", current->binary_code);
     }
     if (L == 3)
     {
-        current->next = convert_word(assembly_line, line, dest_type, DEST_OPERAND, disable_extra_word);
+        current->next = convert_word(assembly_line, line, dest_type, DEST_OPERAND, disable_third_word, *IC);
         current = current->next;
     }
-    add_binary_line(lines, head);
+    add_binary_lines(lines, head);
     return;
 }
 
-BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, int operand_type, int disable_extra_word)
+BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, int operand_type, int disable_third_word, int IC)
 {
     printf("MIUN TYPE: %d\n", miun_type);
-    BinaryLine *binary_line = malloc_BinaryLine(line);
+    BinaryLine *binary_line = malloc_BinaryLine(line, IC);
     if (miun_type == 0)
     {
         binary_line->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
@@ -76,12 +77,18 @@ BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, i
     {
         binary_line->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);
         binary_line->binary_code |= ((operand_type == DEST_OPERAND) ? (assembly_line->destOperand->value[1] - '0') : ((assembly_line->srcOperand->value[1] - '0'))) << ((operand_type == DEST_OPERAND) ? BITWISE_SHIFT_LEFT_DEST_REGISTER : BITWISE_SHIFT_LEFT_SRC_REGISTER);
-        if (disable_extra_word == 1)
+        if (disable_third_word == 1)
         {
             binary_line->binary_code |= (assembly_line->srcOperand->value[1] - '0') << BITWISE_SHIFT_LEFT_SRC_REGISTER;
         }
     }
     return binary_line;
+}
+
+BinaryLine *convert_directive_to_binary_code(int value, int line, int DC)
+{
+    BinaryLine *binary_line = malloc_BinaryLine(line, DC);
+    binary_line->binary_code = value;
 }
 
 int calc_miun_binary(struct BinaryLine *line, int miun)
@@ -105,7 +112,7 @@ int calc_miun_binary(struct BinaryLine *line, int miun)
     return -1;
 }
 
-void add_binary_line(struct BinaryLine *line, struct BinaryLine **head)
+void add_binary_lines(struct BinaryLine *line, struct BinaryLine **head)
 {
     if (*head == NULL)
     {
@@ -120,7 +127,7 @@ void add_binary_line(struct BinaryLine *line, struct BinaryLine **head)
     current->next = line;
 }
 
-struct BinaryLine *malloc_BinaryLine(int line_number)
+struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address)
 {
     struct BinaryLine *line = NULL;
     line = (struct BinaryLine *)malloc(sizeof(struct BinaryLine));
@@ -134,6 +141,7 @@ struct BinaryLine *malloc_BinaryLine(int line_number)
     line->label = NULL;
     line->next = NULL;
     line->original_line_number = line_number;
+    line->decimal_memory_address = decimal_memory_address;
     return line;
 }
 
