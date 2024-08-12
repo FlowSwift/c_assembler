@@ -37,7 +37,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
     AssemblyLine parsedLine;
-    SymbolNode *current = NULL;
+    SymbolNode *current_symbol = NULL;
     int line_number = 0;
     int is_symbol = 0;
     int temp_memory_place = 0;
@@ -66,17 +66,17 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
                 temp_memory_place = *DC;
                 error_flag = handleDataDirective(&parsedLine, symbolTable, directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
-                {                                                                                                              /*data was in correct format and has symbol definition*/
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
+                {                                                                                                                              /*data was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
                 }
             }
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)
             { /* if string*/
                 temp_memory_place = *DC;
-                error_flag = handleStringDirective(&parsedLine, symbolTable, directive_binary_table, line_number ,DC);
+                error_flag = handleStringDirective(&parsedLine, symbolTable, directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
-                {                                                                                                                /*string was in correct format and has symbol definition*/
-                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
+                {                                                                                                                                /*string was in correct format and has symbol definition*/
+                    error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
                 }
             }
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)
@@ -97,8 +97,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
             if (is_symbol && (error_flag == 0))
-            {                                                                                                                   /* has label and is in regular instruction format.*/
-                error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
+            {                                                                                                                                     /* has label and is in regular instruction format.*/
+                error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_INSTRUCTION, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
             }
         }
         if (error_flag != 0)
@@ -178,21 +178,26 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         printf("%s\n", bin);
         temp = temp->next;
     }
-    current = symbolTable->head;
-    while (current != NULL)
+    current_symbol = symbolTable->head;
+    while (current_symbol != NULL)
     {
-        if (current->type == 1) /* data type is {data}*/
+        if ((current_symbol->type == TYPE_DATA) || (current_symbol->type == TYPE_STRING)) /* data type is {data}*/
         {
-            current->memory_place += *IC;
+            current_symbol->memory_place += *IC + 100;
         }
-        current = current->next;
+        else if (current_symbol->type == TYPE_INSTRUCTION)
+        {
+            current_symbol->memory_place += 100;
+        }
+        current_symbol = current_symbol->next;
     }
-    SymbolNode *current_symbol = symbolTable->head;
+    current_symbol = symbolTable->head;
     while (current_symbol != NULL)
     {
         printf("----------------\n");
         printf("Symbol: %s\n", current_symbol->name);
         printf("Type: %d\n", current_symbol->type);
+        printf("Label type: %d\n", current_symbol->label_type);
         printf("Memory place: %d\n", current_symbol->memory_place);
         current_symbol = current_symbol->next;
     }
@@ -661,7 +666,7 @@ int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, TYPE_EXTERN, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_EXTERN, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
         if (error_flag != 0)
         { /*if some label not valid.*/
             return error_flag;
@@ -690,7 +695,7 @@ int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bin
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, TYPE_ENTRY, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_ENTRY, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
         if (error_flag != 0)
         { /*if some label not valid.*/
             return error_flag;

@@ -72,33 +72,21 @@ int is_valid_symbol(struct macros *macro_head, char *label)
     return error_flag; /* 0 if success*/
 }
 
-int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, int memory_place, struct macros *macro_head)
+int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int label_type, int memory_place, struct macros *macro_head)
 {
     SymbolNode *new_node = NULL;
     ErrorCode error_flag = 0; /*assume success*/
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL)
     {
-        if ((new_node->type == symbol_type))
+        if ((new_node->label_type == TYPE_LABEL_DEF))
         {
-            error_flag = ERROR_SYMBOL_DEFINED_TWICE;
-            return error_flag; /*Symbol already exists*/
+            error_flag = ERROR_SYMBOL_DEF_ERROR;
+            return error_flag;
         }
-        if (new_node->type == TYPE_LABEL_DEF)
+        else if (new_node->label_type == TYPE_ENTRY && label_type == TYPE_LABEL_DEF)
         {
-            if (symbol_type == TYPE_ENTRY)
-            {
-                new_node->type = symbol_type;
-                return error_flag;
-            }
-            else if (symbol_type == TYPE_EXTERN)
-            {
-                error_flag = ERROR_CANT_DEFINE_EXTERN;
-                return error_flag;
-            }
-        }
-        else if (new_node->type == TYPE_ENTRY && symbol_type == TYPE_LABEL_DEF)
-        {
+            new_node->type = type;
             new_node->memory_place = memory_place; /*only add memory place*/
             return error_flag;
         }
@@ -125,7 +113,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int symbol_type, 
             return error_flag;
         }
         new_node->name = strdup1(symbol_name);
-        new_node->type = symbol_type;
+        new_node->type = type;
+        new_node->label_type = label_type;
         new_node->memory_place = memory_place;
         if (table->head == NULL)
         {

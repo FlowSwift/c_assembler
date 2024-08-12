@@ -91,6 +91,7 @@ BinaryLine *convert_directive_to_binary_code(int value, int line, int DC)
 {
     BinaryLine *binary_line = malloc_BinaryLine(line, DC);
     binary_line->binary_code = value;
+    return binary_line;
 }
 
 int calc_miun_binary(struct BinaryLine *line, int miun)
