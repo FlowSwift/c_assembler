@@ -3,7 +3,6 @@
 /*#define MAX_LABEL_LEN 31*/
 #include "line_parser.h"
 #include "symbol_table.h"
-#include "binary_table.h"
 #include "binary_conversion.h"
 
 typedef struct

@@ -7,7 +7,6 @@
 #include "line_parser.h"
 #include "lines.h"
 #include "symbol_table.h"
-#include "binary_table.h"
 #include "util.h"
 #include "constant.h"
 #include "error_handler.h"

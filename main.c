@@ -2,7 +2,6 @@
 #include "preprocessor.h"
 #include "first_pass.h"
 #include "symbol_table.h"
-#include "binary_table.h"
 #include "macros.h"
 #include "binary_conversion.h"
 
