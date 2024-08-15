@@ -143,7 +143,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     current_directive = *directive_binary_table;
     int i = 1;
     char bin[16];
-    BinaryLine *temp = (current_instruction);
+    BinaryLine *temp_instruction = (current_instruction);
+    BinaryLine *temp_directive = (current_directive);
     while (current_instruction != NULL)
     {
         printf("Binary Line: %d\n", i);
@@ -172,11 +173,14 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         printf("---------------------\n");
         current_directive = (current_directive)->next;
     }
-    while (temp != NULL)
+    i = 0;
+    add_binary_lines(temp_directive, &temp_instruction);
+    while (temp_instruction != NULL)
     {
-        decimal_to_binary(temp->binary_code, bin, 16);
-        printf("%s\n", bin);
-        temp = temp->next;
+        decimal_to_binary(temp_instruction->binary_code, bin, 16);
+        printf("%d: %s\n", i, bin);
+        i++;
+        temp_instruction = temp_instruction->next;
     }
     current_symbol = symbolTable->head;
     while (current_symbol != NULL)
