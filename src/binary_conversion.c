@@ -183,12 +183,16 @@ struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address
 */
 void free_BinaryLine(struct BinaryLine *line)
 {
-    if (line == NULL)
+    while (line != NULL)
     {
-        return;
+        struct BinaryLine *temp = line;
+        line = line->next;
+        if (temp->label != NULL)
+        {
+            free(temp->label);
+        }
+        free(temp);
     }
-    free(line->label);
-    free(line);
 }
 
 /*

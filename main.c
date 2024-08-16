@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     int IC = 0;
     int DC = 0;
     firstPass("test_firstpass", macro_head, symbolTable, &instruction_binary_table, &directive_binary_table, &IC, &DC);
+    free_BinaryLine(instruction_binary_table);
     freeSymbolTable(symbolTable);
     return 0;
 }
