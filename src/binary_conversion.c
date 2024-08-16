@@ -68,6 +68,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     }
     /* append the 1-3 words block to the binary table head*/
     add_binary_lines(lines, head);
+    printf("ANNANANANAN\n");
     return;
 }
 
@@ -149,6 +150,7 @@ void add_binary_lines(struct BinaryLine *line, struct BinaryLine **head)
         return;
     }
     struct BinaryLine *current = *head;
+    printf("CURRENTTTTTTTTTTTTT %d\n", current->original_line_number);
     while (current->next != NULL)
     {
         current = current->next;

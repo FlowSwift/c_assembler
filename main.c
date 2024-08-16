@@ -10,13 +10,12 @@ int main(int argc, char *argv[])
     struct macros *macro_head = NULL;
     /*pre_process(argv[1], macro_head);*/
     SymbolTable *symbolTable = NULL;
-    struct BinaryLine *instruction_binary_table = NULL;
-    struct BinaryLine *directive_binary_table = NULL;
+    BinaryLine *binary_table = NULL;
     symbolTable = createSymbolTable(); /*create empty symbol table*/
     int IC = 0;
     int DC = 0;
-    firstPass("test_firstpass", macro_head, symbolTable, &instruction_binary_table, &directive_binary_table, &IC, &DC);
-    free_BinaryLine(instruction_binary_table);
+    firstPass("test_firstpass", macro_head, symbolTable, &binary_table, &IC, &DC);
+    free_BinaryLine(binary_table);
     freeSymbolTable(symbolTable);
     return 0;
 }

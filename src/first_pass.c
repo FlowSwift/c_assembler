@@ -31,12 +31,14 @@ Opcode OPCODES[] = {
     {14, "rts", 0},
     {15, "stop", 0}};
 
-int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **instruction_binary_table, BinaryLine **directive_binary_table, int *IC, int *DC)
+int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
     AssemblyLine parsedLine;
     SymbolNode *current_symbol = NULL;
+    BinaryLine *instruction_binary_table = NULL;
+    BinaryLine *directive_binary_table = NULL;
     int line_number = 0;
     int is_symbol = 0;
     int temp_memory_place = 0;
@@ -63,7 +65,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             if (strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0)
             { /* if data*/
                 temp_memory_place = *DC;
-                error_flag = handleDataDirective(&parsedLine, symbolTable, directive_binary_table, line_number, DC);
+                error_flag = handleDataDirective(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                              /*data was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
@@ -72,7 +74,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)
             { /* if string*/
                 temp_memory_place = *DC;
-                error_flag = handleStringDirective(&parsedLine, symbolTable, directive_binary_table, line_number, DC);
+                error_flag = handleStringDirective(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                                /*string was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
@@ -80,11 +82,11 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             }
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)
             { /* if extern*/
-                error_flag = handleExternDirective(&parsedLine, symbolTable, instruction_binary_table, macro_head);
+                error_flag = handleExternDirective(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
             }
             else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0)
             { /* if entry*/
-                error_flag = handleEntryDirective(&parsedLine, symbolTable, instruction_binary_table, macro_head);
+                error_flag = handleEntryDirective(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
             }
             else
             { /*if not one of defined directives.*/
@@ -94,7 +96,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         else
         { /* assume line is command - maybe also label is defined*/
             temp_memory_place = *IC;
-            error_flag = handle_instruction(&parsedLine, symbolTable, instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
+            error_flag = handle_instruction(&parsedLine, symbolTable, &instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
             if (is_symbol && (error_flag == 0))
             {                                                                                                                                     /* has label and is in regular instruction format.*/
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_INSTRUCTION, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
@@ -127,7 +129,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         }
         freeAssemblyLine(&parsedLine);
     }
-    BinaryLine *current_instruction = *instruction_binary_table, *current_directive = *directive_binary_table;
+    BinaryLine *current_instruction = instruction_binary_table, *current_directive = directive_binary_table;
     while (current_instruction != NULL)
     {
         (current_instruction)->decimal_memory_address += 100;
@@ -138,8 +140,8 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         (current_directive)->decimal_memory_address += *IC + 100;
         current_directive = (current_directive)->next;
     }
-    current_instruction = *instruction_binary_table;
-    current_directive = *directive_binary_table;
+    current_instruction = instruction_binary_table;
+    current_directive = directive_binary_table;
     int i = 1;
     char bin[16];
     BinaryLine *temp_instruction = (current_instruction);
@@ -174,6 +176,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
     }
     i = 0;
     add_binary_lines(temp_directive, &temp_instruction);
+    *binary_table = temp_instruction;
     while (temp_instruction != NULL)
     {
         decimal_to_binary(temp_instruction->binary_code, bin, 16);
