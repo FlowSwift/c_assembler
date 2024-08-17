@@ -27,7 +27,7 @@ typedef enum
 extern Opcode OPCODES[];
 
 /*first pass function - goes through each line, parses and makes to binary*/
-int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC);
+int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC);
 /*checks type of miun of each operand. changes value to name and updates in Operand*/
 int check_type(Operand *operand, struct macros *macro_head);
 /*gets opcode number of operands*/

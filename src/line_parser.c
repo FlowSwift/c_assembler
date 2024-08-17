@@ -30,6 +30,8 @@ AssemblyLine parseAssemblyLine(char *line)
         parsedLine.label = (char *)malloc(labelLen + 1);
         strncpy(parsedLine.label, line, labelLen);
         parsedLine.label[labelLen] = '\0';
+        printf("Label!!!!!!!!!!!!!!: %s\n", parsedLine.label);
+        printf("Line!!!!!!!!!!!!!!: %s\n", line);
         /* Move past the colon*/
         line = colonPos + 1;
         while (*line == ' ')

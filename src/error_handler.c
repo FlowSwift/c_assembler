@@ -115,6 +115,12 @@ void handle_error(ErrorCode error, int line_number)
         case ERROR_SYMBOL_DEF_ERROR:
             printf("ERROR: Symbol definition error, on line %d\n.", line_number);
             break;
+        case ERROR_SYMBOL_ALREADY_EXTERN:
+            printf("ERROR: Symbol already defined as extern, on line %d\n.", line_number);
+            break;
+        case ERROR_SYMBOL_WAS_NOT_DEFINED:
+            printf("ERROR: Symbol was not defined, on line %d\n.", line_number);
+            break;
         default:
             printf("Unknown error occurred.\n");
     }

@@ -31,7 +31,7 @@ Opcode OPCODES[] = {
     {14, "rts", 0},
     {15, "stop", 0}};
 
-int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
+int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
     FILE *amfile = fopen(file_name, "r");
@@ -152,7 +152,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         printf("Binary Line: %d\n", i);
         decimal_to_binary((current_instruction)->binary_code, bin, 16);
         printf("Binary Line: %s\n", bin);
-        printf("Labal: %s\n", (current_instruction)->label);
+        printf("Label: %s\n", (current_instruction)->label);
         printf("Binary code: %d\n", (current_instruction)->binary_code);
         printf("Original line number: %d\n", (current_instruction)->original_line_number);
         printf("Decimal memory address: %d\n", (current_instruction)->decimal_memory_address);
@@ -167,7 +167,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
         printf("Binary Line: %d\n", i);
         decimal_to_binary((current_directive)->binary_code, bin, 16);
         printf("Binary Line: %s\n", bin);
-        printf("Labal: %s\n", (current_directive)->label);
+        printf("Label: %s\n", (current_directive)->label);
         printf("Binary code: %d\n", (current_directive)->binary_code);
         printf("Original line number: %d\n", (current_directive)->original_line_number);
         printf("Decimal memory address: %d\n", (current_directive)->decimal_memory_address);

@@ -25,6 +25,7 @@ BinaryLine *convert_directive_to_binary_code(int value, int line, int DC);
 int calc_miun_binary(int miun);
 void add_binary_lines(struct BinaryLine *line, struct BinaryLine **head);
 struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address);
+void convert_label_adress_to_binary_line(BinaryLine *binary_line, SymbolNode *symbol);
 void free_BinaryLine(struct BinaryLine *line);
 void decimal_to_binary(unsigned int num, char str[], int size);
 

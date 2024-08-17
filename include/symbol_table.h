@@ -1,7 +1,7 @@
 #ifndef __SYMBOL_TABLE_H__
 #define __SYMBOL_TABLE_H__
 
-enum SymbolType
+typedef enum
 {
     TYPE_LABEL_DEF = 0,
     TYPE_INSTRUCTION,
@@ -9,7 +9,7 @@ enum SymbolType
     TYPE_STRING,
     TYPE_ENTRY,
     TYPE_EXTERN
-};
+} SymbolType;
 
 /*
     Todo:

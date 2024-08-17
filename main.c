@@ -4,6 +4,7 @@
 #include "symbol_table.h"
 #include "macros.h"
 #include "binary_conversion.h"
+#include "second_pass.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +15,14 @@ int main(int argc, char *argv[])
     symbolTable = createSymbolTable(); /*create empty symbol table*/
     int IC = 0;
     int DC = 0;
-    firstPass("test_firstpass", macro_head, symbolTable, &binary_table, &IC, &DC);
+    printf("FIRST PASS:\n");
+    printf("FIRST PASS:\n");
+    printf("FIRST PASS:\n");
+    first_pass("test_firstpass", macro_head, symbolTable, &binary_table, &IC, &DC);
+    printf("SECOND PASS:\n");
+    printf("SECOND PASS:\n");
+    printf("SECOND PASS:\n");
+    second_pass("test_secondpass", macro_head, symbolTable, &binary_table, &IC, &DC);
     free_BinaryLine(binary_table);
     freeSymbolTable(symbolTable);
     return 0;
