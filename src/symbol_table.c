@@ -79,15 +79,19 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL)
     {
-        if ((new_node->label_type == TYPE_LABEL_DEF))
+        if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != 0))
         {
-            error_flag = ERROR_SYMBOL_DEF_ERROR;
+            error_flag = ERROR_SYMBOL_DEFINED_TWICE;
+            return error_flag;
+        }
+        else if (new_node->label_type == TYPE_LABEL_DEF && label_type == TYPE_ENTRY)
+        {
+            new_node->label_type = label_type;
             return error_flag;
         }
         else if (new_node->label_type == TYPE_ENTRY && label_type == TYPE_LABEL_DEF)
         {
-            new_node->type = type;
-            new_node->memory_place = memory_place; /*only add memory place*/
+            new_node->memory_place = memory_place;
             return error_flag;
         }
         else

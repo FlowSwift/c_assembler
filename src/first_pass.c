@@ -100,6 +100,7 @@ int firstPass(char *file_name, struct macros *macro_head, SymbolTable *symbolTab
             if (is_symbol && (error_flag == 0))
             {                                                                                                                                     /* has label and is in regular instruction format.*/
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_INSTRUCTION, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
+                handle_error(error_flag, line_number);
             }
         }
         if (error_flag != 0)
