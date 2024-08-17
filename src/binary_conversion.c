@@ -233,3 +233,21 @@ void decimal_to_binary(unsigned int num, char str[], int size)
     }
     return;
 }
+
+/*
+    Function to convert a decimal number to octal
+    Modifies the str array with the octal number
+*/
+void decimal_to_octal(unsigned int num, char str[], int size)
+{
+    char currentBinDigit;
+    int i = size - 2;     /* set i to the index before \0 */
+    str[size - 1] = '\0'; /* set a null terminator */
+    while (i >= 0)
+    {
+        str[i] = (num % 8) + '0';
+        num /= 8;
+        i--;
+    }
+    return;
+}

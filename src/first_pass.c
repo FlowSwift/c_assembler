@@ -34,7 +34,6 @@ Opcode OPCODES[] = {
 int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
-    FILE *amfile = fopen(file_name, "r");
     AssemblyLine parsedLine;
     SymbolNode *current_symbol = NULL;
     BinaryLine *instruction_binary_table = NULL;
@@ -43,6 +42,12 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     int is_symbol = 0;
     int temp_memory_place = 0;
     ErrorCode error_flag = 0; /*assume success*/
+    FILE *amfile = fopen(file_name, "r");
+    if (amfile == NULL)
+    {
+        error_flag = ERROR_FILE_NOT_FOUND;
+        return error_flag;
+    }
     while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL)
     {
         printf("----------------\n");

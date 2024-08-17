@@ -9,6 +9,7 @@ int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, B
 {
     BinaryLine *current_line = *binary_table;
     SymbolNode *current_symbol = symbolTable->head;
+    char octal_code[6];
     ErrorCode error_flag = ERROR_NONE;
     while (current_line != NULL)
     {
@@ -48,5 +49,19 @@ int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, B
         printf("---------------------\n");
         temp_line = (temp_line)->next;
     }
+    FILE *file = fopen("output.ob", "w");
+    if (file == NULL)
+    {
+        error_flag = ERROR_CANT_WRITE_FILE;
+        return error_flag;
+    }
+    temp_line = *binary_table;
+    while (temp_line != NULL)
+    {
+        decimal_to_octal(temp_line->binary_code, octal_code, 6);
+        fprintf(file, "%d %s\n", temp_line->decimal_memory_address, octal_code);
+        temp_line = temp_line->next;
+    }
+    fclose(file);
     return error_flag;
 }

@@ -28,5 +28,6 @@ struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address
 void convert_label_adress_to_binary_line(BinaryLine *binary_line, SymbolNode *symbol);
 void free_BinaryLine(struct BinaryLine *line);
 void decimal_to_binary(unsigned int num, char str[], int size);
+void decimal_to_octal(unsigned int num, char str[], int size);
 
 #endif /* __BINARY_CONVERSION_H__ */
