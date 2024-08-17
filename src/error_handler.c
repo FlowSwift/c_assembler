@@ -65,61 +65,61 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: .data directive syntax is not valid: should receive only integers with comma's between, on line %d\n", line_number);
             break;
         case ERROR_NOT_DEFINED_DIRECTIVE:
-            printf("Error: Directive is not valid (should be one of .data, .string, .entry or .extern): on line %d\n.", line_number);
+            printf("Error: Directive is not valid (should be one of .data, .string, .entry or .extern): on line %d\n", line_number);
             break;
         case ERROR_MEMORY_OVERFLOW:
             printf("Error: Memory Overflow.");
             break;
         case ERROR_STRING_SYNTAX_NOT_VALID:
-            printf("Error: .string directive syntax is not valid: should be quotantion and not empty, on line %d\n.", line_number);
+            printf("Error: .string directive syntax is not valid: should be quotantion and not empty, on line %d\n", line_number);
             break;
         case ERROR_EXTERN_NOT_VALID:
-            printf("Error: .extern directive syntax is not valid: has label definition, on line %d\n.", line_number);
+            printf("Error: .extern directive syntax is not valid: has label definition, on line %d\n", line_number);
             break;
         case ERROR_ENTRY_NOT_VALID:
-            printf("Error: .entry directive syntax is not valid: has label definition, on line %d\n.", line_number);
+            printf("Error: .entry directive syntax is not valid: has label definition, on line %d\n", line_number);
             break;
         case ERROR_INSTRUCTION_NOT_VALID:
-            printf("ERROR: Instruction is not valid, on line %d\n.", line_number);
+            printf("ERROR: Instruction is not valid, on line %d\n", line_number);
             break;
         case ERROR_NOT_ENOUGH_OPERANDS:
-            printf("ERROR: Not enough operands for instruction, on line %d\n.", line_number);
+            printf("ERROR: Not enough operands for instruction, on line %d\n", line_number);
             break;
         case ERROR_OPERAND_IS_EMPTY:
-            printf("ERROR: Operand is empty, on line %d\n.", line_number);
+            printf("ERROR: Operand is empty, on line %d\n", line_number);
             break;
         case ERROR_NOT_VALID_INTEGER:
-            printf("ERROR: Operand not valid Inetger, on line %d\n.", line_number);
+            printf("ERROR: Operand not valid Inetger, on line %d\n", line_number);
             break;
         case ERROR_MACRO_NAME_EXISTS:
-            printf("ERROR: Macro name exists, on line %d\n.", line_number);
+            printf("ERROR: Macro name exists, on line %d\n", line_number);
             break;
         case ERROR_MACRO_NAME_IS_OPCODE:
-            printf("ERROR: Macro name is Opcode, on line %d\n.", line_number);
+            printf("ERROR: Macro name is Opcode, on line %d\n", line_number);
             break;
         case ERROR_TOO_MANY_OPERANDS:
-            printf("ERROR: Too many operands for instruction, on line %d\n.", line_number);
+            printf("ERROR: Too many operands for instruction, on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_SHORT:
-            printf("ERROR: Symbol is too short, on line %d\n.", line_number);
+            printf("ERROR: Symbol is too short, on line %d\n", line_number);
             break;
         case ERROR_MIUN_TYPES_DONT_MATCH:
-            printf("ERROR: Miun types don't match what is allowed for instruction, on line %d\n.", line_number);
+            printf("ERROR: Miun types don't match what is allowed for instruction, on line %d\n", line_number);
             break;
         case ERROR_WRONG_OPERAND_SYNTAX:
-            printf("ERROR: Wrong operand syntax, on line %d\n.", line_number);
+            printf("ERROR: Wrong operand syntax, on line %d\n", line_number);
             break;
         case ERROR_CANT_DEFINE_EXTERN:
-            printf("ERROR: Can't define extern, on line %d\n.", line_number);
+            printf("ERROR: Can't define extern, on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_DEF_ERROR:
-            printf("ERROR: Symbol definition error, on line %d\n.", line_number);
+            printf("ERROR: Symbol definition error, on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_ALREADY_EXTERN:
-            printf("ERROR: Symbol already defined as extern, on line %d\n.", line_number);
+            printf("ERROR: Symbol already defined as extern, on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_WAS_NOT_DEFINED:
-            printf("ERROR: Symbol was not defined, on line %d\n.", line_number);
+            printf("ERROR: Symbol was not defined, on line %d\n", line_number);
             break;
         default:
             printf("Unknown error occurred.\n");
