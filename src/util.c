@@ -98,7 +98,7 @@ int valid_reg_name(char *value)
     {
         return 0; /*SUCCESS*/
     }
-    return 1;
+    return ERROR_WRONG_OPERAND_SYNTAX;
 }
 
 /*

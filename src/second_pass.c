@@ -23,7 +23,6 @@ int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, B
             else
             {
                 error_flag = ERROR_SYMBOL_WAS_NOT_DEFINED;
-                printf("SYMBOL NAME: %s\n", current_line->label);
                 handle_error(error_flag, current_line->original_line_number);
             }
         }
