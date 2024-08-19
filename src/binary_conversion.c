@@ -240,7 +240,6 @@ void decimal_to_binary(unsigned int num, char str[], int size)
 */
 void decimal_to_octal(unsigned int num, char str[], int size)
 {
-    char currentBinDigit;
     int i = size - 2;     /* set i to the index before \0 */
     str[size - 1] = '\0'; /* set a null terminator */
     while (i >= 0)

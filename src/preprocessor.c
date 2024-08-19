@@ -184,6 +184,8 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
         }
     }
     free_macros(head);
+    fclose(file);
+    fclose(processed_file);
     if (error_flag != 0)
     {
         return error_flag;

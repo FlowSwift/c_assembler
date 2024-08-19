@@ -92,6 +92,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         else if (new_node->label_type == TYPE_ENTRY && label_type == TYPE_LABEL_DEF)
         {
             new_node->memory_place = memory_place;
+            new_node->type = type;
             return error_flag;
         }
         else

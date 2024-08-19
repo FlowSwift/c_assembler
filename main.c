@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     struct macros *macro_head = NULL;
-    /*pre_process(argv[1], macro_head);*/
+    pre_process("test_firstpass", macro_head);
     SymbolTable *symbolTable = NULL;
     BinaryLine *binary_table = NULL;
     symbolTable = createSymbolTable(); /*create empty symbol table*/
@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
     printf("FIRST PASS:\n");
     printf("FIRST PASS:\n");
     printf("FIRST PASS:\n");
-    first_pass("test_firstpass", macro_head, symbolTable, &binary_table, &IC, &DC);
+    first_pass("test_firstpass.am", macro_head, symbolTable, &binary_table, &IC, &DC);
     printf("SECOND PASS:\n");
     printf("SECOND PASS:\n");
     printf("SECOND PASS:\n");
-    second_pass("test_secondpass", macro_head, symbolTable, &binary_table, &IC, &DC);
+    second_pass(macro_head, symbolTable, &binary_table, &IC, &DC);
     free_BinaryLine(binary_table);
     freeSymbolTable(symbolTable);
     return 0;

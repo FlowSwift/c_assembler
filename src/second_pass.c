@@ -5,7 +5,7 @@
 #include "binary_conversion.h"
 #include "error_handler.h"
 
-int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
+int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     BinaryLine *current_line = *binary_table;
     SymbolNode *current_symbol = symbolTable->head;
@@ -22,6 +22,7 @@ int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, B
             }
             else
             {
+                printf("Label: %s\n", current_line->label);
                 error_flag = ERROR_SYMBOL_WAS_NOT_DEFINED;
                 handle_error(error_flag, current_line->original_line_number);
             }
@@ -55,6 +56,7 @@ int second_pass(char *filename, struct macros *head, SymbolTable *symbolTable, B
         return error_flag;
     }
     temp_line = *binary_table;
+    fprintf(file, "%d %d\n", *IC, *DC);
     while (temp_line != NULL)
     {
         decimal_to_octal(temp_line->binary_code, octal_code, 6);
