@@ -204,15 +204,18 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         current_symbol = current_symbol->next;
     }
     current_symbol = symbolTable->head;
+    printf("-------------------\n");
+    printf("SYMBOL TABLE:\n");
     while (current_symbol != NULL)
     {
         printf("----------------\n");
-        printf("Symbol: %s\n", current_symbol->name);
+        printf("Symbol: -%s-\n", current_symbol->name);
         printf("Type: %d\n", current_symbol->type);
         printf("Label type: %d\n", current_symbol->label_type);
         printf("Memory place: %d\n", current_symbol->memory_place);
         current_symbol = current_symbol->next;
     }
+    printf("-------------------\n");
     fclose(amfile);
     return error_flag; /* 0 -> SUCCESS*/
 }

@@ -20,8 +20,8 @@ typedef struct SymbolNode
 {
     /*every label will have this structure after it is checked that it is legal definition */
     char *name;
-    int type;
-    int label_type;
+    int type; /* Instruction, data or string */
+    int label_type; /* Label def, entry or extern */
     int memory_place;
     struct SymbolNode *next;
 } SymbolNode;

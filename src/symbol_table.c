@@ -74,7 +74,7 @@ int is_valid_symbol(struct macros *macro_head, char *label)
 
 int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int label_type, int memory_place, struct macros *macro_head)
 {
-    SymbolNode *new_node = NULL;
+    SymbolNode *new_node = NULL, *current = table->head;
     ErrorCode error_flag = 0; /*assume success*/
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL)
@@ -84,15 +84,25 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
             error_flag = ERROR_SYMBOL_DEFINED_TWICE;
             return error_flag;
         }
-        else if (new_node->label_type == TYPE_LABEL_DEF && label_type == TYPE_ENTRY)
+        else if ((label_type == TYPE_ENTRY) && (new_node->label_type == TYPE_LABEL_DEF))
         {
             new_node->label_type = label_type;
             return error_flag;
         }
-        else if (new_node->label_type == TYPE_ENTRY && label_type == TYPE_LABEL_DEF)
+        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_LABEL_DEF))
         {
             new_node->memory_place = memory_place;
             new_node->type = type;
+            return error_flag;
+        }
+        else if ((new_node->label_type == TYPE_EXTERN) && (label_type == TYPE_ENTRY))
+        {
+            error_flag = ERROR_SYMBOL_ALREADY_EXTERN;
+            return error_flag;
+        }
+        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_EXTERN))
+        {
+            error_flag = ERROR_SYMBOL_ALREADY_EXTERN;
             return error_flag;
         }
         else
@@ -121,16 +131,22 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         new_node->type = type;
         new_node->label_type = label_type;
         new_node->memory_place = memory_place;
+        /* Add the new node to the table */
         if (table->head == NULL)
         {
+            /* The list is empty, so the new node is the head */
             table->head = new_node;
-            table->last = new_node;
         }
-        else if (table->last != NULL)
+        else
         {
-            table->last->next = new_node;
+            /* Traverse the list to find the last node */
+            while (current->next != NULL)
+            {
+                current = current->next;
+            }
+            /* Link the new node at the end of the list */
+            current->next = new_node;
         }
-        table->last = new_node;
     }
     return error_flag; /*if 0, Symbol added successfully*/
 }

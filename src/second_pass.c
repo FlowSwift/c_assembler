@@ -11,6 +11,15 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
     SymbolNode *current_symbol = symbolTable->head;
     char octal_code[6];
     ErrorCode error_flag = ERROR_NONE;
+    // printf("ALL SYMBOLS:\n");
+    // while (current_symbol != NULL) {
+    //     printf("Symbol: %s\n", current_symbol->name);
+    // }
+    // printf("END OF SYMBOLS\n");
+    if (validate_symbols(symbolTable, binary_table))
+    {
+        return error_flag;
+    }
     while (current_line != NULL)
     {
         if (current_line->label != NULL)
@@ -22,7 +31,7 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
             }
             else
             {
-                printf("Label: %s\n", current_line->label);
+                printf("Label: -%s-\n", current_line->label);
                 error_flag = ERROR_SYMBOL_WAS_NOT_DEFINED;
                 handle_error(error_flag, current_line->original_line_number);
             }
@@ -60,9 +69,33 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
     while (temp_line != NULL)
     {
         decimal_to_octal(temp_line->binary_code, octal_code, 6);
-        fprintf(file, "%d %s\n", temp_line->decimal_memory_address, octal_code);
+        fprintf(file, "%04d %s\n", temp_line->decimal_memory_address, octal_code);
         temp_line = temp_line->next;
     }
     fclose(file);
+    return error_flag;
+}
+
+int validate_symbols(SymbolTable *symbolTable, BinaryLine **binary_table)
+{
+    BinaryLine *current_line = *binary_table;
+    SymbolNode *current_symbol = symbolTable->head;
+    ErrorCode error_flag = ERROR_NONE;
+    while (current_symbol != NULL)
+    {
+        if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == 0))
+        {
+            printf("An error occured for the following symbol: %s\n", current_symbol->name);
+            error_flag = ERROR_ENTRY_NOT_VALID;
+            handle_error(error_flag, 0);
+        }
+        else if((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != 0))
+        {
+            printf("An error occured for the following symbol: %s\n", current_symbol->name);
+            error_flag = ERROR_EXTERN_NOT_VALID;
+            handle_error(error_flag, 0);
+        }
+        current_symbol = current_symbol->next;
+    }
     return error_flag;
 }
