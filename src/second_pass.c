@@ -18,7 +18,15 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
     // printf("END OF SYMBOLS\n");
     if (validate_symbols(symbolTable, binary_table))
     {
-        return error_flag;
+        return -1;
+    }
+    if (create_ent_file(symbolTable))
+    {
+        return -1;
+    }
+    if (create_ext_file(symbolTable, binary_table))
+    {
+        return -1;
     }
     while (current_line != NULL)
     {
@@ -85,17 +93,80 @@ int validate_symbols(SymbolTable *symbolTable, BinaryLine **binary_table)
     {
         if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == 0))
         {
-            printf("An error occured for the following symbol: %s\n", current_symbol->name);
-            error_flag = ERROR_ENTRY_NOT_VALID;
+            printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
+            error_flag = ERROR_ENTRY_WAS_NOT_DEFINED;
             handle_error(error_flag, 0);
         }
-        else if((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != 0))
+        else if ((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != 0))
         {
-            printf("An error occured for the following symbol: %s\n", current_symbol->name);
-            error_flag = ERROR_EXTERN_NOT_VALID;
+            printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
+            error_flag = ERROR_EXTERN_WAS_DEFINED;
             handle_error(error_flag, 0);
         }
         current_symbol = current_symbol->next;
     }
     return error_flag;
+}
+
+int create_ent_file(SymbolTable *symbolTable)
+{
+    SymbolNode *current_symbol = symbolTable->head;
+    FILE *ent_file = NULL; /* Only create file if a symbol was found */
+    ErrorCode error_code = ERROR_NONE;
+    while (current_symbol != NULL)
+    {
+        if (current_symbol->label_type == TYPE_ENTRY)
+        {
+            if (ent_file == NULL)
+            {
+                ent_file = fopen("output.ent", "w");
+                if (ent_file == NULL)
+                {
+                    error_code = ERROR_CANT_WRITE_FILE;
+                    handle_error(error_code, 0);
+                    return error_code;
+                }
+            }
+            fprintf(ent_file, "%s %d\n", current_symbol->name, current_symbol->memory_place);
+        }
+        current_symbol = current_symbol->next;
+    }
+    if (ent_file != NULL)
+        fclose(ent_file);
+    return error_code;
+}
+
+int create_ext_file(SymbolTable *symbolTable, BinaryLine **binary_table)
+{
+    SymbolNode *current_symbol = symbolTable->head;
+    BinaryLine *current_binary_line = *binary_table;
+    FILE *ext_file = NULL;
+    ErrorCode error_code = ERROR_NONE;
+    while (current_binary_line != NULL)
+    {
+        if (current_binary_line->label != NULL)
+        {
+            current_symbol = is_symbol_in_table(symbolTable, current_binary_line->label);
+            if (current_symbol != NULL)
+            {
+                if (current_symbol->label_type == TYPE_EXTERN)
+                {
+                    if (ext_file == NULL)
+                    {
+                        ext_file = fopen("output.ext", "w");
+                        if (ext_file == NULL)
+                        {
+                            error_code = ERROR_CANT_WRITE_FILE;
+                            handle_error(error_code, 0);
+                            return error_code;
+                        }
+                    }
+                    fprintf(ext_file, "%s %04d\n", current_binary_line->label, current_binary_line->decimal_memory_address);
+                }
+            }
+        }
+        current_binary_line = current_binary_line->next;
+    }
+    if (ext_file != NULL)
+        fclose(ext_file);
 }

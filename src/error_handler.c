@@ -79,6 +79,12 @@ void handle_error(ErrorCode error, int line_number)
         case ERROR_ENTRY_NOT_VALID:
             printf("Error: .entry directive syntax is not valid: has label definition, on line %d\n", line_number);
             break;
+        case ERROR_EXTERN_WAS_DEFINED:
+            printf("Error: .extern was not defined, on line %d\n", line_number);
+            break;
+        case ERROR_ENTRY_WAS_NOT_DEFINED:
+            printf("Error: .entry was not defined, on line %d\n", line_number);
+            break;
         case ERROR_INSTRUCTION_NOT_VALID:
             printf("ERROR: Instruction is not valid, on line %d\n", line_number);
             break;
