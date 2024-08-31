@@ -34,8 +34,6 @@ int check_type(Operand *operand, struct macros *macro_head);
 int get_opcode_operands(char *instruction);
 /*gets opcode code value*/
 int get_opcode_code(char *instruction);
-/*cheks if operand is legit integer: +789, -9, 8 are allowed*/
-int is_valid_integer(char *operand);
 /*parses operands gor command line -> checks the insturction is valid(one of 16),
     gets type of miun for each operand and checks if they are allowed for the instruction.*/
 int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head);

@@ -223,6 +223,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
 int check_type(Operand *operand, struct macros *macro_head)
 {
     ErrorCode error_flag = 0; /*assume success*/
+    int num = 0;
     int len = strlen(operand->value) - 1;
     if ((operand->value[0] == '\0'))
     {
@@ -238,6 +239,17 @@ int check_type(Operand *operand, struct macros *macro_head)
         error_flag = is_valid_integer(operand->value);
         if (error_flag == 0)
         {
+            {
+                num = atoi(operand->value); /*convert string to int*/
+                if (num > MAX_OPERAND_INT)
+                {
+                    error_flag = ERROR_INTEGER_VALUE_TOO_BIG; /*integer value too big*/
+                }
+                else if (num < MIN_OPERAND_INT)
+                {
+                    error_flag = ERROR_INTEGER_VALUE_TOO_SMALL; /*integer value too small*/
+                }
+            }
             operand->type = 0;
         }
         else
@@ -600,10 +612,18 @@ int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bina
         {                        /*symbol syntax is checked and is integer*/
             value = atoi(token); /*numeral value of the operand*/
         }
+        if (error_flag == 0) /* if the operand is a valid integer */
+        {
+            if (value > MAX_DATA_INT)
+            {
+                error_flag = ERROR_INTEGER_VALUE_TOO_BIG; /*integer value too big*/
+            }
+            else if (value < MIN_DATA_INT)
+            {
+                error_flag = ERROR_INTEGER_VALUE_TOO_SMALL; /*integer value too small*/
+            }
+        }
         /* Insert the binary */
-        /*make binary -
-        error = insertToBinaryCodesTable(instruction_binary_table, *DC, parsedLine, convertIntToBinary(value, BINARY_CODE_LEN), parsedLine->operands);
-        */
         if (error_flag != 0)
         {
             return error_flag; /* some error in binary conversion*/
