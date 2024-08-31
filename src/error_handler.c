@@ -91,6 +91,12 @@ void handle_error(ErrorCode error, int line_number)
         case ERROR_NOT_VALID_INTEGER:
             printf("ERROR: Operand not valid Inetger, on line %d\n", line_number);
             break;
+        case ERROR_INTEGER_VALUE_TOO_BIG:
+            printf("ERROR: Integer value too big, on line %d\n", line_number);
+            break;
+        case ERROR_INTEGER_VALUE_TOO_SMALL:
+            printf("ERROR: Integer value too small, on line %d\n", line_number);
+            break;
         case ERROR_MACRO_NAME_EXISTS:
             printf("ERROR: Macro name exists, on line %d\n", line_number);
             break;

@@ -58,7 +58,9 @@ int is_commented_line(char *line)
 int is_valid_integer(char *operand)
 {
     ErrorCode error_flag = 0; /*assume success*/
-    if (operand == NULL || *operand == '\0')
+    char *start_pos = operand;
+    int num = 0;
+    if ((operand == NULL) || (*operand == '\0'))
     { /* Operand is null or empty */
         error_flag = ERROR_OPERAND_IS_EMPTY;
         return error_flag;
@@ -84,6 +86,18 @@ int is_valid_integer(char *operand)
     else
     {                                         /*if first char not in allowed chars*/
         error_flag = ERROR_NOT_VALID_INTEGER; /*founs not integer char */
+    }
+    if(error_flag == 0) /* if the operand is a valid integer */
+    {
+        num = atoi(start_pos); /*convert string to int*/
+        if (num > MAX_OPERAND_INT)
+        {
+            error_flag = ERROR_INTEGER_VALUE_TOO_BIG; /*integer value too big*/
+        }
+        else if (num < MIN_OPERAND_INT)
+        {
+            error_flag = ERROR_INTEGER_VALUE_TOO_SMALL; /*integer value too small*/
+        }
     }
     return error_flag; /* 0 - > Success. Operand is a valid integer */
 }
