@@ -119,7 +119,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         /* check if memory overflow*/
         printf("IC: %d\n", *IC);
         printf("DC: %d\n", *DC);
-        if ((*IC + *DC) > 4)
+        if ((*IC + *DC) > MAX_MEMORY_WORDS)
         {
             error_flag = ERROR_MEMORY_OVERFLOW;
             handle_error(error_flag, line_number);
