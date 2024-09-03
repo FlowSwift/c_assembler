@@ -35,16 +35,22 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
 {
     char line[MAX_LINE_LENGTH];
     char *am_file_name = NULL;
+    char bin[16];
     AssemblyLine parsedLine;
     SymbolNode *current_symbol = NULL;
     BinaryLine *instruction_binary_table = NULL;
     BinaryLine *directive_binary_table = NULL;
+    BinaryLine *temp_instruction = NULL;
+    BinaryLine *temp_directive = NULL;
     int line_number = 0;
     int is_symbol = 0;
     int temp_memory_place = 0;
+    int i = 0;
     ErrorCode error_flag = 0; /*assume success*/
+    FILE *amfile = NULL;
+    BinaryLine *current_instruction = NULL, *current_directive = NULL;
     am_file_name = add_file_extension(file_name, ".am");
-    FILE *amfile = fopen(am_file_name, "r");
+    amfile = fopen(am_file_name, "r");
     free(am_file_name);
     if (amfile == NULL)
     {
@@ -140,7 +146,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         }
         freeAssemblyLine(&parsedLine);
     }
-    BinaryLine *current_instruction = instruction_binary_table, *current_directive = directive_binary_table;
+    current_instruction = instruction_binary_table, current_directive = directive_binary_table;
     while (current_instruction != NULL)
     {
         (current_instruction)->decimal_memory_address += 100;
@@ -153,10 +159,9 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     }
     current_instruction = instruction_binary_table;
     current_directive = directive_binary_table;
-    int i = 1;
-    char bin[16];
-    BinaryLine *temp_instruction = (current_instruction);
-    BinaryLine *temp_directive = (current_directive);
+    i = 1;
+    temp_instruction = (current_instruction);
+    temp_directive = (current_directive);
     while (current_instruction != NULL)
     {
         printf("Binary Line: %d\n", i);
@@ -333,10 +338,10 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
 {
     char *ptr_in_line = NULL;
     char *start = NULL;
-    ptr_in_line = parsedLine->operands;
     ErrorCode error_flag = 0; /*assume success*/
-    /*helper variables:*/
     int opcode_code = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
+    ptr_in_line = parsedLine->operands;
+    /*helper variables:*/
     opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
     parsedLine->opcode_code = opcode_code;
     char *operandValue = NULL;
