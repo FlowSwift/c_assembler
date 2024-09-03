@@ -11,7 +11,7 @@ typedef struct Operand
 typedef struct AssemblyLine
 {
     char *label;
-    char *instruction;
+    char *instruction; /* instruction can be a direct command(inc, dec, stop etc) or directive */
     char *operands;
     int opcode_code;
     Operand *srcOperand;
