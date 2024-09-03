@@ -94,7 +94,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             }
             else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0)
             { /* if entry*/
-                error_flag = handleEntryDirective(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
+                error_flag = handle_entry_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
             }
             else
             { /*if not one of defined directives.*/
@@ -716,7 +716,7 @@ int handle_extern_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
     return error_flag; /*0 -> SUCCESS*/
 }
 
-int handleEntryDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
+int handle_entry_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
 {
     /* TO DO - add if there is space between operands*/
     char *token = NULL;
