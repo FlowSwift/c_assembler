@@ -97,10 +97,18 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)
             { /* if extern*/
                 error_flag = handle_extern_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
+                if (is_symbol)
+                {                                                                                                                                     /*extern was in correct format and has symbol definition*/
+                    handle_error(ERROR_EXTERN_NOT_VALID, line_number); /*Extern directive cannot have a label*/
+                }
             }
             else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0)
             { /* if entry*/
                 error_flag = handle_entry_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
+                if (is_symbol)
+                {                                                                                                                                     /*extern was in correct format and has symbol definition*/
+                    handle_error(ERROR_ENTRY_NOT_VALID, line_number); /*Extern directive cannot have a label*/
+                }
             }
             else
             { /*if not one of defined directives.*/
@@ -338,15 +346,15 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
 {
     char *ptr_in_line = NULL;
     char *start = NULL;
+    char *operandValue = NULL;
+    Operand *temp_srcOperand = NULL;
+    Operand *temp_destOperand = NULL;
     ErrorCode error_flag = 0; /*assume success*/
     int opcode_code = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
     ptr_in_line = parsedLine->operands;
     /*helper variables:*/
     opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
     parsedLine->opcode_code = opcode_code;
-    char *operandValue = NULL;
-    Operand *temp_srcOperand = NULL;
-    Operand *temp_destOperand = NULL;
     num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*got how many operands allowed for Opcode*/
     if (num_operands_allowed == -1)
     { /*insturction not found*/
@@ -675,11 +683,6 @@ int handle_extern_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
 {
     char *token = NULL;
     ErrorCode error_flag = 0; /* Assume success */
-    if (parsedLine->label != NULL)
-    {
-        error_flag = ERROR_EXTERN_NOT_VALID;
-        return error_flag;
-    }
     token = strtok(parsedLine->operands, ","); /*in .extern the labels will be the operands.*/
     while (token != NULL)
     {                                   /*if number of labels is bigger then one*/
@@ -704,11 +707,6 @@ int handle_entry_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, B
     /* TO DO - add if there is space between operands*/
     char *token = NULL;
     ErrorCode error_flag = 0; /* Assume success */
-    if (parsedLine->label != NULL)
-    {
-        error_flag = ERROR_ENTRY_NOT_VALID;
-        return error_flag;
-    }
     token = strtok(parsedLine->operands, ","); /*in .entry the labels will be the operands.*/
     while (token != NULL)
     {

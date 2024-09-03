@@ -152,10 +152,10 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
 
 SymbolTable *createSymbolTable()
 {
-    printf("Creating symbol table\n");
     SymbolTable *table = NULL;
-    table = (SymbolTable *)malloc(sizeof(SymbolTable));
     ErrorCode error_flag = 0; /*assume success*/
+    printf("Creating symbol table\n");
+    table = (SymbolTable *)malloc(sizeof(SymbolTable));
     if (table == NULL)
     {
         error_flag = ERROR_MEMORY_ALLOCATION_FAILED;

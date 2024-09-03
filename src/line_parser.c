@@ -11,6 +11,8 @@ AssemblyLine parseAssemblyLine(char *line)
 {
     AssemblyLine parsedLine;
     int len = strlen(line);
+    char *spacePos = NULL;
+    char *colonPos = NULL;
     if (line[(len - 1)] == '\n')
         line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     /*Initialize parsed Line structure */
@@ -19,8 +21,6 @@ AssemblyLine parseAssemblyLine(char *line)
     parsedLine.operands = NULL;
     parsedLine.srcOperand = NULL;
     parsedLine.destOperand = NULL;
-    char *spacePos = NULL;
-    char *colonPos = NULL;
     /* Find the position of the colon*/
     colonPos = strchr(line, ':');
     if ((colonPos != NULL) && ((*(colonPos + 1)) == ' '))

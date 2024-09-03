@@ -19,6 +19,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     struct BinaryLine *lines = malloc_BinaryLine(line, *IC); /* the head of the 1-3 words */
     struct BinaryLine *current = lines;                      /* current word */
     int disable_third_word = 0;                              /* disable third word when src and dest miun are both of type 2/3 */
+    int L;
     /* miun types */
     int src_type = -1;
     int dest_type = -1;
@@ -30,7 +31,7 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     {
         dest_type = assembly_line->destOperand->type;
     }
-    int L = calculate_L(src_type, dest_type);
+    L = calculate_L(src_type, dest_type);
     printf("L AMOUNT %d\n", L);
     printf("IC BEFORE: %d\n", *IC);
     printf("IC AFTER: %d\n", *IC);
