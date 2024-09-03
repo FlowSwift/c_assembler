@@ -68,7 +68,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: Directive is not valid (should be one of .data, .string, .entry or .extern): on line %d\n", line_number);
             break;
         case ERROR_MEMORY_OVERFLOW:
-            printf("Error: Memory Overflow.");
+            printf("Error: Memory Overflow.\n");
             break;
         case ERROR_STRING_SYNTAX_NOT_VALID:
             printf("Error: .string directive syntax is not valid: should be quotantion and not empty, on line %d\n", line_number);
