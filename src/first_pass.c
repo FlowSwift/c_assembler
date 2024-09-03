@@ -34,6 +34,7 @@ Opcode OPCODES[] = {
 int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     char line[MAX_LINE_LENGTH];
+    char *am_file_name = NULL;
     AssemblyLine parsedLine;
     SymbolNode *current_symbol = NULL;
     BinaryLine *instruction_binary_table = NULL;
@@ -42,7 +43,9 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     int is_symbol = 0;
     int temp_memory_place = 0;
     ErrorCode error_flag = 0; /*assume success*/
-    FILE *amfile = fopen(file_name, "r");
+    am_file_name = add_file_extension(file_name, ".am");
+    FILE *amfile = fopen(am_file_name, "r");
+    free(am_file_name);
     if (amfile == NULL)
     {
         error_flag = ERROR_FILE_NOT_FOUND;

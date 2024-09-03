@@ -187,3 +187,22 @@ char *trim_whitespace(char *str)
     end[1] = '\0';
     return str; /*return pointer for the start of not space string*/
 }
+
+void free_all(struct macros **macro_head, SymbolTable **symbolTable, BinaryLine **binary_table)
+{
+    if ((*macro_head) != NULL)
+    {
+        free_macros((*macro_head));
+        (*macro_head) = NULL;
+    }
+    if ((*symbolTable) != NULL)
+    {
+        freeSymbolTable((*symbolTable));
+        (*symbolTable) = NULL;
+    }
+    if ((*binary_table) != NULL)
+    {
+        free_BinaryLine((*binary_table));
+        (*binary_table) = NULL;
+    }
+}

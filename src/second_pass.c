@@ -1,30 +1,33 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "second_pass.h"
 #include "symbol_table.h"
 #include "binary_conversion.h"
 #include "error_handler.h"
+#include "util.h"
 
-int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
+int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     BinaryLine *current_line = *binary_table;
     SymbolNode *current_symbol = symbolTable->head;
     char octal_code[6];
     ErrorCode error_flag = ERROR_NONE;
+    char *ob_file_name = NULL;
     // printf("ALL SYMBOLS:\n");
     // while (current_symbol != NULL) {
     //     printf("Symbol: %s\n", current_symbol->name);
     // }
     // printf("END OF SYMBOLS\n");
-    if (validate_symbols(symbolTable, binary_table))
+    if (validate_symbols(symbolTable))
     {
         return -1;
     }
-    if (create_ent_file(symbolTable))
+    if (create_ent_file(file_name, symbolTable))
     {
         return -1;
     }
-    if (create_ext_file(symbolTable, binary_table))
+    if (create_ext_file(file_name, symbolTable, binary_table))
     {
         return -1;
     }
@@ -66,7 +69,9 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
         printf("---------------------\n");
         temp_line = (temp_line)->next;
     }
-    FILE *file = fopen("output.ob", "w");
+    ob_file_name = add_file_extension(file_name, ".ob");
+    FILE *file = fopen(ob_file_name, "w");
+    free(ob_file_name);
     if (file == NULL)
     {
         error_flag = ERROR_CANT_WRITE_FILE;
@@ -84,9 +89,8 @@ int second_pass(struct macros *head, SymbolTable *symbolTable, BinaryLine **bina
     return error_flag;
 }
 
-int validate_symbols(SymbolTable *symbolTable, BinaryLine **binary_table)
+int validate_symbols(SymbolTable *symbolTable)
 {
-    BinaryLine *current_line = *binary_table;
     SymbolNode *current_symbol = symbolTable->head;
     ErrorCode error_flag = ERROR_NONE;
     while (current_symbol != NULL)
@@ -108,18 +112,21 @@ int validate_symbols(SymbolTable *symbolTable, BinaryLine **binary_table)
     return error_flag;
 }
 
-int create_ent_file(SymbolTable *symbolTable)
+int create_ent_file(char *file_name, SymbolTable *symbolTable)
 {
     SymbolNode *current_symbol = symbolTable->head;
     FILE *ent_file = NULL; /* Only create file if a symbol was found */
     ErrorCode error_code = ERROR_NONE;
+    char *ent_file_name = NULL;
     while (current_symbol != NULL)
     {
         if (current_symbol->label_type == TYPE_ENTRY)
         {
             if (ent_file == NULL)
             {
-                ent_file = fopen("output.ent", "w");
+                ent_file_name = add_file_extension(file_name, ".ent");
+                ent_file = fopen(ent_file_name, "w");
+                free(ent_file_name);
                 if (ent_file == NULL)
                 {
                     error_code = ERROR_CANT_WRITE_FILE;
@@ -136,12 +143,13 @@ int create_ent_file(SymbolTable *symbolTable)
     return error_code;
 }
 
-int create_ext_file(SymbolTable *symbolTable, BinaryLine **binary_table)
+int create_ext_file(char *file_name, SymbolTable *symbolTable, BinaryLine **binary_table)
 {
     SymbolNode *current_symbol = symbolTable->head;
     BinaryLine *current_binary_line = *binary_table;
     FILE *ext_file = NULL;
     ErrorCode error_code = ERROR_NONE;
+    char *ext_file_name = NULL;
     while (current_binary_line != NULL)
     {
         if (current_binary_line->label != NULL)
@@ -153,7 +161,9 @@ int create_ext_file(SymbolTable *symbolTable, BinaryLine **binary_table)
                 {
                     if (ext_file == NULL)
                     {
-                        ext_file = fopen("output.ext", "w");
+                        ext_file_name = add_file_extension(file_name, ".ent");
+                        ext_file = fopen(ext_file_name, "w");
+                        free(ext_file_name);
                         if (ext_file == NULL)
                         {
                             error_code = ERROR_CANT_WRITE_FILE;
@@ -169,4 +179,5 @@ int create_ext_file(SymbolTable *symbolTable, BinaryLine **binary_table)
     }
     if (ext_file != NULL)
         fclose(ext_file);
+    return error_code;
 }

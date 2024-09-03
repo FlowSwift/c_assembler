@@ -15,7 +15,7 @@
 */
 
 /* Main pre-process function that handles the initial file processing */
-int pre_process(char *file_name, struct macros *head)
+int pre_process(char *file_name, struct macros **macro_head)
 {
     char *full_file_name; /* File name including extension */
     char *temp_file_name; /* Temp file */
@@ -32,7 +32,7 @@ int pre_process(char *file_name, struct macros *head)
         handle_error(error_flag, 0);
         return error_flag;
     }
-    if (process_macros(file_name, temp_file_name, head) != 0)
+    if (process_macros(file_name, temp_file_name, macro_head) != 0)
     {
         free(full_file_name);
         free(temp_file_name);
@@ -133,7 +133,7 @@ void strip_line(char *dest, char *source)
     Processes macros in the file.
     Returns 0 if successful, error code otherwise.
 */
-int process_macros(char *filename, char *temp_file_name, struct macros *head)
+int process_macros(char *filename, char *temp_file_name, struct macros **macros_head)
 {
     FILE *file = NULL, *processed_file = NULL;
     char *am_file_name = NULL;
@@ -163,7 +163,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
-        if ((macro = is_existing_macro(head, line)) != NULL)
+        if ((macro = is_existing_macro((*macros_head), line)) != NULL)
         {
             write_macro(macro, processed_file);
         }
@@ -172,9 +172,9 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
         */
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if ((error_flag = validate_macro_name(macr_pos, line, line_counter, head)) == 0)
+            if ((error_flag = validate_macro_name(macr_pos, line, line_counter, (*macros_head))) == 0)
             {
-                add_macro(file, processed_file, &head, line);
+                add_macro(file, processed_file, macros_head, line);
             }
             macr_pos = NULL;
         }
@@ -183,7 +183,6 @@ int process_macros(char *filename, char *temp_file_name, struct macros *head)
             fprintf(processed_file, "%s", line);
         }
     }
-    free_macros(head);
     fclose(file);
     fclose(processed_file);
     if (error_flag != 0)

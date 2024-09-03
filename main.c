@@ -5,25 +5,40 @@
 #include "macros.h"
 #include "binary_conversion.h"
 #include "second_pass.h"
+#include "util.h"
 
 int main(int argc, char *argv[])
 {
     struct macros *macro_head = NULL;
-    pre_process("test_firstpass", macro_head);
     SymbolTable *symbolTable = NULL;
     BinaryLine *binary_table = NULL;
-    symbolTable = createSymbolTable(); /*create empty symbol table*/
-    int IC = 0;
-    int DC = 0;
-    printf("FIRST PASS:\n");
-    printf("FIRST PASS:\n");
-    printf("FIRST PASS:\n");
-    first_pass("test_firstpass.am", macro_head, symbolTable, &binary_table, &IC, &DC);
-    printf("SECOND PASS:\n");
-    printf("SECOND PASS:\n");
-    printf("SECOND PASS:\n");
-    second_pass(macro_head, symbolTable, &binary_table, &IC, &DC);
-    free_BinaryLine(binary_table);
-    freeSymbolTable(symbolTable);
+    int IC, DC;
+    int file_counter = 1;
+    while (file_counter < argc)
+    {
+        free_all(&macro_head, &symbolTable, &binary_table);
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        printf("File: %s\n", argv[file_counter]);
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        IC = 0, DC = 0;
+        if (pre_process(argv[file_counter], &macro_head))
+        {
+            printf("Error in preprocessor, will continue to next file if available\n");
+            file_counter++;
+            continue;
+        }
+        symbolTable = createSymbolTable(); /*create empty symbol table*/
+        printf("FIRST PASS:\n");
+        printf("FIRST PASS:\n");
+        printf("FIRST PASS:\n");
+        first_pass(argv[file_counter], macro_head, symbolTable, &binary_table, &IC, &DC);
+        printf("SECOND PASS:\n");
+        printf("SECOND PASS:\n");
+        printf("SECOND PASS:\n");
+        second_pass(argv[file_counter] ,macro_head, symbolTable, &binary_table, &IC, &DC);
+        file_counter++;
+    }
+    printf("FINISHED FILES\n");
+    free_all(&macro_head, &symbolTable, &binary_table);
     return 0;
 }

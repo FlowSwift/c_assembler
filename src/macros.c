@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "macros.h"
@@ -9,7 +10,7 @@
 */
 struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
 {
-    struct macros *head = *ptr_to_head;
+    struct macros *head = (*ptr_to_head);
     struct macros *new_macro = malloc(sizeof(struct macros));
     if (new_macro == NULL)
     {
@@ -19,9 +20,9 @@ struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
     strcpy(new_macro->name, macro_name);
     new_macro->lines = NULL;
     new_macro->next = NULL;
-    if (*ptr_to_head == NULL)
+    if ((*ptr_to_head) == NULL)
     {
-        *ptr_to_head = new_macro;
+        (*ptr_to_head) = new_macro;
         return new_macro;
     }
     while (head->next != NULL)
