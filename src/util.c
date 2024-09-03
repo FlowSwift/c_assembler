@@ -188,6 +188,28 @@ char *trim_whitespace(char *str)
     return str; /*return pointer for the start of not space string*/
 }
 
+int calculate_L(int srcType, int dstType)
+{
+    int L = 1; /* at least 1, the base word */
+    if (srcType == -1 && dstType == -1)
+    {
+        return L;
+    }
+    if ((srcType == 2 || srcType == 3) && (dstType == 2 || dstType == 3))
+    {
+        return L + 1;
+    }
+    if (srcType != -1)
+    {
+        L = L + 1;
+    }
+    if (dstType != -1)
+    {
+        L = L + 1;
+    }
+    return L;
+}
+
 void free_all(struct macros **macro_head, SymbolTable **symbolTable, BinaryLine **binary_table)
 {
     if ((*macro_head) != NULL)

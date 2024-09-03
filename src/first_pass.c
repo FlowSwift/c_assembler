@@ -567,28 +567,6 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int calculate_L(int srcType, int dstType)
-{
-    int L = 1; /* at least 1, the base word */
-    if (srcType == -1 && dstType == -1)
-    {
-        return L;
-    }
-    if ((srcType == 2 || srcType == 3) && (dstType == 2 || dstType == 3))
-    {
-        return L + 1;
-    }
-    if (srcType != -1)
-    {
-        L = L + 1;
-    }
-    if (dstType != -1)
-    {
-        L = L + 1;
-    }
-    return L;
-}
-
 int handle_data_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line, int *DC)
 {
     char *token = NULL;

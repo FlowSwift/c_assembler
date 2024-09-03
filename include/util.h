@@ -16,6 +16,8 @@ int count_occurrences(const char *str, char ch);
 char *strdup1(char *src_string);
 int is_valid_string(char *str);
 char *trim_whitespace(char *str);
+/*calculates L by miun types of Operands*/
+int calculate_L(int srcType, int dstType);
 void free_all(struct macros **macro_head, SymbolTable **symbolTable, BinaryLine **binary_table);
 
 #endif
