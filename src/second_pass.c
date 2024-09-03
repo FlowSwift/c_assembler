@@ -161,7 +161,7 @@ int create_ext_file(char *file_name, SymbolTable *symbolTable, BinaryLine **bina
                 {
                     if (ext_file == NULL)
                     {
-                        ext_file_name = add_file_extension(file_name, ".ent");
+                        ext_file_name = add_file_extension(file_name, ".ext");
                         ext_file = fopen(ext_file_name, "w");
                         free(ext_file_name);
                         if (ext_file == NULL)
