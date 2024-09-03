@@ -29,7 +29,6 @@ SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name)
 int is_valid_symbol(struct macros *macro_head, char *label)
 {
     int i = 1;
-    int j = 0;
     ErrorCode error_flag = 0; /*assume success*/
     if (strlen(label) > MAX_LABEL_LEN)
     {

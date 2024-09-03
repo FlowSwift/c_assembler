@@ -19,8 +19,6 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     struct BinaryLine *lines = malloc_BinaryLine(line, *IC); /* the head of the 1-3 words */
     struct BinaryLine *current = lines;                      /* current word */
     int disable_third_word = 0;                              /* disable third word when src and dest miun are both of type 2/3 */
-    char *label = NULL;
-    char *instruction = NULL;
     /* miun types */
     int src_type = -1;
     int dest_type = -1;
