@@ -648,9 +648,8 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
     ErrorCode error_flag = 0; /*assume success*/
     stringLen = strlen(parsedLine->operands);
     memset(binaryCode, '\0', sizeof(binaryCode));
-    if (is_valid_string(parsedLine->operands) != 0)
+    if ((error_flag = is_valid_string(parsedLine->operands)) != 0)
     { /*doesnt start and end with quotation.*/
-        error_flag = ERROR_STRING_SYNTAX_NOT_VALID;
         return error_flag;
     }
     /*go through string without ""*/
