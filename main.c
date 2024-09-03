@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         IC = 0, DC = 0;
         if (pre_process(argv[file_counter], &macro_head))
         {
-            printf("Error in preprocessor, will continue to next file if available\n");
+            printf("Error in preprocessor for the following file: %s\n, will continue to next file if available\n", argv[file_counter]);
             file_counter++;
             continue;
         }
