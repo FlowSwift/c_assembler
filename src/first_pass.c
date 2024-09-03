@@ -73,7 +73,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             if (strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0)
             { /* if data*/
                 temp_memory_place = *DC;
-                error_flag = handleDataDirective(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
+                error_flag = handle_data_directive(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                              /*data was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
@@ -82,7 +82,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)
             { /* if string*/
                 temp_memory_place = *DC;
-                error_flag = handleStringDirective(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
+                error_flag = handle_string_directive(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
                 if (is_symbol && (error_flag == 0))
                 {                                                                                                                                /*string was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
@@ -90,7 +90,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             }
             else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)
             { /* if extern*/
-                error_flag = handleExternDirective(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
+                error_flag = handle_extern_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
             }
             else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0)
             { /* if entry*/
@@ -589,7 +589,7 @@ int calculate_L(int srcType, int dstType)
     return L;
 }
 
-int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line, int *DC)
+int handle_data_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line, int *DC)
 {
     char *token = NULL;
     int value = 0;
@@ -650,7 +650,7 @@ int handleDataDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bina
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line_number, int *DC)
+int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line_number, int *DC)
 {
     int stringLen = 0, i = 0;
     char binaryCode[BINARY_CODE_LEN];
@@ -688,7 +688,7 @@ int handleStringDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handleExternDirective(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
+int handle_extern_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **binary_table, struct macros *macro_head)
 {
     char *token = NULL;
     ErrorCode error_flag = 0; /* Assume success */
