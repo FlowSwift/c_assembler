@@ -23,7 +23,7 @@ AssemblyLine parseAssemblyLine(char *line)
     char *colonPos = NULL;
     /* Find the position of the colon*/
     colonPos = strchr(line, ':');
-    if (colonPos != NULL)
+    if ((colonPos != NULL) && ((colonPos + 1) == " "))
     {
         /* Extract and set the label*/
         size_t labelLen = colonPos - line;
