@@ -78,7 +78,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
         return error_flag;
     }
     temp_line = *binary_table;
-    fprintf(file, "%d %d\n", *IC, *DC);
+    fprintf(file, "   %d %d\n", *IC, *DC);
     while (temp_line != NULL)
     {
         decimal_to_octal(temp_line->binary_code, octal_code, 6);
