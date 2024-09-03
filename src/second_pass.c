@@ -10,15 +10,21 @@
 int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC)
 {
     BinaryLine *current_line = *binary_table;
+    BinaryLine *temp_line = NULL;
     SymbolNode *current_symbol = symbolTable->head;
     char octal_code[6];
     ErrorCode error_flag = ERROR_NONE;
+    FILE *file = NULL;
+    int i = 1;
+    char bin[16];
     char *ob_file_name = NULL;
-    // printf("ALL SYMBOLS:\n");
-    // while (current_symbol != NULL) {
-    //     printf("Symbol: %s\n", current_symbol->name);
-    // }
-    // printf("END OF SYMBOLS\n");
+    /*
+        printf("ALL SYMBOLS:\n");
+        while (current_symbol != NULL) {
+            printf("Symbol: %s\n", current_symbol->name);
+        }
+        printf("END OF SYMBOLS\n");
+    */
     if (validate_symbols(symbolTable))
     {
         return -1;
@@ -53,9 +59,8 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     {
         return error_flag;
     }
-    int i = 1;
-    char bin[16];
-    BinaryLine *temp_line = *binary_table;
+    i = 1;
+    temp_line = *binary_table;
     while (temp_line != NULL)
     {
         printf("Binary Line: %d\n", i);
@@ -70,7 +75,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
         temp_line = (temp_line)->next;
     }
     ob_file_name = add_file_extension(file_name, ".ob");
-    FILE *file = fopen(ob_file_name, "w");
+    file = fopen(ob_file_name, "w");
     free(ob_file_name);
     if (file == NULL)
     {

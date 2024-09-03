@@ -146,12 +146,13 @@ int calc_miun_binary(int miun)
 */
 void add_binary_lines(struct BinaryLine *line, struct BinaryLine **head)
 {
+    struct BinaryLine *current = NULL;
     if (*head == NULL)
     {
         *head = line;
         return;
     }
-    struct BinaryLine *current = *head;
+    current = *head;
     while (current->next != NULL)
     {
         current = current->next;
