@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         IC = 0, DC = 0;
         if (pre_process(argv[file_counter], &macro_head))
         {
-            printf("Error in preprocessor for the following file: %s\n, will continue to next file if available\n", argv[file_counter]);
+            printf("Error in preprocessor for the following file: %s\nWill continue to next file if available\n", argv[file_counter]);
             file_counter++;
             continue;
         }
@@ -31,11 +31,21 @@ int main(int argc, char *argv[])
         printf("FIRST PASS:\n");
         printf("FIRST PASS:\n");
         printf("FIRST PASS:\n");
-        first_pass(argv[file_counter], macro_head, symbolTable, &binary_table, &IC, &DC);
+        if (first_pass(argv[file_counter], macro_head, symbolTable, &binary_table, &IC, &DC))
+        {
+            printf("Error in first pass for the following file: %s\nWill continue to next file if available\n", argv[file_counter]);
+            file_counter++;
+            continue;
+        }
         printf("SECOND PASS:\n");
         printf("SECOND PASS:\n");
         printf("SECOND PASS:\n");
-        second_pass(argv[file_counter] ,macro_head, symbolTable, &binary_table, &IC, &DC);
+        if (second_pass(argv[file_counter] ,macro_head, symbolTable, &binary_table, &IC, &DC))
+        {
+            printf("Error in second pass for the following file: %s\nWill continue to next file if available\n", argv[file_counter]);
+            file_counter++;
+            continue;
+        }
         file_counter++;
     }
     printf("FINISHED FILES\n");
