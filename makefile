@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS= -pedantic -Wall -g
-TESTFLAGS= -pedantic -Wall -g
+CFLAGS= -pedantic -Wall -g -ansi
+TESTFLAGS= -pedantic -Wall -g -ansi
 INCDIR=./include
 INCLUDE=-I$(INCDIR)
 SRCDIR=./src
