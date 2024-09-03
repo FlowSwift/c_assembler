@@ -47,7 +47,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: Extern defined more than once on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_SYNTAX_IS_WRONG:
-            printf("Error: Symbol syntax is wrong.  %d\n", line_number);
+            printf("Error: Symbol syntax is wrong on line %d.\n", line_number);
             break;
         case ERROR_SYMBOL_TOO_LONG:
             printf("Error: Symbol syntax problem - symbol too long. on line %d\n", line_number);
@@ -59,7 +59,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: Symbol name is not allowed - is Register, on line %d\n", line_number);
             break;
         case ERROR_SYMBOL_NAME_IS_MACRO:
-            printf("Error: Symbol name is not allowed - Macro, on line %d\n", line_number);
+            printf("Error: Symbol name is not allowed - Was defined as macro, on line %d\n", line_number);
             break;
         case ERROR_WRONG_DATA_DIRECTIVE_SYNTAX:
             printf("Error: .data directive syntax is not valid: should receive only integers with comma's between, on line %d\n", line_number);
@@ -104,7 +104,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("ERROR: Integer value too small, on line %d\n", line_number);
             break;
         case ERROR_MACRO_NAME_EXISTS:
-            printf("ERROR: Macro name exists, on line %d\n", line_number);
+            printf("ERROR: a macro was already defined with this name, on line %d\n", line_number);
             break;
         case ERROR_MACRO_NAME_IS_OPCODE:
             printf("ERROR: Macro name is Opcode, on line %d\n", line_number);
@@ -135,6 +135,12 @@ void handle_error(ErrorCode error, int line_number)
             break;
         case ERROR_SYMBOL_WAS_NOT_DEFINED:
             printf("ERROR: Symbol was not defined, on line %d\n", line_number);
+            break;
+        case ERROR_INVALID_STRING_SYNTAX:
+            printf("ERROR: Invalid string syntax, on line %d\n", line_number);
+            break;
+        case ERROR_INVALID_STRING_CHAR:
+            printf("ERROR: Invalid string character, on line %d\n", line_number);
             break;
         default:
             printf("Unknown error occurred.\n");

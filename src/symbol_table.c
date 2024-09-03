@@ -121,9 +121,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         }
         new_node->name = NULL;
         new_node->next = NULL;
-        if (is_valid_symbol(macro_head, symbol_name) != 0)
+        if ((error_flag = is_valid_symbol(macro_head, symbol_name)) != 0)
         {
-            error_flag = ERROR_SYMBOL_SYNTAX_IS_WRONG; /* checks if symbol is in correct format */
             return error_flag;
         }
         new_node->name = strdup1(symbol_name);

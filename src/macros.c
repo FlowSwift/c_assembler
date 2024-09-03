@@ -40,12 +40,9 @@ struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
 struct macros *is_existing_macro(struct macros *head, char *name)
 {
     struct macros *current = head;
-    char macro_name[MAX_LINE_LENGTH];
-    strcpy(macro_name, name);
-    macro_name[strlen(macro_name) - 1] = '\0'; /* Remove newline for comparison */
     while (current != NULL)
     {
-        if (strcmp(current->name, macro_name) == 0)
+        if (strcmp(current->name, name) == 0)
         {
             return current;
         }

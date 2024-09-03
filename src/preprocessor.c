@@ -163,6 +163,12 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
+        /* 
+        char macro_name[MAX_LINE_LENGTH];
+        strcpy(macro_name, line);
+        strtok(macro_name, " \t\n");
+        strcpy(macro_name, strtok(NULL, " \t\n"));
+        */
         if ((macro = is_existing_macro((*macros_head), line)) != NULL)
         {
             write_macro(macro, processed_file);
@@ -174,7 +180,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
         {
             if ((error_flag = validate_macro_name(macr_pos, line, line_counter, (*macros_head))) == 0)
             {
-                add_macro(file, processed_file, macros_head, line);
+                add_macro(file, processed_file, macros_head, line, &line_counter);
             }
             macr_pos = NULL;
         }
@@ -212,12 +218,14 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
         return error_flag;
     }
     /* Check if the macro name does not exist */
+    printf("BEFORE: \n");
     if (is_existing_macro(head, macro_name) != NULL)
     {
         error_flag = ERROR_MACRO_NAME_EXISTS;
         handle_error(error_flag, line_number);
         return error_flag;
     }
+    printf("AFTER: \n");
     if (check_if_opcode(macro_name) != 0)
     {
         error_flag = ERROR_MACRO_NAME_IS_OPCODE;
@@ -235,19 +243,21 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
 }
 
 /* Adds a macro to the macro list */
-void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr)
+void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_number)
 {
     char macro_name[MAX_LINE_LENGTH];
     char line[MAX_LINE_LENGTH];
-    struct macros *new_macro = create_macro_node(macro_name, ptr_to_head);
+    struct macros *new_macro = NULL;
     struct lines *current_line = NULL;
     struct lines *last = NULL;
     /* get the macro name and copy to macro_name */
     strtok(macro_ptr, " \t\n");
     strcpy(macro_name, strtok(NULL, " \t\n"));
+    new_macro = create_macro_node(macro_name, ptr_to_head);
     /* Process lines until the end of the macro */
     while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
+        (*line_number)++;
         /* ADD ERROR CHECK TO MACRO_END */
         if (strstr(line, MACRO_END) != NULL)
         {
