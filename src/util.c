@@ -6,6 +6,7 @@
 #include "error_handler.h"
 #include "constant.h"
 #include "first_pass.h"
+#include "command_handler.h"
 
 /*
     Adds a file extension to the given filename.
