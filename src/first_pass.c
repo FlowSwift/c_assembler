@@ -579,7 +579,7 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     return error_flag; /* 0 -> SUCCESS*/
 }
 
-int handle_data_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line, int *DC)
+int handle_data_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, BinaryLine **directive_binary_table, int line_number, int *DC)
 {
     char *token = NULL;
     int value = 0;
@@ -626,12 +626,12 @@ int handle_data_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, Bi
         token = strtok(NULL, ",");
         if (binary_line == NULL)
         {
-            binary_line = convert_directive_to_binary_code(value, line, *DC);
+            binary_line = convert_directive_to_binary_code(value, line_number, *DC);
             head = binary_line;
         }
         else
         {
-            binary_line->next = convert_directive_to_binary_code(value, line, *DC);
+            binary_line->next = convert_directive_to_binary_code(value, line_number, *DC);
             binary_line = binary_line->next;
         }
         *DC = *DC + 1;

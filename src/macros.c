@@ -4,10 +4,6 @@
 #include "macros.h"
 #include "error_handler.h"
 
-/*
-    Creates a new macro node and adds it to the end of the linked list of macros.
-    Returns a pointer to the new macro node.
-*/
 struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
 {
     struct macros *head = (*ptr_to_head);
@@ -33,10 +29,6 @@ struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
     return new_macro;
 }
 
-/*
-    Checks if a macro with the given name exists in the linked list of macros.
-    Returns a pointer to the macro node if it exists, NULL otherwise.
-*/
 struct macros *is_existing_macro(struct macros *head, char *name)
 {
     struct macros *current = head;
@@ -51,9 +43,6 @@ struct macros *is_existing_macro(struct macros *head, char *name)
     return NULL;
 }
 
-/*
-    Frees all the macro nodes and their associated lines in the linked list.
-*/
 void free_macros(struct macros *head)
 {
     struct macros *current = head;
