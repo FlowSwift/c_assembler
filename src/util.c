@@ -167,7 +167,7 @@ char *strdup1(char *src_string)
 int is_valid_string(char *str)
 {
     /* starts and ends with "" */
-    if ((str[0] != '"') || (str[strlen(str) - 1] != '"') || (strlen(str) <= 2))
+    if ((strlen(str) < 2) || (str[0] != '"') || (str[strlen(str) - 1] != '"'))
     {
         return ERROR_INVALID_STRING_SYNTAX;
     }

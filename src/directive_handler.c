@@ -84,6 +84,7 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
         return error_flag;
     }
     /*go through string without ""*/
+
     for (i = 1; i < stringLen - 1; i++)
     {
         if (binary_line == NULL)
@@ -99,7 +100,15 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
         /* converts the ASCII value of the character to a binary string */
         *DC = *DC + 1;
     }
-    binary_line->next = convert_directive_to_binary_code(0, line_number, *DC); /* add null terminator */
+    if (binary_line == NULL)
+    {
+        binary_line = convert_directive_to_binary_code(0, line_number, *DC); /* add null terminator */
+        head = binary_line;
+    }
+    else
+    {
+        binary_line->next = convert_directive_to_binary_code(0, line_number, *DC); /* add null terminator */
+    }
     add_binary_lines(head, directive_binary_table);
     /* Null byte at the end of the string */
     /* Check if BINARY_CODE_LEN or BINARY_CODE_LEN -1 */
