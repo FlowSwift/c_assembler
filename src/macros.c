@@ -3,6 +3,7 @@
 #include <string.h>
 #include "macros.h"
 #include "error_handler.h"
+#include "constant.h"
 
 struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
 {

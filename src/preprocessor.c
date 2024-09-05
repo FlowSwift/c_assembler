@@ -8,6 +8,7 @@
 #include "util.h"
 #include "preprocessor.h"
 #include "error_handler.h"
+#include "constant.h"
 
 /*
     To do:
@@ -204,6 +205,8 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
 */
 int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macros *head)
 {
+    char *reserved_words[] = {MACRO_START, MACRO_END, ENTRY_DIRECTIVE, EXTERN_DIRECTIVE, DATA_DIRECTIVE, STRING_DIRECTIVE};
+    int i = 0;
     char macro_name[MAX_LINE_LENGTH];
     char temp[MAX_LINE_LENGTH];
     ErrorCode error_flag = 0;
@@ -218,19 +221,33 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
         return error_flag;
     }
     /* Check if the macro name does not exist */
-    printf("BEFORE: \n");
     if (is_existing_macro(head, macro_name) != NULL)
     {
         error_flag = ERROR_MACRO_NAME_EXISTS;
         handle_error(error_flag, line_number);
         return error_flag;
     }
-    printf("AFTER: \n");
     if (check_if_opcode(macro_name) != 0)
     {
         error_flag = ERROR_MACRO_NAME_IS_OPCODE;
         handle_error(error_flag, line_number);
         return error_flag;
+    }
+    if (valid_reg_name(macro_name) == 0)
+    {
+        error_flag = ERROR_MACRO_NAME_IS_REGISTER;
+        handle_error(error_flag, line_number);
+        return error_flag;
+    }
+    while ((sizeof(reserved_words) / sizeof(reserved_words[0])) > i)
+    {
+        if (strcmp(macro_name, reserved_words[i]) == 0)
+        {
+            error_flag = ERROR_MACRO_NAME_IS_RESERVED;
+            handle_error(error_flag, line_number);
+            return error_flag;
+        }
+        i++;
     }
     /* Check if the macro name was followed by another word */
     if (strtok(NULL, " \t\n") != NULL)

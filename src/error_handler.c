@@ -142,6 +142,12 @@ void handle_error(ErrorCode error, int line_number)
         case ERROR_INVALID_STRING_CHAR:
             printf("ERROR: Invalid string character, on line %d\n", line_number);
             break;
+        case ERROR_MACRO_NAME_IS_REGISTER:
+            printf("ERROR: Macro name is register, on line %d\n", line_number);
+            break;
+        case ERROR_MACRO_NAME_IS_RESERVED:
+            printf("ERROR: Macro name is reserved, on line %d\n", line_number);
+            break;
         default:
             printf("Unknown error occurred.\n");
     }
