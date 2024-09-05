@@ -10,17 +10,13 @@
 #include "util.h"
 #include "constant.h"
 
-/*
-    Receive a parsed line using AssemblyLine struct and convert an instruction to binary
-    Adds 1-3 words(in binary form) to the binary table head
-*/
 void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct BinaryLine **head, int line, int *IC)
 {
     struct BinaryLine *lines = malloc_BinaryLine(line, *IC); /* the head of the 1-3 words */
-    struct BinaryLine *current = lines;                      /* current word */
-    int disable_third_word = 0;                              /* disable third word when src and dest miun are both of type 2/3 */
-    int L;
-    /* miun types */
+    struct BinaryLine *current = lines; /* current word */
+    int disable_third_word = 0; /* disable third word when src and dest miun are both of type 2/3 */
+    int L; /*amount of words in Binary Line*/
+    /*initialize miun types */
     int src_type = -1;
     int dest_type = -1;
     if (assembly_line->srcOperand != NULL)
@@ -31,10 +27,10 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     {
         dest_type = assembly_line->destOperand->type;
     }
-    L = calculate_L(src_type, dest_type);
-    printf("L AMOUNT %d\n", L);
-    printf("IC BEFORE: %d\n", *IC);
-    printf("IC AFTER: %d\n", *IC);
+    L = calculate_L(src_type, dest_type); /*ca,cultes the number of words that will be in binary form.*/
+    printf("L AMOUNT %d\n", L); /*delete*/
+    printf("IC BEFORE: %d\n", *IC); /*delete*/
+    printf("IC AFTER: %d\n", *IC); /*delete*/
     /* Create the first word of the instruction, there is always at least 1 word */
     current->binary_code |= (1 << BITWISE_SHIFT_LEFT_A);                                 /* set A to 1 */
     current->binary_code |= ((assembly_line->opcode_code) << BITWISE_SHIFT_LEFT_OPCODE); /* set the opcode */
@@ -72,10 +68,6 @@ void convert_instruction_to_binary_code(AssemblyLine *assembly_line, struct Bina
     return;
 }
 
-/*
-    Function to form the second or third word of an instruction
-    Returns a BinaryLine struct with the binary code of the word
-*/
 BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, enum operand_type operand_type, int disable_third_word, int IC)
 {
     BinaryLine *binary_line = malloc_BinaryLine(line, IC);
@@ -88,7 +80,7 @@ BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, e
     else if (miun_type == 1)
     {
         binary_line->label = strdup1(operand); /* set the label member to the label name */
-        printf("LABEL@@@@@@@@@: %s\n", binary_line->label);
+        printf("LABEL@@@@@@@@@: %s\n", binary_line->label); /*delete*/
     }
     else if (miun_type == 2 || miun_type == 3)
     {
@@ -103,23 +95,15 @@ BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, e
     return binary_line;
 }
 
-/*
-    Function to convert a directive to binary code
-    @param value - the value of the directive (letter or number)
-    Returns a BinaryLine struct with the binary code of the directive
-*/
+
 BinaryLine *convert_directive_to_binary_code(int value, int line, int DC)
 {
     BinaryLine *binary_line = malloc_BinaryLine(line, DC);
-    binary_line->binary_code = value;
+    binary_line->binary_code = value; /*set the value, number or character in ASCII representation*/
     return binary_line;
 }
 
-/*
-    Function to calculate the miun binary code
-    @param miun - the miun type
-    Returns the number with the right bit (1) shifted to the left
-*/
+
 int calc_miun_binary(int miun)
 {
     if (miun == 0)
@@ -141,29 +125,24 @@ int calc_miun_binary(int miun)
     return -1;
 }
 
-/*
-    Function to add a linked list of binary lines to the binary table head linked list
-*/
+
 void add_binary_lines(struct BinaryLine *line, struct BinaryLine **head)
 {
     struct BinaryLine *current = NULL;
-    if (*head == NULL)
+    if (*head == NULL) /*if new Binary line*/
     {
         *head = line;
         return;
     }
     current = *head;
-    while (current->next != NULL)
+    while (current->next != NULL) /*add to previous line*/
     {
         current = current->next;
     }
     current->next = line;
 }
 
-/*
-    Function to allocate memory for a BinaryLine struct
-    Returns a BinaryLine struct
-*/
+
 struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address)
 {
     struct BinaryLine *line = NULL;
@@ -184,19 +163,18 @@ struct BinaryLine *malloc_BinaryLine(int line_number, int decimal_memory_address
 
 void convert_label_adress_to_binary_line(BinaryLine *binary_line, SymbolNode *symbol)
 {
-    if (symbol->label_type == TYPE_EXTERN)
+    if (symbol->label_type == TYPE_EXTERN) /*if label is extern than symbol is shifter to E*/
     {
         binary_line->binary_code = (1 << BITWISE_SHIFT_LEFT_E);
     }
-    else
+    else /*if label is not extern than symbol is shifter to R*/
     {
         binary_line->binary_code = (1 << BITWISE_SHIFT_LEFT_R);
         binary_line->binary_code |= ((symbol->memory_place) << BITWISE_SHIFT_LEFT_ADDRESS);
     }
 }
-/*
-    Function to free a BinaryLine struct
-*/
+
+
 void free_BinaryLine(struct BinaryLine *line)
 {
     while (line != NULL)
@@ -211,10 +189,6 @@ void free_BinaryLine(struct BinaryLine *line)
     }
 }
 
-/*
-    Function to convert a decimal number to binary
-    Modifies the str array with the binary number
-*/
 void decimal_to_binary(unsigned int num, char str[], int size)
 {
     char currentBinDigit;
@@ -234,10 +208,7 @@ void decimal_to_binary(unsigned int num, char str[], int size)
     return;
 }
 
-/*
-    Function to convert a decimal number to octal
-    Modifies the str array with the octal number
-*/
+
 void decimal_to_octal(unsigned int num, char str[], int size)
 {
     int i = size - 2;     /* set i to the index before \0 */

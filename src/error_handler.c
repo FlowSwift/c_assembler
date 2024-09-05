@@ -37,6 +37,9 @@ void handle_error(ErrorCode error, int line_number)
         case ERROR_INVALID_MACRO_DECLARATION:
             printf("Error: Invalid macro declaration on line %d\n", line_number);
             break;
+        case ERROR_PARSE_LINE_FAILED:
+            printf("Error: Parsing line failed on line %d\n", line_number);
+            break;
         case ERROR_SYMBOL_DEFINED_TWICE:
             printf("Error: Symbol defined more than once on line %d\n", line_number);
             break;

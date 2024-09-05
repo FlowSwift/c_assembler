@@ -8,10 +8,6 @@
 #include "first_pass.h"
 #include "command_handler.h"
 
-/*
-    Adds a file extension to the given filename.
-    Returns a new string with the filename and extension.
-*/
 char *add_file_extension(char *filename, char *extension)
 {
     char *new_filename = malloc(sizeof(char) * MAX_FILE_NAME);
@@ -25,10 +21,6 @@ char *add_file_extension(char *filename, char *extension)
     return new_filename;
 }
 
-/*
-    Checks if a line is empty (only contains whitespace).
-    Returns 0 if the line is empty, 1 otherwise.
-*/
 int is_empty_line(char *line)
 {
     while (*line != '\0')
@@ -42,7 +34,6 @@ int is_empty_line(char *line)
     return 0;
 }
 
-/* Checks if a line is a commented line (starts with ';') */
 int is_commented_line(char *line)
 {
     if (*line == ';')
@@ -52,10 +43,6 @@ int is_commented_line(char *line)
     return 1;
 }
 
-/*
-    Validates if the operand is a valid integer
-    Returns 0 if the operand is a valid integer, error code otherwise.
-*/
 int is_valid_integer(char *operand)
 {
     ErrorCode error_flag = 0; /*assume success*/
@@ -89,10 +76,6 @@ int is_valid_integer(char *operand)
     return error_flag; /* 0 - > Success. Operand is a valid integer */
 }
 
-/*
-    Validates if the value is a valid register name (r0 to r7).
-    Returns 0 if the value is a valid register name, 1 otherwise.
-*/
 int valid_reg_name(char *value)
 {
     if (strlen(value) == 2 && value[0] == 'r' && value[1] >= '0' && value[1] <= '7')
@@ -102,10 +85,6 @@ int valid_reg_name(char *value)
     return ERROR_WRONG_OPERAND_SYNTAX;
 }
 
-/*
-    Check if a string is a opcode.
-    Returns 1 if the string is an opcode, 0 otherwise.
-*/
 int check_if_opcode(char *name)
 {
     int j = 0;
@@ -119,10 +98,6 @@ int check_if_opcode(char *name)
     return 0; /*not opcode*/
 }
 
-/*
-    Counts the occurrences of a character in a string.
-    Returns the number of occurrences.
-*/
 int count_occurrences(const char *str, char ch)
 {
     int count = 0;
@@ -137,9 +112,7 @@ int count_occurrences(const char *str, char ch)
     return count;
 }
 
-/*
-    Duplicates a string to a new allocated memory location.
-*/
+
 char *strdup1(char *src_string)
 {
     size_t len;
@@ -160,10 +133,6 @@ char *strdup1(char *src_string)
     return duplicate_string;
 }
 
-/*
-    Checks if a string is valid (starts and ends with double quotes).
-    Returns 0 if the string is valid, 1 otherwise.
-*/
 int is_valid_string(char *str)
 {
     /* starts and ends with "" */
@@ -176,7 +145,6 @@ int is_valid_string(char *str)
 
 char *trim_whitespace(char *str)
 {
-    /*function to move past whitespace values*/
     char *end = NULL;
     end = str + strlen(str) - 1;
     while (isspace((unsigned char)*str))

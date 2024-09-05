@@ -1,6 +1,34 @@
 #ifndef __SYMBOL_TABLE_H__
 #define __SYMBOL_TABLE_H__
 
+/**
+ * @enum SymbolType
+ * @brief An enumeration representing the different types of symbols in assembly language.
+ *
+ * This enum is used to categorize symbols (labels) in the symbol table. It defines the role or type
+ * of the symbol within the assembly program, such as whether the symbol is an instruction, data,
+ * or a special directive like `.entry` or `.extern`.
+ *
+ * @var TYPE_LABEL_DEF
+ * Represents a label definition.
+ *
+ * @var TYPE_INSTRUCTION
+ * Represents an instruction symbol.
+ *
+ * @var TYPE_DATA
+ * Represents a data symbol. 
+ *
+ * @var TYPE_STRING
+ * Represents a string symbol.
+ *
+ * @var TYPE_ENTRY
+ * Represents an entry symbol. This type is used for symbols that are marked with the `.entry` directive,
+ * indicating that they should be included in the entry table.
+ *
+ * @var TYPE_EXTERN
+ * Represents an external symbol. This type is used for symbols that are marked with the `.extern` directive,
+ * indicating that they are defined outside of the current assembly file.
+ */
 typedef enum
 {
     TYPE_LABEL_DEF = 0,
@@ -16,7 +44,7 @@ typedef enum
 /**
  * @struct SymbolNode
  * @brief A structure representing a symbol (label) in the assembly language.
- * Each symbol node stores information about a label such as its name, type (instruction, data, or string),
+ * Each symbol node stores information about a label - name, type (instruction, data, or string),
  * label type (label definition, entry, or extern), and its memory address.
  *
  * @var SymbolNode::name
@@ -72,7 +100,7 @@ typedef struct SymbolTable
 SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name);
 
 /**
- * @brief Checks if a symbol name is valid in format,
+ * @brief Checks if a symbol name is valid in allowed format.
  * This function checks if the given symbol name is valid by this rules for symbol names:
  * - name length under 31 characters
  * - valid characters, only alphabetic characters allowed

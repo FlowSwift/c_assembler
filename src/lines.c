@@ -4,14 +4,11 @@
 #include "lines.h"
 #include "error_handler.h"
 
-/*
-    Allocates memory for a new line node and initializes it with the given line content.
-    Returns a pointer to the new line node.
-*/
+
 struct lines *malloc_line(char *line)
 {
     struct lines *new_line = malloc(sizeof(struct lines));
-    if (new_line == NULL)
+    if (new_line == NULL) /*if allocation failed*/
     {
         handle_error(ERROR_MEMORY_ALLOCATION_FAILED, 0);
         return NULL;
@@ -21,7 +18,6 @@ struct lines *malloc_line(char *line)
     return new_line;
 }
 
-/* Frees all the line nodes in the linked list */
 void free_lines(struct lines *head)
 {
     struct lines *current = head;

@@ -7,7 +7,9 @@
 
 /**
  * @brief Performs the first pass on the assembly file.
- * This function foes through each line of the assembly code, parses it and converts it into binary.
+ * The function foes through each line of the assembly code, parses it into AssemblyLine structure , by parseAssemblyLine function in line)parser.c.
+ * If the line is valid it converts it into binary, by convert_instruction_to_binary_code function in binary_conversion.c.
+ * Depends on the type of the Assembly line(directive or command) the function calls the relevent functions to continue parsing and validation. 
  * The function updates the symbol table with the symbols defined in the file.
  *
  * @param file_name The name of the assembly file to process.
