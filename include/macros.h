@@ -9,9 +9,9 @@
  * @struct macros
  * @brief A structure representing a macro definition in the assembly language.
  *
- * This structure is used to store the name and associated lines of a macro, as well as a pointer to the next macro in a linked list.
+ * This structure stores the name and associated lines of a macro, as well as a pointer to the next macro in the linked list.
  * @var macros::name
- * The name of the macro, stored as a character array with a maximum length defined by `MAX_LINE_LENGTH`.
+ * The name of the macro, is a character array with a maximum length defined by `MAX_LINE_LENGTH`.
  *
  * @var macros::lines
  * A pointer to the first node in a linked list of lines associated with the macro. Each node contains a line of text that defines the macro's content.
@@ -36,7 +36,8 @@ struct macros
 struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head);
 
 /**
- * @brief Checks if a macro with the same given name exists in the linked list of macros.
+ * @brief Checks if a macro with the same given name already exists in the linked list of macros.
+ * 
  * @param head A pointer to the head of the macros linked list.
  * @param name The name of the macro to search for.
  *

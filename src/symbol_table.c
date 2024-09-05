@@ -122,7 +122,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         }
         new_node->name = NULL;
         new_node->next = NULL;
-        if ((error_flag = is_valid_symbol(macro_head, symbol_name)) != 0)
+        error_flag = is_valid_symbol(macro_head, symbol_name);
+        if (error_flag != 0)
         {
             return error_flag;
         }

@@ -25,8 +25,9 @@
 int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, BinaryLine **binary_table, int *IC, int *DC);
 
 /**
- * @brief Validates the symbols in the symbol table.
- * Function ensures that all entry symbols have been defined and that extern symbols are not defined.
+ * @brief Validates all the symbols in the symbol table.
+ * Ensures that all entry symbols have been defined and that extern symbols are not defined.
+ * The function will print if an error occured for every not valid symbol.
  *
  * @param symbolTable A pointer to the symbol table.
  *

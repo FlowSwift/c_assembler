@@ -26,17 +26,17 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
         }
         printf("END OF SYMBOLS\n");
     */
-    if (validate_symbols(symbolTable)!=0) /*Symbols are not valid*/
+    if (validate_symbols(symbolTable) != 0) /*if Symbols are not valid, will handle every symbol and error in function*/
     {
-        return -1;
+        return ERROR_SYMBOLS_NOT_VALID;
     }
-    if (create_ent_file(file_name, symbolTable))
+    if (create_ent_file(file_name, symbolTable) != 0) /*if failed*/
     {
-        return -1;
+        return ERROR_FAILED_ENT_FILE;
     }
-    if (create_ext_file(file_name, symbolTable, binary_table))
+    if (create_ext_file(file_name, symbolTable, binary_table) != 0) /*if failed*/
     {
-        return -1;
+        return ERROR_FAILED_EXT_FILE;
     }
     /*now that all labels are valid, change every label to it's Binary form*/
     while (current_line != NULL)
@@ -50,7 +50,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
             }
             else
             {
-                printf("Label: -%s-\n", current_line->label);
+                printf("Label: -%s-\n", current_line->label); /*delete*/
                 error_flag = ERROR_SYMBOL_WAS_NOT_DEFINED;
                 handle_error(error_flag, current_line->original_line_number);
             }
@@ -91,7 +91,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     while (temp_line != NULL)
     {
         decimal_to_octal(temp_line->binary_code, octal_code, 6);
-        fprintf(file, "%04d %s\n", temp_line->decimal_memory_address, octal_code);
+        fprintf(file, "%04d %s\n", temp_line->decimal_memory_address, octal_code); 
         temp_line = temp_line->next;
     }
     fclose(file);
@@ -101,7 +101,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
 int validate_symbols(SymbolTable *symbolTable)
 {
     SymbolNode *current_symbol = symbolTable->head;
-    ErrorCode error_flag = ERROR_NONE;
+    ErrorCode error_flag = 0; /*Assume success*/
     while (current_symbol != NULL)
     {
         if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == 0))

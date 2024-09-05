@@ -4,7 +4,7 @@
 #include "macros.h"
 
 /**
- * @brief Pre-processing function that handles the file for next functions.
+ * @brief Pre-process function that initializes and handles the file for next functions.
  * This function performs the initial processing of the assembly file, including stripping whitespace,
  * processing macros, and generating a temporary processed file.
  *
@@ -39,8 +39,7 @@ int strip_file(char *filename, char *temp_file_name);
 void strip_line(char *dest, char *source);
 
 /**
- * @brief Processes macros in the file.
- * This function scans the file for macros, expands any existing macros, and writes the
+ * @brief Processes macros in the file, scans the file for macros, expands any existing macros, and writes the
  * processed content to a temporary file.
  *
  * @param filename The name of the file being processed.
@@ -52,10 +51,9 @@ void strip_line(char *dest, char *source);
 int process_macros(char *filename, char *temp_file_name, struct macros **macros_head);
 
 /**
- * @brief Validates if the given macro name is legal.
- *
+ * @brief Validates if the given macro name is valid.
  * This function checks if the macro name in the line is valid, ensuring it doesn't conflict with
- * existing macro names or reserved keywords.
+ * existing macro names or reserved keywords (.data, .string, register name, macr, endmacr).
  *
  * @param macr_ptr A pointer to the macro name.
  * @param line The line where the macro is declared.

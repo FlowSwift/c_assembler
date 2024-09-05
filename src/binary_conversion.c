@@ -99,7 +99,7 @@ BinaryLine *convert_word(AssemblyLine *assembly_line, int line, int miun_type, e
 BinaryLine *convert_directive_to_binary_code(int value, int line, int DC)
 {
     BinaryLine *binary_line = malloc_BinaryLine(line, DC);
-    binary_line->binary_code = value; /*set the value, number or character in ASCII representation*/
+    binary_line->binary_code = value; /*set the value, number or character*/
     return binary_line;
 }
 
@@ -122,7 +122,7 @@ int calc_miun_binary(int miun)
     {
         return (1 << 3);
     }
-    return -1;
+    return -1; /*address type is not one the allowed.*/
 }
 
 

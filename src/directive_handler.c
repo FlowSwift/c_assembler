@@ -28,7 +28,8 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
     /*go through string without ""*/
     for (i = 1; i < stringLen - 1; i++)
     {
-        if (binary_line == NULL)
+        /* converts the ASCII value of the character to a binary string */
+        if (binary_line == NULL) /*if line is empty*/
         {
             binary_line = convert_directive_to_binary_code(parsedLine->operands[i], line_number, *DC);
             head = binary_line;
@@ -38,7 +39,6 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
             binary_line->next = convert_directive_to_binary_code(parsedLine->operands[i], line_number, *DC);
             binary_line = binary_line->next;
         }
-        /* converts the ASCII value of the character to a binary string */
         *DC = *DC + 1;
     }
     if (binary_line == NULL)

@@ -9,7 +9,7 @@ struct macros *create_macro_node(char *macro_name, struct macros **ptr_to_head)
 {
     struct macros *head = (*ptr_to_head);
     struct macros *new_macro = malloc(sizeof(struct macros));
-    if (new_macro == NULL)
+    if (new_macro == NULL) /*if allocation failed.*/
     {
         handle_error(ERROR_MEMORY_ALLOCATION_FAILED, 0);
         return NULL;
@@ -37,7 +37,7 @@ struct macros *is_existing_macro(struct macros *head, char *name)
     {
         if (strcmp(current->name, name) == 0)
         {
-            return current;
+            return current; /*returns a pointer to the existing macro.*/
         }
         current = current->next;
     }
