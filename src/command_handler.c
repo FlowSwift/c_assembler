@@ -169,6 +169,11 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     }
     parsedLine->srcOperand->value = NULL;
     parsedLine->destOperand->value = NULL;
+    if ((num_operands_allowed > 0) && (parsedLine->operands == NULL))
+    {
+        error_flag = ERROR_NOT_ENOUGH_OPERANDS;
+        return error_flag;
+    }
     /*goes through Operands in parsed line and sets Operands to their place in the Assembly line structure.*/
     while ((*ptr_in_line != '\0') && (operandCount < num_operands_allowed))
     {
@@ -238,6 +243,11 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             return error_flag;
         }
         ptr_in_line++;
+    }
+    if (num_operands_allowed > operandCount)
+    {
+        error_flag = ERROR_NOT_ENOUGH_OPERANDS;
+        return error_flag;
     }
     if ((num_operands_allowed != operandCount) || (operandCount == 0 && parsedLine->operands != NULL))
     {

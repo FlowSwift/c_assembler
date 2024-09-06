@@ -15,6 +15,7 @@ SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name)
 {
     SymbolNode *current = NULL;
     current = table->head;
+    printf("Symbol name ADD: %s\n", symbol_name);
     while (current != NULL)
     {
         if ((strcmp(current->name, symbol_name) == 0))
@@ -75,6 +76,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
 {
     SymbolNode *new_node = NULL, *current = table->head;
     ErrorCode error_flag = 0; /*Assume success*/
+    printf("Adding symbol to table\n");
+    printf("Symbol name: %s\n", symbol_name);
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL) /*symbol found*/
     {

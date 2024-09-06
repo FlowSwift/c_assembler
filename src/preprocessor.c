@@ -69,6 +69,10 @@ int strip_file(char *filename, char *stripped_file_name)
         int length;
         char c;
         line_counter++;
+        if (is_empty_line(line) == 0)
+        {
+            continue;
+        }
         if (line[(length = strlen(line)) - 1] != '\n' && length > MAX_LINE_LENGTH - 2)
         {
             while (((c = fgetc(file)) != '\n') && (c != EOF));

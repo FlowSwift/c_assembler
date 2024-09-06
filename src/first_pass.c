@@ -110,6 +110,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         {
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, &instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
+            printf("Error flaggggggggg: %d\n", error_flag);
             if (is_symbol && (error_flag == 0))                                                                                /*if handeling was succesful and a label is defined*/
             {
                 /* has label and is in regular instruction format.*/
