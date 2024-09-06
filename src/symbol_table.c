@@ -102,7 +102,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         }
         else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_EXTERN)) /*if entry and extern*/
         { 
-            error_flag = ERROR_SYMBOL_ALREADY_EXTERN;
+            error_flag = ERROR_SYMBOL_ALREADY_ENTRY;
             return error_flag;
         }
         else /*not one of allowed symbols*/
