@@ -13,7 +13,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: File not found.\n");
             break;
         case ERROR_CANT_WRITE_FILE:
-            printf("Error: Permission denied.\n");
+            printf("Error: File write permission denied.\n");
             break;
         case ERROR_MEMORY_ALLOCATION_FAILED:
             printf("Error: Memory allocation failed.\n");
