@@ -75,14 +75,10 @@ typedef enum
  *
  * @var Error::code
  * The error code representing the type of error.
- *
- * @var Error::message
- * A human-readable error message describing the error.
  */
 typedef struct Error
 {
     ErrorCode code;
-    char *message; /*delete?*/
 } Error;
 
 
