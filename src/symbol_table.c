@@ -51,13 +51,13 @@ int is_valid_symbol(struct macros *macro_head, char *label)
         }
     }
     /*check if label is opcode -> not allowed*/
-    if (check_if_opcode(label) != 0)
+    if (check_if_opcode(label) == 1)
     {
         error_flag = ERROR_SYMBOL_NAME_IS_OPCODE;
         return error_flag;
     }
     /*check if label is register name -> not allowed*/
-    if (valid_reg_name(label) != 0)
+    if (valid_reg_name(label) == 0)
     {
         error_flag = ERROR_SYMBOL_NAME_IS_REGISTER;
         return error_flag;
