@@ -125,8 +125,10 @@ void freeOperand(Operand *operand)
 {
     if (operand != NULL)
     {
-        free(operand->value);
+        if (operand->value != NULL)
+        {
+            free(operand->value);
+        }
         free(operand);
-        operand = NULL;
     }
 }
