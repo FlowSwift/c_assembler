@@ -86,7 +86,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("Error: .extern was not defined, on line %d\n", line_number);
             break;
         case ERROR_ENTRY_WAS_NOT_DEFINED:
-            printf("Error: .entry was not defined, on line %d\n", line_number);
+            printf("Error: .entry was not defined\n");
             break;
         case ERROR_INSTRUCTION_NOT_VALID:
             printf("ERROR: Instruction is not valid, on line %d\n", line_number);
