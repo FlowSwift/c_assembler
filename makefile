@@ -7,8 +7,8 @@ SRCDIR=./src
 OBJDIR=./obj
 BINDIR=./bin
 
-prod: main.c lines.o macros.o preprocessor.o util.o first_pass.o command_handler.o directive_handler.o line_parser.o error_handler.o symbol_table.o binary_conversion.o second_pass.o $(BINDIR) $(OBJDIR)
-	$(CC) $(CFLAGS) $(INCLUDE) main.c $(OBJDIR)/lines.o $(OBJDIR)/macros.o $(OBJDIR)/preprocessor.o $(OBJDIR)/util.o $(OBJDIR)/first_pass.o $(OBJDIR)/directive_handler.o $(OBJDIR)/command_handler.o $(OBJDIR)/line_parser.o $(OBJDIR)/error_handler.o $(OBJDIR)/symbol_table.o $(OBJDIR)/binary_conversion.o $(OBJDIR)/second_pass.o -o $(BINDIR)/test.test
+prod: assembler.c lines.o macros.o preprocessor.o util.o first_pass.o command_handler.o directive_handler.o line_parser.o error_handler.o symbol_table.o binary_conversion.o second_pass.o $(BINDIR) $(OBJDIR)
+	$(CC) $(CFLAGS) $(INCLUDE) assembler.c $(OBJDIR)/lines.o $(OBJDIR)/macros.o $(OBJDIR)/preprocessor.o $(OBJDIR)/util.o $(OBJDIR)/first_pass.o $(OBJDIR)/directive_handler.o $(OBJDIR)/command_handler.o $(OBJDIR)/line_parser.o $(OBJDIR)/error_handler.o $(OBJDIR)/symbol_table.o $(OBJDIR)/binary_conversion.o $(OBJDIR)/second_pass.o -o $(BINDIR)/test.test
 
 lines.o: $(SRCDIR)/lines.c $(INCDIR)/lines.h $(OBJDIR)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $(SRCDIR)/lines.c -o $(OBJDIR)/lines.o

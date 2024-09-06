@@ -10,10 +10,10 @@
  * @struct Opcode
  * @brief A structure representing an opcode in assembly language.
  *
- * This structure holds information about an opcode, including its name, the opcode code, and the number of operands it accepts.
+ * This structure holds information about an opcode, including its name, opcode code and the number of operands it accepts.
  *
  * @var Opcode::code
- * The numeric code associated with the opcode (given by the array of OPCODES).
+ * The numeric code associated with the opcode (given in the array of OPCODES).
  *
  * @var Opcode::name
  * The name of the opcode ("mov", "add" ect.).
@@ -44,15 +44,15 @@ typedef enum
     r7
 } Register;
 
-/*using OPCODES table to format all aloowed opcodes and there name, number and num of operands allowed.*/
+/*using OPCODES table to format all allowed opcodes and there name, number and num of operands allowed.*/
 extern Opcode OPCODES[];
 
 /**
- * @brief Checks the addressing type(miun) of operand and updates it in its structure.
+ * @brief Function checks the addressing type(miun) of operand and updates it in its structure.
  * The function determines the type of addressing based on its format and based on the type updates the value. 
  *
  * @param operand A pointer to the operand to update.
- * @param macro_head A pointer to the head of the macro list for validation(needed to check if label name is valid).
+ * @param macro_head A pointer to the head of the macro list for validation(needed to check if operand is label and it's valid).
  *
  * @return 0 on success, or an error code on failure.
  */
@@ -81,6 +81,7 @@ int get_opcode_code(char *instruction);
  * @brief Parses operands for the given assembly line of instruction type.
  * Validates the format of the line - the instruction is one of the defined opcodes, checks the type of operands,
  * and ensures that the number of operands is correct for the instruction.
+ * Sets Operands in SrcOperand and DestOperand in AssemblyLine structure.
  *
  * @param parsedLine A pointer to the parsed assembly line structure.
  * @param macro_head A pointer to the head of the macro list for validation(needed to check if label name is valid).
@@ -102,7 +103,7 @@ int check_valid_operands(AssemblyLine *parsedLine);
 
 /**
  * @brief Handles the processing of an instruction, parsing into Operands, validates the format of the instruction
- * inserts it into the binary table, and adds defined label to the symbol table.
+ * inserts it into the binary table.
  * instruction structure is: <label:-optional> <OPCODE> <operand :optional>, <operand :optional>
  *
  * @param parsedLine A pointer to the parsed assembly line structure.

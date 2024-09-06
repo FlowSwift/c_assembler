@@ -28,8 +28,8 @@ Opcode OPCODES[] = {
 
 int check_type(Operand *operand, struct macros *macro_head)
 {
-    ErrorCode error_flag = 0; /*assume success*/
-    int num = 0;
+    ErrorCode error_flag = 0; /*Assume success*/
+    int num = 0; /*number if addressing type is immediate (0)*/
     int len = strlen(operand->value) - 1;
     if ((operand->value[0] == '\0'))
     {
@@ -38,7 +38,7 @@ int check_type(Operand *operand, struct macros *macro_head)
     }
     switch (operand->value[0])
     {
-    case '#':
+    case '#': /*Immediate addressing type(0).*/
         /*Remove '#' and check if the remaining part is a valid integer*/
         memmove(operand->value, operand->value + 1, len);
         operand->value[len] = '\0';
@@ -58,12 +58,13 @@ int check_type(Operand *operand, struct macros *macro_head)
             }
             operand->type = 0;
         }
-        else
+        else /*value wasn't integer.*/
         {
             return error_flag;
         }
         break;
-    case '*':
+    case '*': /*indirect register addressing type(2).*/
+        /*Remove '*' and check if the remaining part is a valid register*/
         memmove(operand->value, operand->value + 1, len);
         operand->value[len] = '\0';
         error_flag = valid_reg_name(operand->value);
@@ -76,8 +77,8 @@ int check_type(Operand *operand, struct macros *macro_head)
         {
             return error_flag;
         }
-    case 'r':
-        error_flag = valid_reg_name(operand->value);
+    case 'r': /*direct register addressing type(3).*/
+        error_flag = valid_reg_name(operand->value); 
         if (error_flag == 0)
         {
             operand->type = 3;
@@ -87,14 +88,14 @@ int check_type(Operand *operand, struct macros *macro_head)
         {
             return error_flag;
         }
-    default:
+    default: /*if isn't one of 0,2,3 addressing type than assume it is direct and the operand is symbol.*/
         error_flag = is_valid_symbol(macro_head, operand->value);
         if (error_flag == 0)
         {
-            operand->type = 1; /*Default is it's label, will be checked in 2 pass */
+            operand->type = 1; /*Default is label but it's existence will be checked in second pass */
             break;
         }
-        else
+        else /*not valid symbol name*/
         {
             return error_flag;
         }
@@ -104,7 +105,6 @@ int check_type(Operand *operand, struct macros *macro_head)
 
 int get_opcode_operands(char *instruction)
 {
-    /* gets allowed operands of insturction*/
     int i = 0;
     for (i = 0; i < OP_CODE_ARRAY_SIZE; i++)
     {
@@ -118,7 +118,6 @@ int get_opcode_operands(char *instruction)
 
 int get_opcode_code(char *instruction)
 {
-    /* gets opcode number of insturction*/
     int i = 0;
     for (i = 0; i < OP_CODE_ARRAY_SIZE; i++)
     {
@@ -137,25 +136,28 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     char *operandValue = NULL;
     Operand *temp_srcOperand = NULL;
     Operand *temp_destOperand = NULL;
-    ErrorCode error_flag = 0; /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
+    /*helper variables:*/
     int opcode_code = -1, operandCount = 0, num_operands_allowed = 0, operandLen = 0;
     ptr_in_line = parsedLine->operands;
-    /*helper variables:*/
-    opcode_code = get_opcode_code(parsedLine->instruction); /*get the value of the opcode*/
+
+    opcode_code = get_opcode_code(parsedLine->instruction); /*gets the value of the opcode*/
     parsedLine->opcode_code = opcode_code;
-    num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*got how many operands allowed for Opcode*/
+    num_operands_allowed = get_opcode_operands(parsedLine->instruction); /*gets how many operands allowed for Opcode*/
+
     if (num_operands_allowed == -1)
     { /*insturction not found*/
         error_flag = ERROR_INSTRUCTION_NOT_VALID;
         return error_flag;
     }
-    printf("num_operands_allowed: %d\n", num_operands_allowed);
+    printf("num_operands_allowed: %d\n", num_operands_allowed); /*delete*/
     if (num_operands_allowed == 0)
     { /*no operands allowed*/
         parsedLine->srcOperand = NULL;
         parsedLine->destOperand = NULL;
         return error_flag;
     }
+    /*if one or more operands allowed*/
     temp_srcOperand = (Operand *)malloc(sizeof(Operand));
     temp_destOperand = (Operand *)malloc(sizeof(Operand));
     if ((temp_srcOperand == NULL) || (temp_destOperand == NULL))
@@ -165,11 +167,12 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     }
     temp_srcOperand->value = NULL;
     temp_destOperand->value = NULL;
+    /*goes through Operands in parsed line and sets Operands to their place in the Assembly line structure.*/
     while ((*ptr_in_line != '\0') && (operandCount < num_operands_allowed))
     {
         while ((*ptr_in_line != '\0') && (isspace(*ptr_in_line)))
             ptr_in_line++; /* Skip whitespace */
-        if (*ptr_in_line == ',' && operandCount == 0)
+        if (*ptr_in_line == ',' && operandCount == 0) /*if another operand is found but should be 0.*/
         {
             error_flag = ERROR_WRONG_OPERAND_SYNTAX;
             freeOperand(temp_srcOperand);
@@ -195,7 +198,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         operandValue[operandLen] = '\0';
         operandValue = trim_whitespace(operandValue); /*already adds operandValue[operandLen] = '\0';*/
         if (num_operands_allowed == 2 && operandCount == 0)
-        { /*while reading first operand where should be two -> assign to srcOperand*/
+        { /*if while reading first operand where should be two -> assign to srcOperand*/
             temp_srcOperand->value = operandValue;
             error_flag = check_type(temp_srcOperand, macro_head);
             if (error_flag != 0)
@@ -206,7 +209,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             }
         }
         else if (num_operands_allowed == 1 || (num_operands_allowed == 2 && operandCount == 1))
-        { /*if only one operand allowed or if two and this is second opperand -> assign to destOperand .*/
+        { /*if only one operand allowed or if two and this is second operand -> assign to destOperand .*/
             temp_destOperand->value = operandValue;
             error_flag = check_type(temp_destOperand, macro_head);
             if (error_flag != 0)
@@ -258,7 +261,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         temp_srcOperand->value = '\0';
         parsedLine->destOperand = temp_destOperand;
     }
-    if (num_operands_allowed == 0 && parsedLine->operands == NULL)
+    if (num_operands_allowed == 0 && parsedLine->operands == NULL) /*if noe operands found, set type to -1 and value to 0.*/
     {
         temp_srcOperand->type = -1;
         temp_srcOperand->value = '\0';
@@ -266,13 +269,14 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         temp_destOperand->value = '\0';
     }
     else
-    {
+    {/*set Operands in assembly line.*/
         parsedLine->srcOperand = temp_srcOperand;
         parsedLine->destOperand = temp_destOperand;
     }
-    error_flag = check_valid_operands(parsedLine);
-    printf("ERROR FLAG %d\n", error_flag);
-    if (error_flag != 0)
+
+    error_flag = check_valid_operands(parsedLine); /*checks if operand types are allowed for the command.*/
+    printf("ERROR FLAG %d\n", error_flag); /*delete*/
+    if (error_flag != 0) /*if program failed, free temp operands.*/
     {
         freeOperand(temp_srcOperand);
         freeOperand(temp_destOperand);
@@ -286,10 +290,10 @@ int check_valid_operands(AssemblyLine *parsedLine)
     int type_miun_src = parsedLine->srcOperand->type;
     int type_miun_dest = parsedLine->destOperand->type;
     int opcode_code = parsedLine->opcode_code;
-    ErrorCode error_flag = 0; /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     switch (opcode_code)
     {
-    /* -1 if instruction is not one of 16 allowed. */
+    /* -1 if instruction is not found in 16 allowed OPCODES. */
     case -1:
         error_flag = ERROR_INSTRUCTION_NOT_VALID; /*cannot find insturction*/
         break;
@@ -357,13 +361,14 @@ int check_valid_operands(AssemblyLine *parsedLine)
 
 int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, BinaryLine **instruction_binary_table, int *IC, struct macros *macro_head, int line)
 {
-    ErrorCode error_flag = 0;                            /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if (error_flag != 0)
     {
         return error_flag;
     }
-    printf("CHECK %s\n", parsedLine->instruction);
-    convert_instruction_to_binary_code(parsedLine, instruction_binary_table, line, IC);
+    printf("CHECK %s\n", parsedLine->instruction); /*delete*/
+    /*converts to binary a valid parsed line.*/
+    convert_instruction_to_binary_code(parsedLine, instruction_binary_table, line, IC); 
     return error_flag; /* 0 -> SUCCESS*/
 }

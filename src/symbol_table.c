@@ -29,13 +29,13 @@ SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name)
 int is_valid_symbol(struct macros *macro_head, char *label)
 {
     int i = 1;
-    ErrorCode error_flag = 0; /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     if (strlen(label) > MAX_LABEL_LEN)
     {
         error_flag = ERROR_SYMBOL_TOO_LONG;
         return ERROR_SYMBOL_TOO_LONG;
     }
-    /* Check if the first character is an alphabetic letter */
+    /* Check if the first character is an alphabetic character */
     if (!isalpha(label[0]))
     {
         error_flag = ERROR_SYMBOL_SYNTAX_IS_WRONG;
@@ -50,19 +50,19 @@ int is_valid_symbol(struct macros *macro_head, char *label)
             return error_flag;
         }
     }
-    /*check if label is opcode*/
+    /*check if label is opcode -> not allowed*/
     if (check_if_opcode(label) != 0)
     {
         error_flag = ERROR_SYMBOL_NAME_IS_OPCODE;
         return error_flag;
     }
-    /*check if label is register name*/
-    if (!valid_reg_name(label))
+    /*check if label is register name -> not allowed*/
+    if (valid_reg_name(label) != 0)
     {
         error_flag = ERROR_SYMBOL_NAME_IS_REGISTER;
         return error_flag;
     }
-    /*check if label is macro name*/
+    /*check if label is macro name -> not allowed*/
     if (is_existing_macro(macro_head, label) != NULL)
     { /*found label in macro table*/
         error_flag = ERROR_SYMBOL_NAME_IS_MACRO;
@@ -74,45 +74,46 @@ int is_valid_symbol(struct macros *macro_head, char *label)
 int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int label_type, int memory_place, struct macros *macro_head)
 {
     SymbolNode *new_node = NULL, *current = table->head;
-    ErrorCode error_flag = 0; /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     new_node = is_symbol_in_table(table, symbol_name);
-    if (new_node != NULL)
+    if (new_node != NULL) /*symbol found*/
     {
-        if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != 0))
+        /*Same symbol only allowed when entry and definition are in the file for the same symbol. else - ERROR*/
+        if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != 0)) /*if defined twice*/
         {
             error_flag = ERROR_SYMBOL_DEFINED_TWICE;
             return error_flag;
         }
-        else if ((label_type == TYPE_ENTRY) && (new_node->label_type == TYPE_LABEL_DEF))
+        else if ((label_type == TYPE_ENTRY) && (new_node->label_type == TYPE_LABEL_DEF)) /*if was defined and now added as entry*/
         {
-            new_node->label_type = label_type;
+            new_node->label_type = label_type; /*change type to entry*/
             return error_flag;
         }
-        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_LABEL_DEF))
+        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_LABEL_DEF)) /*if was entry and now added as definition*/
         {
-            new_node->memory_place = memory_place;
+            new_node->memory_place = memory_place; /*add memory place of definition*/
             new_node->type = type;
             return error_flag;
         }
-        else if ((new_node->label_type == TYPE_EXTERN) && (label_type == TYPE_ENTRY))
+        else if ((new_node->label_type == TYPE_EXTERN) && (label_type == TYPE_ENTRY)) /*if entry and extern*/
         {
             error_flag = ERROR_SYMBOL_ALREADY_EXTERN;
             return error_flag;
         }
-        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_EXTERN))
-        {
+        else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_EXTERN)) /*if entry and extern*/
+        { 
             error_flag = ERROR_SYMBOL_ALREADY_EXTERN;
             return error_flag;
         }
-        else
+        else /*not one of allowed symbols*/
         {
             error_flag = ERROR_SYMBOL_DEF_ERROR;
             return error_flag; /*Symbol already exists*/
         }
     }
-    else
+    else /*if the symbol wasn't found*/
     {
-        /* Create a new node */
+        /* Creates new node */
         new_node = (SymbolNode *)malloc(sizeof(SymbolNode));
         if (new_node == NULL)
         {
@@ -121,7 +122,8 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         }
         new_node->name = NULL;
         new_node->next = NULL;
-        if ((error_flag = is_valid_symbol(macro_head, symbol_name)) != 0)
+        error_flag = is_valid_symbol(macro_head, symbol_name);
+        if (error_flag != 0)
         {
             return error_flag;
         }
@@ -152,7 +154,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
 SymbolTable *createSymbolTable()
 {
     SymbolTable *table = NULL;
-    ErrorCode error_flag = 0; /*assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     printf("Creating symbol table\n");
     table = (SymbolTable *)malloc(sizeof(SymbolTable));
     if (table == NULL)

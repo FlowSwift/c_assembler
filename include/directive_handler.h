@@ -8,7 +8,7 @@
 /**
  * @brief Handles a `.string` directive line.
  * String directive lines structure is: <label:-optional> .string "<data>". 
- * The data can be any character as long it is between teo "".
+ * The data can be any character as long it is between two "".
  * Function processes a string directive, converts it into binary code, and updates the data counter.
  *
  * @param parsedLine A pointer to the parsed assembly line structure.
@@ -25,7 +25,7 @@ int handle_string_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
  * @brief Handles a `.data` directive line.
  * Data directive lines structure is: <label:-optional> .data <numeric values devided by `,`>.
  * The values must be whole numbers.
- * Function processes a data directive, converting the data into binary, and updates the data counter.
+ * Function processes a data directive, validates the format,, converts the data into binary code and updates the data counter.
  *
  * @param parsedLine A pointer to the parsed assembly line structure.
  * @param symbolTable A pointer to the symbol table.

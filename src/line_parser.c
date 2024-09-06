@@ -5,55 +5,69 @@
 
 #include "line_parser.h"
 #include "util.h"
+#include "error_handler.h"
 
-/*every line will be parsed and inputed to this structure */
-AssemblyLine parseAssemblyLine(char *line)
+AssemblyLine parseAssemblyLine(char *line, int line_number)
 {
     AssemblyLine parsedLine;
-    int len = strlen(line);
-    char *spacePos = NULL;
-    char *colonPos = NULL;
-    if (line[(len - 1)] == '\n')
-        line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
     parsedLine.instruction = NULL;
     parsedLine.operands = NULL;
     parsedLine.srcOperand = NULL;
     parsedLine.destOperand = NULL;
+    int line_length = strlen(line);
+    char *space_position = NULL;
+    char *colon_position = NULL;
+    if (line[(line_length - 1)] == '\n')
+    {        
+        line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
+    }
     /* Find the position of the colon*/
-    colonPos = strchr(line, ':');
-    if ((colonPos != NULL) && ((*(colonPos + 1)) == ' '))
+    colon_position = strchr(line, ':');
+    if ((colon_position != NULL) && ((*(colon_position + 1)) == ' ')) /*must be a whitespace after ":"*/
     {
         /* Extract and set the label*/
-        size_t labelLen = colonPos - line;
+        size_t labelLen = colon_position - line;
         parsedLine.label = (char *)malloc(labelLen + 1);
+        if(parsedLine.label == NULL) /*check malloc*/
+        {
+            handle_error(ERROR_MEMORY_ALLOCATION_FAILED,line_number);
+            parsedLine.instruction = NULL; /*return this value because it is always in line and label is optional. if failed -> NULL*/
+            return parsedLine;
+        }
         strncpy(parsedLine.label, line, labelLen);
         parsedLine.label[labelLen] = '\0';
-        printf("Label!!!!!!!!!!!!!!: %s\n", parsedLine.label);
-        printf("Line!!!!!!!!!!!!!!: %s\n", line);
+        printf("Label!!!!!!!!!!!!!!: %s\n", parsedLine.label); /*delete*/
+        printf("Line!!!!!!!!!!!!!!: %s\n", line); /*delete*/
         /* Move past the colon*/
-        line = colonPos + 1;
+        line = colon_position + 1;
         while (*line == ' ')
         {
             line++;
         }
     }
     /*Find the position of the first space after the label (if any)*/
-    spacePos = strchr(line, ' ');
-    if (spacePos != NULL)
+    space_position = strchr(line, ' ');
+    if (space_position != NULL)
     {
         /* Extract and set the instruction*/
-        size_t instrLen = spacePos - line;
+        size_t instrLen = space_position - line;
         parsedLine.instruction = (char *)malloc(instrLen + 1);
+        if(parsedLine.instruction == NULL)
+        {
+            handle_error(ERROR_MEMORY_ALLOCATION_FAILED,line_number);
+            parsedLine.instruction = NULL;
+            return parsedLine;
+        }
         strncpy(parsedLine.instruction, line, instrLen);
         parsedLine.instruction[instrLen] = '\0';
         /* Move past space to operands*/
-        line = spacePos + 1;
+        line = space_position + 1;
         /* Set operands*/
         if (*line != '\0')
         {
-            parsedLine.operands = strdup1(line);
+            parsedLine.operands = strdup1(line); /*operands are set by what is after the space. will be put in SrcOperand and DestOperand later*/
         }
         else
         {

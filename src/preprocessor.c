@@ -10,17 +10,11 @@
 #include "error_handler.h"
 #include "constant.h"
 
-/*
-    To do:
-        Check macros name
-*/
-
-/* Main pre-process function that handles the initial file processing */
 int pre_process(char *file_name, struct macros **macro_head)
 {
     char *full_file_name; /* File name including extension */
     char *temp_file_name; /* Temp file */
-    ErrorCode error_flag = 0;
+    ErrorCode error_flag = 0; /*Assume success*/
     /* Assumes file input was without extension, add file extension */
     full_file_name = add_file_extension(file_name, ".as");
     temp_file_name = add_file_extension(file_name, ".tmp");
@@ -43,13 +37,9 @@ int pre_process(char *file_name, struct macros **macro_head)
     }
     free(full_file_name);
     free(temp_file_name);
-    return 0;
+    return error_flag; /*0 -> SUCCESS*/
 }
 
-/*
-    Strips file of extra whitespace
-    Returns 0 if successful or error code otherwise
-*/
 int strip_file(char *filename, char *stripped_file_name)
 {
     FILE *stripped_file = NULL;
@@ -57,7 +47,7 @@ int strip_file(char *filename, char *stripped_file_name)
     char line[MAX_LINE_LENGTH];
     char stripped_line[MAX_LINE_LENGTH];
     int line_counter = 0;
-    ErrorCode error_flag = 0;
+    ErrorCode error_flag = 0;  /*Assume success*/
     file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -73,7 +63,7 @@ int strip_file(char *filename, char *stripped_file_name)
         handle_error(error_flag, 0);
         return error_flag; /* IMPROVE ERRORS*/
     }
-    /* Strip lines and checking the line length can't be over MAX_LINE_LENGTH including the extra whitespace*/
+    /* Strip lines and check the line length. can't be over MAX_LINE_LENGTH including the extra whitespace*/
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
         int length;
@@ -104,12 +94,9 @@ int strip_file(char *filename, char *stripped_file_name)
     {
         return error_flag;
     }
-    return 0;
+    return error_flag; /*0 -> SUCCESS*/
 }
 
-/*
-    Remove any leading or trailing whitespaces in the line or any 2 or more following whitespaces
-*/
 void strip_line(char *dest, char *source)
 {
     int i = 0, j = 0;
@@ -130,10 +117,6 @@ void strip_line(char *dest, char *source)
     return;
 }
 
-/*
-    Processes macros in the file.
-    Returns 0 if successful, error code otherwise.
-*/
 int process_macros(char *filename, char *temp_file_name, struct macros **macros_head)
 {
     FILE *file = NULL, *processed_file = NULL;
@@ -142,7 +125,8 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     struct macros *macro = NULL;
     int line_counter = 0;
     char *macr_pos = NULL;
-    ErrorCode error_flag = 0;
+    ErrorCode error_flag = 0; /*Assume success*/
+    ErrorCode total_error_flag = 0; /*Assume success*/
     file = fopen(temp_file_name, "r");
     if (file == NULL)
     {
@@ -164,45 +148,39 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
+        /*delete*/
         /* 
         char macro_name[MAX_LINE_LENGTH];
         strcpy(macro_name, line);
         strtok(macro_name, " \t\n");
         strcpy(macro_name, strtok(NULL, " \t\n"));
         */
-        if ((macro = is_existing_macro((*macros_head), line)) != NULL)
+        if ((macro = is_existing_macro((*macros_head), line)) != NULL) /*if macro is found*/
         {
-            write_macro(macro, processed_file);
+            write_macro(macro, processed_file); /*write exsiting macro into file*/
         }
-        /*
-            Check if found MACRO_START as the first word in the line
-        */
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if ((error_flag = validate_macro_name(macr_pos, line, line_counter, (*macros_head))) == 0)
+            if (error_flag = validate_macro_name(macr_pos, line, line_counter, *macros_head) == 0) /*if Macro is valid, add to list*/
             {
                 add_macro(file, processed_file, macros_head, line, &line_counter);
+            }
+            else
+            {
+                total_error_flag = ERROR_SOME_MACRO_NOT_VALID;
             }
             macr_pos = NULL;
         }
         else
         {
-            fprintf(processed_file, "%s", line);
+            fprintf(processed_file, "%s", line); /*delete?*/
         }
     }
     fclose(file);
     fclose(processed_file);
-    if (error_flag != 0)
-    {
-        return error_flag;
-    }
-    return 0;
+    return total_error_flag;
 }
 
-/*
-    Validates the macro name is legal in the given line
-    Returns 0 if successful, error code otherwise.
-*/
 int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macros *head)
 {
     char *reserved_words[] = {MACRO_START, MACRO_END, ENTRY_DIRECTIVE, EXTERN_DIRECTIVE, DATA_DIRECTIVE, STRING_DIRECTIVE};
@@ -220,20 +198,19 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
         handle_error(error_flag, line_number);
         return error_flag;
     }
-    /* Check if the macro name does not exist */
-    if (is_existing_macro(head, macro_name) != NULL)
+    if (is_existing_macro(head, macro_name) != NULL) /* Check if the macro name does not exist */
     {
         error_flag = ERROR_MACRO_NAME_EXISTS;
         handle_error(error_flag, line_number);
         return error_flag;
     }
-    if (check_if_opcode(macro_name) != 0)
+    if (check_if_opcode(macro_name) != 0) /*Chek if Opcode*/
     {
         error_flag = ERROR_MACRO_NAME_IS_OPCODE;
         handle_error(error_flag, line_number);
         return error_flag;
     }
-    if (valid_reg_name(macro_name) == 0)
+    if (valid_reg_name(macro_name) == 0) /*check if register*/
     {
         error_flag = ERROR_MACRO_NAME_IS_REGISTER;
         handle_error(error_flag, line_number);
@@ -256,10 +233,9 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
         handle_error(error_flag, line_number);
         return error_flag;
     }
-    return 0;
+    return error_flag; /*0 -> SUCCESS*/
 }
 
-/* Adds a macro to the macro list */
 void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_number)
 {
     char macro_name[MAX_LINE_LENGTH];
@@ -275,7 +251,6 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         (*line_number)++;
-        /* ADD ERROR CHECK TO MACRO_END */
         if (strstr(line, MACRO_END) != NULL)
         {
             return;
@@ -294,11 +269,10 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     return;
 }
 
-/* Writes macro to files*/
 void write_macro(struct macros *macro, FILE *file)
 {
     struct lines *current_line = macro->lines;
-    while (current_line != NULL)
+    while (current_line != NULL) /*writes every line to file.*/
     {
         fprintf(file, "%s", current_line->line);
         current_line = current_line->next;
