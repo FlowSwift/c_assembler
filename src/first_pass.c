@@ -30,6 +30,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     int is_symbol = 0;
     int temp_memory_place = 0;
     int i = 0;
+    int was_error = 0; /* -1 if error happened at all during first_pass, 0 otherwise */
     ErrorCode error_flag = 0; /*Assume success*/
     FILE *amfile = NULL;
     BinaryLine *current_instruction = NULL, *current_directive = NULL;
@@ -57,7 +58,6 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         {
             error_flag = ERROR_PARSE_LINE_FAILED;
             handle_error(ERROR_PARSE_LINE_FAILED, line_number);
-            return error_flag;
         } 
         printf("Parsed Line %d:\n", line_number); /*delete*/
         printAssemblyLine(&parsedLine); /*delete*/
@@ -116,7 +116,8 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             }
         }
         if (error_flag != 0) /*if handeling failed or the instruction wasn't allowed.*/
-        { 
+        {
+            was_error = -1;
             handle_error(error_flag, line_number);
         }
         is_symbol = 0; /*return symbol flag to 0*/
@@ -237,5 +238,5 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     printf("-------------------\n");
 
     fclose(amfile);
-    return error_flag; /* 0 -> SUCCESS*/
+    return was_error; /* 0 -> SUCCESS*/
 }
