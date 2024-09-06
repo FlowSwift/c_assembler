@@ -153,7 +153,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
             printf("CCCCCCCCCCCCCCCCCCCC\n");
             write_macro(macro, processed_file); /*write exsiting macro into file*/
         }
-        else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
+        else if (macr_pos == line)
         {
             if (validate_macro_name(macr_pos, line, line_counter, *macros_head) == 0) /*if Macro is valid, add to list*/
             {
@@ -179,12 +179,12 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
 {
     char *reserved_words[] = {MACRO_START, MACRO_END, ENTRY_DIRECTIVE, EXTERN_DIRECTIVE, DATA_DIRECTIVE, STRING_DIRECTIVE};
     int i = 0;
-    char macro_name[MAX_LINE_LENGTH];
+    char *macro_name = NULL;
     char temp[MAX_LINE_LENGTH];
     ErrorCode error_flag = 0;
     strcpy(temp, line);
     strtok(temp, " \t\n");
-    strcpy(macro_name, strtok(NULL, " \t\n"));
+    macro_name = strtok(NULL, " \t\n");
     /* Check if a macro name was given */
     if (macro_name == NULL)
     {
