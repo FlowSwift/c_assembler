@@ -3,6 +3,7 @@ END: stop
 STR: .string "abcd"
 LIST: .data 6, -9, +7
 .data -100000000000000000, 7
+.data 324849
 K: .data 31
 rts
 .extern fn1
