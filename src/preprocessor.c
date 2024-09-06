@@ -157,7 +157,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
         {
             if (validate_macro_name(macr_pos, line, line_counter, *macros_head) == 0) /*if Macro is valid, add to list*/
             {
-                add_macro(file, processed_file, macros_head, line, &line_counter);
+                error_flag = add_macro(file, processed_file, macros_head, line, &line_counter);
             }
             else
             {
@@ -230,10 +230,10 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
     return error_flag; /*0 -> SUCCESS*/
 }
 
-void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_number)
+int add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_number)
 {
     char macro_name[MAX_LINE_LENGTH];
-    char line[MAX_LINE_LENGTH];
+    char line[MAX_LINE_LENGTH], *macr_pos = NULL;
     struct macros *new_macro = NULL;
     struct lines *current_line = NULL;
     struct lines *last = NULL;
@@ -245,9 +245,18 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
     while ((fgets(line, MAX_LINE_LENGTH, file)) != NULL)
     {
         (*line_number)++;
-        if (strstr(line, MACRO_END) != NULL)
+        if ((macr_pos = strstr(line, MACRO_END)) != NULL)
         {
-            return;
+            if (macr_pos[strlen(macr_pos) - 1] == '\n')
+            {
+                macr_pos[strlen(macr_pos) - 1] = '\0'; /*remove newline character*/
+            }
+            if (strlen(line) > strlen(MACRO_END))
+            {
+                handle_error(ERROR_MACRO_END_EXTRA_TEXT, *line_number);
+                return ERROR_MACRO_END_EXTRA_TEXT;
+            }
+            return 0;
         }
         current_line = malloc_line(line);
         if (new_macro->lines == NULL)
@@ -260,7 +269,7 @@ void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, ch
         }
         last = current_line;
     }
-    return;
+    return 0;
 }
 
 void write_macro(struct macros *macro, FILE *file)

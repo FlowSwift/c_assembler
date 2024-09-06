@@ -75,8 +75,10 @@ int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macr
  * @param ptr_to_head A pointer to the head of the macro list.
  * @param macro_ptr A pointer to the macro declaration line.
  * @param line_number A pointer to the current line number for error reporting.
+ * 
+ * @return 0 on success, or an error code on failure.
  */
-void add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_counter);
+int add_macro(FILE *file, FILE *processed_file, struct macros **ptr_to_head, char *macro_ptr, int *line_counter);
 
 /**
  * @brief Writes the contents of a macro to the file.

@@ -152,16 +152,19 @@ void handle_error(ErrorCode error, int line_number)
             printf("ERROR: Macro name is reserved, on line %d\n", line_number);
             break;
         case ERROR_SYMBOLS_NOT_VALID:
-            printf("ERROR: Symbols are not valid in file.");
+            printf("ERROR: Symbols are not valid in file.\n");
             break;
         case ERROR_FAILED_ENT_FILE:
-            printf("ERROR: Failed to create entry file.");
+            printf("ERROR: Failed to create entry file.\n");
             break;
         case ERROR_FAILED_EXT_FILE:
-            printf("ERROR: Failed to create extension file.");
+            printf("ERROR: Failed to create extension file.\n");
             break;
         case ERROR_SOME_MACRO_NOT_VALID:
-            printf("ERROR: One or more of the Macros are not vaild.");
+            printf("ERROR: One or more of the Macros are not vaild.\n");
+            break;
+        case ERROR_MACRO_END_EXTRA_TEXT:
+            printf("ERROR: Macro end has extra text. On line %d.\n", line_number);
             break;
         default:
             printf("Unknown error occurred.\n");
