@@ -283,7 +283,7 @@ int check_valid_operands(AssemblyLine *parsedLine)
     case 3:
         printf("type_miun_src: %d\n", type_miun_src);   /*delete*/
         printf("type_miun_dest: %d\n", type_miun_dest); /*delete*/
-        if (!((type_miun_src >= 1 && type_miun_src <= 3) && (type_miun_dest >= 0 && type_miun_dest <= 3)))
+        if (!((type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 1 && type_miun_dest <= 3)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
@@ -295,9 +295,9 @@ int check_valid_operands(AssemblyLine *parsedLine)
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
         break;
-    /*lea(4) - {1,2,3} allowed for src and {1,2,3} for dest*/
+    /*lea(4) - {1} allowed for src and {1,2,3} for dest*/
     case 4:
-        if (!(type_miun_src == 1) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+        if (!((type_miun_src == 1) && (type_miun_dest >= 1 && type_miun_dest <= 3)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
@@ -308,12 +308,12 @@ int check_valid_operands(AssemblyLine *parsedLine)
     case 7:
     case 8:
     case 11:
-        if ((!(type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+        if (!((type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <= 3))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
         break;
-    /*jmp (9), bne(10), jsr(1) - only dest allowed - {1,2}*/
+    /*jmp (9), bne(10), jsr(13) - only dest allowed - {1,2}*/
     case 9:
     case 10:
     case 13:
@@ -324,14 +324,14 @@ int check_valid_operands(AssemblyLine *parsedLine)
         break;
     /*prn(12) - only dest allowed - {0,1,2,3}*/
     case 12:
-        if (!(type_miun_src == -1) && (type_miun_dest >= 0 && type_miun_dest <= 3))
+        if (!((type_miun_src == -1) && (type_miun_dest >= 0 && type_miun_dest <= 3)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
     /*rts(14), stop(15) - not expecting any operands. */
     case 14:
     case 15:
-        if ((!(type_miun_src == -1)) && (!(type_miun_dest == -1)))
+        if (!((type_miun_src == -1)) && (!(type_miun_dest == -1)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
