@@ -308,7 +308,7 @@ int check_valid_operands(AssemblyLine *parsedLine)
     case 7:
     case 8:
     case 11:
-        if (!((type_miun_src == -1)) && (type_miun_dest >= 1 && type_miun_dest <= 3))
+        if (!((type_miun_src == -1) && (type_miun_dest >= 1 && type_miun_dest <= 3)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
         }
