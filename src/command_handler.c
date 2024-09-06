@@ -150,6 +150,11 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     printf("num_operands_allowed: %d\n", num_operands_allowed); /*delete*/
     if (num_operands_allowed == 0)
     { /*no operands allowed*/
+        if (parsedLine->operands != NULL)
+        {
+            error_flag = ERROR_TOO_MANY_OPERANDS;
+            return error_flag;
+        }
         parsedLine->srcOperand = NULL;
         parsedLine->destOperand = NULL;
         return error_flag;

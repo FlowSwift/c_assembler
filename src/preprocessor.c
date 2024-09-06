@@ -71,8 +71,7 @@ int strip_file(char *filename, char *stripped_file_name)
         line_counter++;
         if (line[(length = strlen(line)) - 1] != '\n' && length > MAX_LINE_LENGTH - 2)
         {
-            while (((c = fgetc(file)) != '\n') && (c != EOF))
-                ;
+            while (((c = fgetc(file)) != '\n') && (c != EOF));
             error_flag = ERROR_LINE_TOO_LONG;
             handle_error(error_flag, line_counter);
             continue;
