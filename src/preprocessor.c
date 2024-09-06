@@ -126,7 +126,6 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     int line_counter = 0;
     char *macr_pos = NULL;
     ErrorCode error_flag = 0; /*Assume success*/
-    ErrorCode total_error_flag = 0; /*Assume success*/
     file = fopen(temp_file_name, "r");
     if (file == NULL)
     {
@@ -161,13 +160,13 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
         }
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
         {
-            if (error_flag = validate_macro_name(macr_pos, line, line_counter, *macros_head) == 0) /*if Macro is valid, add to list*/
+            if (validate_macro_name(macr_pos, line, line_counter, *macros_head) == 0) /*if Macro is valid, add to list*/
             {
                 add_macro(file, processed_file, macros_head, line, &line_counter);
             }
             else
             {
-                total_error_flag = ERROR_SOME_MACRO_NOT_VALID;
+                error_flag = ERROR_SOME_MACRO_NOT_VALID;
             }
             macr_pos = NULL;
         }
@@ -178,7 +177,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     }
     fclose(file);
     fclose(processed_file);
-    return total_error_flag;
+    return error_flag;
 }
 
 int validate_macro_name(char *macr_ptr, char *line, int line_number, struct macros *head)
