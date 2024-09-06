@@ -156,6 +156,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
         */
         if ((macro = is_existing_macro((*macros_head), line)) != NULL) /*if macro is found*/
         {
+            printf("CCCCCCCCCCCCCCCCCCCC\n");
             write_macro(macro, processed_file); /*write exsiting macro into file*/
         }
         else if (macr_pos == line && macr_pos[strlen(MACRO_START)] == ' ')
