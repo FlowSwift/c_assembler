@@ -16,6 +16,8 @@ int main(int argc, char *argv[])
     int file_counter = 1;
     while (file_counter < argc)
     {
+        printf("----------------\n");
+        printf("Starting file %s\n", argv[file_counter]);
         free_all(&macro_head, &symbolTable, &binary_table);
         IC = 0, DC = 0;
         printf("Starting pre_process for %s:\n", argv[file_counter]);
@@ -43,6 +45,7 @@ int main(int argc, char *argv[])
             continue;
         }
         printf("Done!\n");
+        printf("----------------\n");
         file_counter++;
     }
     printf("Finished all files!\n");
