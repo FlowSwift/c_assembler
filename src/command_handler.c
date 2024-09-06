@@ -172,10 +172,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         if (*ptr_in_line == ',' && operandCount == 0) /*if another operand is found but should be 0.*/
         {
             error_flag = ERROR_WRONG_OPERAND_SYNTAX;
-            freeOperand(parsedLine->srcOperand);
-            parsedLine->srcOperand = NULL;
-            freeOperand(parsedLine->destOperand);
-            parsedLine->destOperand = NULL;
             return error_flag;
         }
         start = ptr_in_line;
@@ -202,10 +198,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             error_flag = check_type(parsedLine->srcOperand, macro_head);
             if (error_flag != 0)
             { /*inserts type of miun to parsedLine and checks errors*/
-                freeOperand(parsedLine->srcOperand);
-                parsedLine->srcOperand = NULL;
-                freeOperand(parsedLine->destOperand);
-                parsedLine->destOperand = NULL;
                 return error_flag;
             }
         }
@@ -215,10 +207,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             error_flag = check_type(parsedLine->destOperand, macro_head);
             if (error_flag != 0)
             { /*inserts type of miun to parsedLine and checks errors*/
-                freeOperand(parsedLine->srcOperand);
-                parsedLine->srcOperand = NULL;
-                freeOperand(parsedLine->destOperand);
-                parsedLine->destOperand = NULL;
                 return error_flag;
             }
         }
@@ -230,10 +218,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
             if (operandCount == num_operands_allowed)
             {
                 error_flag = ERROR_TOO_MANY_OPERANDS;
-                freeOperand(parsedLine->srcOperand);
-                parsedLine->srcOperand = NULL;
-                freeOperand(parsedLine->destOperand);
-                parsedLine->destOperand = NULL;
                 return error_flag;
             }
             ptr_in_line++; /* Skip comma */
@@ -246,10 +230,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         {
             /*there are chars after last operand or operands when needed to be 0*/
             error_flag = ERROR_TOO_MANY_OPERANDS;
-            freeOperand(parsedLine->srcOperand);
-            parsedLine->srcOperand = NULL;
-            freeOperand(parsedLine->destOperand);
-            parsedLine->destOperand = NULL;
             return error_flag;
         }
         ptr_in_line++;
@@ -257,10 +237,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     if ((num_operands_allowed != operandCount) || (operandCount == 0 && parsedLine->operands != NULL))
     {
         error_flag = ERROR_INSTRUCTION_NOT_VALID;
-        freeOperand(parsedLine->srcOperand);
-        parsedLine->srcOperand = NULL;
-        freeOperand(parsedLine->destOperand);
-        parsedLine->destOperand = NULL;
         return error_flag;
     }
     /* Assign operands to parsedLine */
@@ -285,15 +261,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
 
     error_flag = check_valid_operands(parsedLine); /*checks if operand types are allowed for the command.*/
     printf("ERROR FLAG %d\n", error_flag);         /*delete*/
-    if (error_flag != 0)                           /*if program failed, free temp operands.*/
-    {
-        freeOperand(parsedLine->srcOperand);
-        parsedLine->srcOperand = NULL;
-        parsedLine->srcOperand = NULL;
-        freeOperand(parsedLine->destOperand);
-        parsedLine->destOperand = NULL;
-        parsedLine->destOperand = NULL;
-    }
     return error_flag; /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
 }
 
@@ -380,6 +347,10 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
     error_flag = operand_parser(parsedLine, macro_head); /*checks if OPCODE is legal and Operands are as should be, by types of miun*/
     if (error_flag != 0)
     {
+        freeOperand(parsedLine->srcOperand);
+        parsedLine->srcOperand = NULL;
+        freeOperand(parsedLine->destOperand);
+        parsedLine->destOperand = NULL;
         return error_flag;
     }
     printf("CHECK %s\n", parsedLine->instruction); /*delete*/
