@@ -78,8 +78,13 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL) /*symbol found*/
     {
+        printf("Symbol found in table\n");
+        printf("label_type: %d\n", label_type);
+        printf("new_node->label_type: %d\n", new_node->memory_place);
         /*Same symbol only allowed when entry and definition are in the file for the same symbol. else - ERROR*/
-        if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != 0)) /*if defined twice*/
+        printf("new_node->memory_place: %d\n", new_node->memory_place);
+        printf("label_type: %d\n", label_type);
+        if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != -1)) /*if defined twice*/
         {
             error_flag = ERROR_SYMBOL_DEFINED_TWICE;
             return error_flag;
@@ -131,6 +136,9 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         new_node->type = type;
         new_node->label_type = label_type;
         new_node->memory_place = memory_place;
+        printf("Symbol added to table\n");
+        printf("Symbol name: %s\n", new_node->name);
+        printf("PLACE: %d\n", new_node->memory_place);
         /* Add the new node to the table */
         if (table->head == NULL)
         {

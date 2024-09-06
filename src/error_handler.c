@@ -83,7 +83,7 @@ void handle_error(ErrorCode error, int line_number)
             printf("WARNING: .entry directive was defined in a label def: has label definition, on line %d\n", line_number);
             break;
         case ERROR_EXTERN_WAS_DEFINED:
-            printf("Error: .extern was not defined, on line %d\n", line_number);
+            printf("Error: .extern was defined in file.\n");
             break;
         case ERROR_ENTRY_WAS_NOT_DEFINED:
             printf("Error: .entry was not defined\n");

@@ -18,25 +18,21 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     int i = 1;
     char bin[16];
     char *ob_file_name = NULL;
-    /*delete*/
-    /*  
-        printf("ALL SYMBOLS:\n");
-        while (current_symbol != NULL) {
-            printf("Symbol: %s\n", current_symbol->name);
-        }
-        printf("END OF SYMBOLS\n");
-    */
     if (validate_symbols(symbolTable) != 0) /*if Symbols are not valid, will handle every symbol and error in function*/
     {
-        return ERROR_SYMBOLS_NOT_VALID;
+        error_flag = ERROR_SYMBOLS_NOT_VALID;
     }
     if (create_ent_file(file_name, symbolTable) != 0) /*if failed*/
     {
-        return ERROR_FAILED_ENT_FILE;
+        error_flag = ERROR_FAILED_ENT_FILE;
     }
     if (create_ext_file(file_name, symbolTable, binary_table) != 0) /*if failed*/
     {
-        return ERROR_FAILED_EXT_FILE;
+        error_flag = ERROR_FAILED_EXT_FILE;
+    }
+    if (error_flag != ERROR_NONE) /*if any of the above failed terminate second_pass*/
+    {
+        return error_flag;
     }
     /*now that all labels are valid, change every label to it's Binary form*/
     while (current_line != NULL)
@@ -104,13 +100,13 @@ int validate_symbols(SymbolTable *symbolTable)
     ErrorCode error_flag = 0; /*Assume success*/
     while (current_symbol != NULL)
     {
-        if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == 0))
+        if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == -1))
         {/*The label is entry type but was not defined.*/
             printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
             error_flag = ERROR_ENTRY_WAS_NOT_DEFINED;
             handle_error(error_flag, 0);
         }
-        else if ((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != 0))
+        else if ((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != -1))
         {/*label is extern type and was defined*/
             printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
             error_flag = ERROR_EXTERN_WAS_DEFINED;

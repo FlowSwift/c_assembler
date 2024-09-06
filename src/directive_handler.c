@@ -131,7 +131,7 @@ int handle_extern_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, 
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_EXTERN, 0, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_EXTERN, -1, macro_head); /*extern is type 4. checks inside if the symbol is in valid name*/
         if (error_flag != 0) /*if some label not valid.*/
         {
             return error_flag;
@@ -154,7 +154,7 @@ int handle_entry_directive(AssemblyLine *parsedLine, SymbolTable *symbolTable, B
             error_flag = ERROR_SYMBOL_SHORT;
             return error_flag;
         }
-        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_ENTRY, 0, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
+        error_flag = add_symbol_to_table(symbolTable, token, -1, TYPE_ENTRY, -1, macro_head); /*extern is type 3. checks inside if the symbol is in valid name*/
         if (error_flag != 0) /*if some label not valid.*/
         { 
             return error_flag;

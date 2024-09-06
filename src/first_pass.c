@@ -30,7 +30,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     int is_symbol = 0;
     int temp_memory_place = 0;
     int i = 0;
-    int was_error = 0; /* -1 if error happened at all during first_pass, 0 otherwise */
+    int was_error = 0;        /* -1 if error happened at all during first_pass, 0 otherwise */
     ErrorCode error_flag = 0; /*Assume success*/
     FILE *amfile = NULL;
     BinaryLine *current_instruction = NULL, *current_directive = NULL;
@@ -47,71 +47,74 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     {
         printf("----------------\n"); /*delete*/
         error_flag = 0;
-        temp_memory_place = 0;
+        temp_memory_place = -1;
         line_number++;
         if ((is_empty_line(line) == 0) || (is_commented_line(line) == 0))
         { /*continue to next line if line is empty or commented.*/
             continue;
         }
         parsedLine = parseAssemblyLine(line, line_number); /* Parse line for this format: label{optional},instruction, operands.*/
-        if(parsedLine.instruction == NULL) /*parse line function failed*/
+        if (parsedLine.instruction == NULL)                /*parse line function failed*/
         {
             error_flag = ERROR_PARSE_LINE_FAILED;
             handle_error(ERROR_PARSE_LINE_FAILED, line_number);
-        } 
+        }
         printf("Parsed Line %d:\n", line_number); /*delete*/
-        printAssemblyLine(&parsedLine); /*delete*/
-        if (parsedLine.label != NULL)/*a label is defined. NULL when not.*/
-        {                  
+        printAssemblyLine(&parsedLine);           /*delete*/
+        if (parsedLine.label != NULL)             /*a label is defined. NULL when not.*/
+        {
             is_symbol = 1; /*update is_symbol flag, will add the label if the line is valid.*/
         }
         if (parsedLine.instruction[0] == '.') /* if '.' is found it is directive line.*/
-        { 
-            if (strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0)/* if data*/
-            { 
+        {
+            if (strcmp(parsedLine.instruction, DATA_DIRECTIVE) == 0) /* if data*/
+            {
                 temp_memory_place = *DC;
                 error_flag = handle_data_directive(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
-                if (is_symbol && (error_flag == 0)) /*if handeling was succesful and a label is defined*/
+                if (is_symbol && (error_flag == 0))                                                                                            /*if handeling was succesful and a label is defined*/
                 {                                                                                                                              /*data was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_DATA, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 1: data*/
                 }
             }
-            else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0)/* if string*/
-            { 
+            else if (strcmp(parsedLine.instruction, STRING_DIRECTIVE) == 0) /* if string*/
+            {
                 temp_memory_place = *DC;
                 error_flag = handle_string_directive(&parsedLine, symbolTable, &directive_binary_table, line_number, DC);
-                if (is_symbol && (error_flag == 0)) /*if handeling was succesful and a label is defined*/
+                if (is_symbol && (error_flag == 0))                                                                                              /*if handeling was succesful and a label is defined*/
                 {                                                                                                                                /*string was in correct format and has symbol definition*/
                     error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_STRING, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*Checks correct syntax in function. symbol type is 2: string*/
                 }
             }
-            else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0)/* if extern*/
-            { 
+            else if (strcmp(parsedLine.instruction, EXTERN_DIRECTIVE) == 0) /* if extern*/
+            {
                 error_flag = handle_extern_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
                 if (is_symbol)
-                {                                                                                                                                     /*extern was in correct format and has symbol definition*/
+                {                                                      /*extern was in correct format and has symbol definition*/
                     handle_error(ERROR_EXTERN_NOT_VALID, line_number); /*Extern directive cannot have a label definition.*/
                 }
             }
-            else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0)/* if entry*/
-            { 
+            else if (strcmp(parsedLine.instruction, ENTRY_DIRECTIVE) == 0) /* if entry*/
+            {
                 error_flag = handle_entry_directive(&parsedLine, symbolTable, &instruction_binary_table, macro_head);
                 if (is_symbol)
-                {                                                                                                                                     /*extern was in correct format and has symbol definition*/
+                {                                                     /*extern was in correct format and has symbol definition*/
                     handle_error(ERROR_ENTRY_NOT_VALID, line_number); /*Entry directive cannot have a label definition.*/
                 }
             }
             else /*if the instruction starts with . and is not one of defined directives.*/
-            { 
+            {
                 error_flag = ERROR_NOT_DEFINED_DIRECTIVE;
             }
         }
         else /*if the instrution doesn't start with '.' assumes the line is command.*/
-        { 
+        {
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, &instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
-            if (is_symbol && (error_flag == 0)) /*if handeling was succesful and a label is defined*/
-            {                                                                                                                                     /* has label and is in regular instruction format.*/
+            if (is_symbol && (error_flag == 0))                                                                                /*if handeling was succesful and a label is defined*/
+            {
+                /* has label and is in regular instruction format.*/
+                printf("temp_memory %d\n", temp_memory_place);
+                printf("ic %d\n", *IC);
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_INSTRUCTION, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
             }
         }
@@ -123,13 +126,13 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         is_symbol = 0; /*return symbol flag to 0*/
 
         /* check if memory overflow, above the allowed max memory.*/
-        printf("IC: %d\n", *IC);         /*delete*/
-        printf("DC: %d\n", *DC);        /*delete*/
+        printf("IC: %d\n", *IC); /*delete*/
+        printf("DC: %d\n", *DC); /*delete*/
         if ((*IC + *DC) > MAX_MEMORY_WORDS)
         {
             error_flag = ERROR_MEMORY_OVERFLOW;
             handle_error(error_flag, line_number);
-            return error_flag; 
+            return error_flag;
         }
         /*delete*/
         if (get_opcode_code(parsedLine.instruction) != -1)
