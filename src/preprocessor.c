@@ -80,11 +80,6 @@ int strip_file(char *filename, char *stripped_file_name)
         else
         {
             strip_line(stripped_line, line);
-            /* Ignore comments */
-            if (stripped_line[0] == ';')
-            {
-                continue;
-            }
             fprintf(stripped_file, "%s", stripped_line);
         }
     }
