@@ -19,7 +19,6 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
 {
     char line[MAX_LINE_LENGTH];
     char *am_file_name = NULL;
-    char bin[16];
     AssemblyLine parsedLine; /*initializing an Assembly line structure*/
     SymbolNode *current_symbol = NULL;
     BinaryLine *instruction_binary_table = NULL;
@@ -29,7 +28,6 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     int line_number = 0;
     int is_symbol = 0;
     int temp_memory_place = 0;
-    int i = 0;
     int was_error = 0;        /* -1 if error happened at all during first_pass, 0 otherwise */
     ErrorCode error_flag = 0; /*Assume success*/
     FILE *amfile = NULL;
@@ -45,7 +43,6 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
     }
     while (fgets(line, MAX_LINE_LENGTH, amfile) != NULL) /*goes through every line until the end of file*/
     {
-        printf("----------------\n"); /*delete*/
         error_flag = 0;
         temp_memory_place = -1;
         line_number++;
@@ -59,9 +56,7 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
             error_flag = ERROR_PARSE_LINE_FAILED;
             handle_error(ERROR_PARSE_LINE_FAILED, line_number);
         }
-        printf("Parsed Line %d:\n", line_number); /*delete*/
-        printAssemblyLine(&parsedLine);           /*delete*/
-        if (parsedLine.label != NULL)             /*a label is defined. NULL when not.*/
+        if (parsedLine.label != NULL) /*a label is defined. NULL when not.*/
         {
             is_symbol = 1; /*update is_symbol flag, will add the label if the line is valid.*/
         }
@@ -110,12 +105,9 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         {
             temp_memory_place = *IC;
             error_flag = handle_instruction(&parsedLine, symbolTable, &instruction_binary_table, IC, macro_head, line_number); /*label is defined inside, also makes binary*/
-            printf("Error flaggggggggg: %d\n", error_flag);
             if (is_symbol && (error_flag == 0))                                                                                /*if handeling was succesful and a label is defined*/
             {
                 /* has label and is in regular instruction format.*/
-                printf("temp_memory %d\n", temp_memory_place);
-                printf("ic %d\n", *IC);
                 error_flag = add_symbol_to_table(symbolTable, parsedLine.label, TYPE_INSTRUCTION, TYPE_LABEL_DEF, temp_memory_place, macro_head); /*also checks if name is legal, symbol gets IC place*/
             }
         }
@@ -127,27 +119,11 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         is_symbol = 0; /*return symbol flag to 0*/
 
         /* check if memory overflow, above the allowed max memory.*/
-        printf("IC: %d\n", *IC); /*delete*/
-        printf("DC: %d\n", *DC); /*delete*/
         if ((*IC + *DC) > MAX_MEMORY_WORDS)
         {
             error_flag = ERROR_MEMORY_OVERFLOW;
             handle_error(error_flag, line_number);
             return error_flag;
-        }
-        /*delete*/
-        if (get_opcode_code(parsedLine.instruction) != -1)
-        {
-            if (parsedLine.srcOperand != NULL)
-            {
-                printf("Source Operand: %s\n", parsedLine.srcOperand->value);
-                printf("Type of src %d\n", parsedLine.srcOperand->type);
-            }
-            if (parsedLine.destOperand != NULL)
-            {
-                printf("Destination Operand: %s\n", parsedLine.destOperand->value);
-                printf("Type of dest %d\n", parsedLine.destOperand->type);
-            }
         }
         freeAssemblyLine(&parsedLine); /*after handeling, releases the AssemblyLine*/
     }
@@ -166,52 +142,13 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         (current_directive)->decimal_memory_address += *IC + 100;
         current_directive = (current_directive)->next;
     }
-
-    /*delete*/
     current_instruction = instruction_binary_table;
     current_directive = directive_binary_table;
-    i = 1;
     temp_instruction = (current_instruction);
     temp_directive = (current_directive);
-    while (current_instruction != NULL)
-    {
-        printf("Binary Line: %d\n", i);
-        decimal_to_binary((current_instruction)->binary_code, bin, 16);
-        printf("Binary Line: %s\n", bin);
-        printf("Label: %s\n", (current_instruction)->label);
-        printf("Binary code: %d\n", (current_instruction)->binary_code);
-        printf("Original line number: %d\n", (current_instruction)->original_line_number);
-        printf("Decimal memory address: %d\n", (current_instruction)->decimal_memory_address);
-        i++;
-        printf("---------------------\n");
-        current_instruction = (current_instruction)->next;
-    }
-    i = 1;
-    printf("DIRECTIVE: \n");
-    while (current_directive != NULL)
-    {
-        printf("Binary Line: %d\n", i);
-        decimal_to_binary((current_directive)->binary_code, bin, 16);
-        printf("Binary Line: %s\n", bin);
-        printf("Label: %s\n", (current_directive)->label);
-        printf("Binary code: %d\n", (current_directive)->binary_code);
-        printf("Original line number: %d\n", (current_directive)->original_line_number);
-        printf("Decimal memory address: %d\n", (current_directive)->decimal_memory_address);
-        i++;
-        printf("---------------------\n");
-        current_directive = (current_directive)->next;
-    }
-    i = 0;
     /*adds binary codes of instruction and directive lines, first command lines and then directive.*/
     add_binary_lines(temp_directive, &temp_instruction);
     *binary_table = temp_instruction;
-    while (temp_instruction != NULL)
-    {
-        decimal_to_binary(temp_instruction->binary_code, bin, 16);
-        printf("%d: %s\n", i, bin);
-        i++;
-        temp_instruction = temp_instruction->next;
-    }
     /*add 100 + IC for every symbol defining directive line and 100 for every symbol defining command line.*/
     current_symbol = symbolTable->head;
     while (current_symbol != NULL)
@@ -227,20 +164,6 @@ int first_pass(char *file_name, struct macros *macro_head, SymbolTable *symbolTa
         current_symbol = current_symbol->next;
     }
     current_symbol = symbolTable->head;
-    /*delete*/
-    printf("-------------------\n");
-    printf("SYMBOL TABLE:\n");
-    while (current_symbol != NULL)
-    {
-        printf("----------------\n");
-        printf("Symbol: -%s-\n", current_symbol->name);
-        printf("Type: %d\n", current_symbol->type);
-        printf("Label type: %d\n", current_symbol->label_type);
-        printf("Memory place: %d\n", current_symbol->memory_place);
-        current_symbol = current_symbol->next;
-    }
-    printf("-------------------\n");
-
     fclose(amfile);
     return was_error; /* 0 -> SUCCESS*/
 }

@@ -15,7 +15,6 @@ SymbolNode *is_symbol_in_table(SymbolTable *table, char *symbol_name)
 {
     SymbolNode *current = NULL;
     current = table->head;
-    printf("Symbol name ADD: %s\n", symbol_name);
     while (current != NULL)
     {
         if ((strcmp(current->name, symbol_name) == 0))
@@ -76,17 +75,9 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
 {
     SymbolNode *new_node = NULL, *current = table->head;
     ErrorCode error_flag = 0; /*Assume success*/
-    printf("Adding symbol to table\n");
-    printf("Symbol name: %s\n", symbol_name);
     new_node = is_symbol_in_table(table, symbol_name);
     if (new_node != NULL) /*symbol found*/
     {
-        printf("Symbol found in table\n");
-        printf("label_type: %d\n", label_type);
-        printf("new_node->label_type: %d\n", new_node->memory_place);
-        /*Same symbol only allowed when entry and definition are in the file for the same symbol. else - ERROR*/
-        printf("new_node->memory_place: %d\n", new_node->memory_place);
-        printf("label_type: %d\n", label_type);
         if ((label_type == TYPE_LABEL_DEF) && (new_node->memory_place != -1)) /*if defined twice*/
         {
             error_flag = ERROR_SYMBOL_DEFINED_TWICE;
@@ -109,7 +100,7 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
             return error_flag;
         }
         else if ((new_node->label_type == TYPE_ENTRY) && (label_type == TYPE_EXTERN)) /*if entry and extern*/
-        { 
+        {
             error_flag = ERROR_SYMBOL_ALREADY_ENTRY;
             return error_flag;
         }
@@ -139,9 +130,6 @@ int add_symbol_to_table(SymbolTable *table, char *symbol_name, int type, int lab
         new_node->type = type;
         new_node->label_type = label_type;
         new_node->memory_place = memory_place;
-        printf("Symbol added to table\n");
-        printf("Symbol name: %s\n", new_node->name);
-        printf("PLACE: %d\n", new_node->memory_place);
         /* Add the new node to the table */
         if (table->head == NULL)
         {
@@ -166,7 +154,6 @@ SymbolTable *createSymbolTable()
 {
     SymbolTable *table = NULL;
     ErrorCode error_flag = 0; /*Assume success*/
-    printf("Creating symbol table\n");
     table = (SymbolTable *)malloc(sizeof(SymbolTable));
     if (table == NULL)
     {

@@ -15,8 +15,6 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     char octal_code[6];
     ErrorCode error_flag = ERROR_NONE;
     FILE *file = NULL;
-    int i = 1;
-    char bin[16];
     char *ob_file_name = NULL;
     if (validate_symbols(symbolTable) != 0) /*if Symbols are not valid, will handle every symbol and error in function*/
     {
@@ -46,7 +44,6 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
             }
             else
             {
-                printf("Label: -%s-\n", current_line->label); /*delete*/
                 error_flag = ERROR_SYMBOL_WAS_NOT_DEFINED;
                 handle_error(error_flag, current_line->original_line_number);
             }
@@ -57,21 +54,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     {
         return error_flag;
     }
-    i = 1;
     temp_line = *binary_table;
-    while (temp_line != NULL) /*delete*/
-    {
-        printf("Binary Line: %d\n", i);
-        decimal_to_binary((temp_line)->binary_code, bin, 16);
-        printf("Binary Line: %s\n", bin);
-        printf("Label: %s\n", (temp_line)->label);
-        printf("Binary code: %d\n", (temp_line)->binary_code);
-        printf("Original line number: %d\n", (temp_line)->original_line_number);
-        printf("Decimal memory address: %d\n", (temp_line)->decimal_memory_address);
-        i++;
-        printf("---------------------\n");
-        temp_line = (temp_line)->next;
-    }
 
     /*create object file with the full Binary conversion.*/
     ob_file_name = add_file_extension(file_name, ".ob");
@@ -87,7 +70,7 @@ int second_pass(char *file_name, struct macros *head, SymbolTable *symbolTable, 
     while (temp_line != NULL)
     {
         decimal_to_octal(temp_line->binary_code, octal_code, 6);
-        fprintf(file, "%04d %s\n", temp_line->decimal_memory_address, octal_code); 
+        fprintf(file, "%04d %s\n", temp_line->decimal_memory_address, octal_code);
         temp_line = temp_line->next;
     }
     fclose(file);
@@ -101,13 +84,13 @@ int validate_symbols(SymbolTable *symbolTable)
     while (current_symbol != NULL)
     {
         if ((current_symbol->label_type == TYPE_ENTRY) && (current_symbol->memory_place == -1))
-        {/*The label is entry type but was not defined.*/
+        { /*The label is entry type but was not defined.*/
             printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
             error_flag = ERROR_ENTRY_WAS_NOT_DEFINED;
             handle_error(error_flag, 0);
         }
         else if ((current_symbol->label_type == TYPE_EXTERN) && (current_symbol->memory_place != -1))
-        {/*label is extern type and was defined*/
+        { /*label is extern type and was defined*/
             printf("An error occured for the following symbol: \"%s\". - ", current_symbol->name);
             error_flag = ERROR_EXTERN_WAS_DEFINED;
             handle_error(error_flag, 0);

@@ -20,7 +20,7 @@ AssemblyLine parseAssemblyLine(char *line, int line_number)
     parsedLine.srcOperand = NULL;
     parsedLine.destOperand = NULL;
     if (line[(line_length - 1)] == '\n')
-    {        
+    {
         line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
     }
     /* Find the position of the colon*/
@@ -30,16 +30,14 @@ AssemblyLine parseAssemblyLine(char *line, int line_number)
         /* Extract and set the label*/
         size_t labelLen = colon_position - line;
         parsedLine.label = (char *)malloc(labelLen + 1);
-        if(parsedLine.label == NULL) /*check malloc*/
+        if (parsedLine.label == NULL) /*check malloc*/
         {
-            handle_error(ERROR_MEMORY_ALLOCATION_FAILED,line_number);
+            handle_error(ERROR_MEMORY_ALLOCATION_FAILED, line_number);
             parsedLine.instruction = NULL; /*return this value because it is always in line and label is optional. if failed -> NULL*/
             return parsedLine;
         }
         strncpy(parsedLine.label, line, labelLen);
         parsedLine.label[labelLen] = '\0';
-        printf("Label!!!!!!!!!!!!!!: %s\n", parsedLine.label); /*delete*/
-        printf("Line!!!!!!!!!!!!!!: %s\n", line); /*delete*/
         /* Move past the colon*/
         line = colon_position + 1;
         while (*line == ' ')
@@ -54,9 +52,9 @@ AssemblyLine parseAssemblyLine(char *line, int line_number)
         /* Extract and set the instruction*/
         size_t instrLen = space_position - line;
         parsedLine.instruction = (char *)malloc(instrLen + 1);
-        if(parsedLine.instruction == NULL)
+        if (parsedLine.instruction == NULL)
         {
-            handle_error(ERROR_MEMORY_ALLOCATION_FAILED,line_number);
+            handle_error(ERROR_MEMORY_ALLOCATION_FAILED, line_number);
             parsedLine.instruction = NULL;
             return parsedLine;
         }

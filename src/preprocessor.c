@@ -12,8 +12,8 @@
 
 int pre_process(char *file_name, struct macros **macro_head)
 {
-    char *full_file_name; /* File name including extension */
-    char *temp_file_name; /* Temp file */
+    char *full_file_name;     /* File name including extension */
+    char *temp_file_name;     /* Temp file */
     ErrorCode error_flag = 0; /*Assume success*/
     /* Assumes file input was without extension, add file extension */
     full_file_name = add_file_extension(file_name, ".as");
@@ -47,7 +47,7 @@ int strip_file(char *filename, char *stripped_file_name)
     char line[MAX_LINE_LENGTH];
     char stripped_line[MAX_LINE_LENGTH];
     int line_counter = 0;
-    ErrorCode error_flag = 0;  /*Assume success*/
+    ErrorCode error_flag = 0; /*Assume success*/
     file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -61,7 +61,7 @@ int strip_file(char *filename, char *stripped_file_name)
         fclose(file);
         error_flag = ERROR_CANT_WRITE_FILE;
         handle_error(error_flag, 0);
-        return error_flag; /* IMPROVE ERRORS*/
+        return error_flag;
     }
     /* Strip lines and check the line length. can't be over MAX_LINE_LENGTH including the extra whitespace*/
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
@@ -75,7 +75,8 @@ int strip_file(char *filename, char *stripped_file_name)
         }
         if (line[(length = strlen(line)) - 1] != '\n' && length > MAX_LINE_LENGTH - 2)
         {
-            while (((c = fgetc(file)) != '\n') && (c != EOF));
+            while (((c = fgetc(file)) != '\n') && (c != EOF))
+                ;
             error_flag = ERROR_LINE_TOO_LONG;
             handle_error(error_flag, line_counter);
             continue;
@@ -145,16 +146,8 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
     {
         line_counter++;
         macr_pos = strstr(line, MACRO_START);
-        /*delete*/
-        /* 
-        char macro_name[MAX_LINE_LENGTH];
-        strcpy(macro_name, line);
-        strtok(macro_name, " \t\n");
-        strcpy(macro_name, strtok(NULL, " \t\n"));
-        */
         if ((macro = is_existing_macro((*macros_head), line)) != NULL) /*if macro is found*/
         {
-            printf("CCCCCCCCCCCCCCCCCCCC\n");
             write_macro(macro, processed_file); /*write exsiting macro into file*/
         }
         else if (macr_pos == line)
@@ -171,7 +164,7 @@ int process_macros(char *filename, char *temp_file_name, struct macros **macros_
         }
         else
         {
-            fprintf(processed_file, "%s", line); /*delete?*/
+            fprintf(processed_file, "%s", line);
         }
     }
     fclose(file);

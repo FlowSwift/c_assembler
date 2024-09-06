@@ -147,7 +147,6 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
         error_flag = ERROR_INSTRUCTION_NOT_VALID;
         return error_flag;
     }
-    printf("num_operands_allowed: %d\n", num_operands_allowed); /*delete*/
     if (num_operands_allowed == 0)
     { /*no operands allowed*/
         if (parsedLine->operands != NULL)
@@ -275,8 +274,7 @@ int operand_parser(AssemblyLine *parsedLine, struct macros *macro_head)
     }
 
     error_flag = check_valid_operands(parsedLine); /*checks if operand types are allowed for the command.*/
-    printf("ERROR FLAG %d\n", error_flag);         /*delete*/
-    return error_flag; /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
+    return error_flag;                             /* 0 -> SUCCESS. the instructions matched the operands succefully and all was allocated in parsedLine */
 }
 
 int check_valid_operands(AssemblyLine *parsedLine)
@@ -296,8 +294,6 @@ int check_valid_operands(AssemblyLine *parsedLine)
     case 0:
     case 2:
     case 3:
-        printf("type_miun_src: %d\n", type_miun_src);   /*delete*/
-        printf("type_miun_dest: %d\n", type_miun_dest); /*delete*/
         if (!((type_miun_src >= 0 && type_miun_src <= 3) && (type_miun_dest >= 1 && type_miun_dest <= 3)))
         {
             error_flag = ERROR_MIUN_TYPES_DONT_MATCH;
@@ -368,7 +364,6 @@ int handle_instruction(AssemblyLine *parsedLine, SymbolTable *symbol_table, Bina
         parsedLine->destOperand = NULL;
         return error_flag;
     }
-    printf("CHECK %s\n", parsedLine->instruction); /*delete*/
     /*converts to binary a valid parsed line.*/
     convert_instruction_to_binary_code(parsedLine, instruction_binary_table, line, IC);
     return error_flag; /* 0 -> SUCCESS*/
