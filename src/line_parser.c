@@ -10,15 +10,15 @@
 AssemblyLine parseAssemblyLine(char *line, int line_number)
 {
     AssemblyLine parsedLine;
+    int line_length = strlen(line);
+    char *space_position = NULL;
+    char *colon_position = NULL;
     /*Initialize parsed Line structure */
     parsedLine.label = NULL;
     parsedLine.instruction = NULL;
     parsedLine.operands = NULL;
     parsedLine.srcOperand = NULL;
     parsedLine.destOperand = NULL;
-    int line_length = strlen(line);
-    char *space_position = NULL;
-    char *colon_position = NULL;
     if (line[(line_length - 1)] == '\n')
     {        
         line[strlen(line) - 1] = '\0'; /*Remove the newline character*/
